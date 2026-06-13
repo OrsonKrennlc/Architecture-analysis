@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>ShArch生成器</title>
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="apple-touch-icon" href="favicon.png">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link href="https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Space+Mono:wght@400;700&display=swap"
+    rel="stylesheet" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/suncalc@1.9.0/suncalc.min.js"></script>
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+  <div class="loader" id="loader">
+    <div class="spin"></div>
+    <div class="ltxt" id="ltxt">LOADING</div>
+    <div id="lbarWrap"
+      style="width:160px;height:3px;background:rgba(255,255,255,.15);border-radius:2px;margin-top:14px;overflow:hidden;display:none">
+      <div id="lbar" style="height:100%;width:0%;background:#fff;border-radius:2px;transition:width .4s ease"></div>
+    </div>
+    <div id="lpct"
+      style="font-family:Space Mono,monospace;font-size:9px;color:rgba(255,255,255,.6);margin-top:7px;letter-spacing:.1em">
+    </div>
+  </div>
+  <div class="toast" id="toast"></div>
+  <div id="layerModal"
+    style="display:none;position:fixed;inset:0;z-index:9000;background:rgba(20,20,22,0.45);backdrop-filter:blur(3px);align-items:center;justify-content:center">
+    <div
+      style="background:var(--sf);border:1px solid var(--bd);border-radius:14px;padding:24px;width:380px;max-width:90vw;max-height:80vh;overflow-y:auto;box-shadow:0 12px 48px rgba(0,0,0,.2)">
+      <div
+        style="font-family:'Space Mono',monospace;font-size:13px;font-weight:700;color:var(--tx);letter-spacing:.04em;margin-bottom:4px"
+        data-i18n="modal_layered_title">
+        LAYERED AXONOMETRIC</div>
+      <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--t3);margin-bottom:16px"
+        data-i18n="modal_layered_subtitle">Select 2–8
+        analyses to stack · order = stack order</div>
+      <div id="layerList"></div>
+      <div style="display:flex;gap:8px;margin-top:18px">
+        <button onclick="closeLayerPicker()"
+          style="flex:1;padding:9px;font-family:'Space Mono',monospace;font-size:10px;background:transparent;color:var(--t2);border:1px solid var(--bd);border-radius:8px;cursor:pointer"
+          data-i18n="btn_cancel">CANCEL</button>
+        <button onclick="runLayered()"
+          style="flex:2;padding:9px;font-family:'Space Mono',monospace;font-size:10px;background:var(--tx);color:var(--sf);border:none;border-radius:8px;cursor:pointer;font-weight:700"
+          data-i18n="btn_generate_poster">GENERATE
+          POSTER →</button>
+      </div>
+    </div>
+  </div>
+  <div class="app">
+    <div class="sb">
+      <div class="sb-top" style="flex-wrap: wrap; justify-content: space-between; align-items: center;">
+        <div style="min-width:max-content">
+          <div class="sb-name" id="sbName" style="white-space:nowrap">ShArch<span>生成器</span></div>
+        </div>
+        <div class="lang-switch" onclick="toggleLang()">
+          <span id="langZH" class="active">中</span>
+          <span class="sep" style="font-weight:400;opacity:0.3">/</span>
+          <span id="langEN">EN</span>
+        </div>
+        <div class="sb-sub" data-i18n="sb_sub" style="flex-basis:100%;margin-top:2px">ARCHITECTURAL SITE ANALYSIS</div>
+      </div>
+      <div class="sb-mid">
+        <!-- Location moved to map column -->
+        <div class="sec">
+          <div class="lbl" data-i18n="viewmode">View Mode</div>
+          <div class="ms">
+            <div class="mb on" id="view2d" onclick="setView('2d')" data-i18n="v2d">2D Analysis</div>
+            <div class="mb" id="view3d" onclick="setView('3d')" data-i18n="v3d">3D City</div>
+          </div>
+        </div>
+
+        <div class="sec" id="secStyle">
+          <div class="lbl" data-i18n="mapstyle">Map Style</div>
+          <div class="ms" style="grid-template-columns:1fr 1fr">
+            <div class="mb on" id="tileLight" onclick="setTile(this,'light')" data-i18n="tile_light">Light</div>
+            <div class="mb" id="tileSat" onclick="setTile(this,'sat')" data-i18n="tile_sat">Sat</div>
+          </div>
+          <div class="rr"><label data-i18n="radius">Radius</label><input type="range" min="200" max="2000" step="100"
+              value="600" id="rSlider" oninput="updateR()" /><span class="rv" id="rVal">600m</span></div>
+        </div>
+        <div class="sec" id="secOverlay">
+          <div class="lbl"><span data-i18n="map_overlay">Map Overlay</span> <span
+              style="font-size:8px;color:var(--t3);font-weight:400" data-i18n="after_generate">after generate</span>
+          </div>
+          <div class="ms" style="grid-template-columns:1fr 1fr 1fr">
+            <div class="mb ovbtn" onclick="setOvStyle('nolli',this)">Nolli</div>
+            <div class="mb ovbtn" onclick="setOvStyle('diagram',this)">Diagram</div>
+            <div class="mb ovbtn" onclick="setOvStyle('dark',this)">Dark</div>
+          </div>
+        </div>
+        <div class="sec" id="sec3d" style="display:none">
+          <div class="lbl"><span data-i18n="analysis_types_3d">3D Analysis Types</span> <span
+              style="font-size:8px;color:var(--t3);font-weight:400" data-i18n="tap_preview">tap to preview · all
+              generate</span></div>
+          <div class="ms" style="grid-template-columns:1fr 1fr">
+            <div class="mb on" id="m3d_white" onclick="SM3('white')" data-i18n="m3d_white">White</div>
+            <div class="mb" id="m3d_height" onclick="SM3('height')" data-i18n="m3d_height">Height</div>
+            <div class="mb" id="m3d_zone" onclick="SM3('zone')" data-i18n="m3d_zone">Zoning</div>
+            <div class="mb" id="m3d_density" onclick="SM3('density')" data-i18n="m3d_density">Density</div>
+            <div class="mb" id="m3d_solar" onclick="SM3('solar')" data-i18n="m3d_solar">Solar</div>
+            <div class="mb" id="m3d_skyline" onclick="SM3('skyline')" data-i18n="m3d_skyline">Skyline</div>
+          </div>
+          <div id="leg3d" style="margin-top:10px;font-family:Space Mono,monospace"></div>
+          <div id="solar3d" style="display:none;margin-top:10px">
+            <div id="sclock3d" style="font-size:20px;font-weight:700;color:var(--tx);font-family:Space Mono,monospace">
+              12:00</div>
+            <div id="sph3d" style="font-size:8px;color:var(--t3);margin-bottom:5px;font-family:Space Mono,monospace"
+              data-i18n="solar_noon">
+              SOLAR NOON</div>
+            <input type="range" id="ssl3d" min="0" max="1439" value="720" step="5"
+              style="width:100%;accent-color:var(--tx)" />
+          </div>
+          <div style="display:flex;gap:6px;align-items:center;margin-top:10px">
+            <span style="font-size:8px;color:var(--t3);letter-spacing:.1em" data-i18n="shape_3d">SHAPE</span>
+            <div class="mb on" id="shp3d_circle" onclick="setShape3('circle')"
+              style="flex:1;text-align:center;padding:6px" data-i18n="shp3d_circle">Circle</div>
+            <div class="mb" id="shp3d_square" onclick="setShape3('square')" style="flex:1;text-align:center;padding:6px"
+              data-i18n="shp3d_square">Square</div>
+          </div>
+        </div>
+        <div class="sec" id="secTypes">
+          <div class="lbl" data-i18n="analysis">Analysis Types</div>
+          <div class="ms" style="margin-bottom:12px"><button class="mb" onclick="selAll(1)"
+              data-i18n="btn_all">all</button><button class="mb" onclick="selAll(0)" data-i18n="btn_none">none</button>
+          </div>
+          <div id="alist"></div>
+        </div>
+        <div class="sec" id="secShape">
+          <div class="lbl" data-i18n="shape">Diagram Shape</div>
+          <div class="ms" style="grid-template-columns:1fr 1fr 1fr">
+            <div class="mb on" id="shpCircle" onclick="setShape('circle',this)" data-i18n="shp_circle">● Circle</div>
+            <div class="mb" id="shpRect" onclick="setShape('rect',this)" data-i18n="shp_round">▢ Round</div>
+            <div class="mb" id="shpPoly" onclick="startPolygon()" data-i18n="shp_poly">⬡ Site</div>
+          </div>
+          <div id="polyHint"
+            style="display:none;margin-top:8px;font-size:9px;color:var(--t2);line-height:1.5;background:var(--sf);border:1px solid var(--ln);border-radius:8px;padding:9px">
+            <span id="polyHintTxt" data-i18n="poly_hint_text">点击地图添加边界点（至少3个），画出你的场地范围。</span>
+            <div style="display:flex;gap:6px;margin-top:8px">
+              <button onclick="finishPolygon()"
+                style="flex:1;font-size:9px;font-family:'Space Mono',monospace;background:var(--tx);color:var(--sf);border:none;border-radius:6px;padding:7px;cursor:pointer"
+                data-i18n="btn_done">✓
+                DONE</button>
+              <button onclick="clearPolygon()"
+                style="flex:1;font-size:9px;font-family:'Space Mono',monospace;background:none;color:var(--t2);border:1px solid var(--ln);border-radius:6px;padding:7px;cursor:pointer"
+                data-i18n="btn_clear">✕
+                CLEAR</button>
+            </div>
+          </div>
+        </div>
+        <div class="sec" id="secTheme">
+          <div class="lbl"><span data-i18n="color_theme">Color Theme</span> <span
+              style="font-size:8px;color:var(--t3);font-weight:400" data-i18n="applies_all">applies to all</span>
+          </div>
+          <div class="ms" style="grid-template-columns:1fr 1fr 1fr">
+            <div class="mb on" id="thm0" onclick="setTheme(0)" data-i18n="theme_warm">Warm</div>
+            <div class="mb" id="thm1" onclick="setTheme(1)" data-i18n="theme_cool">Cool</div>
+            <div class="mb" id="thm2" onclick="setTheme(2)" data-i18n="theme_mono">Mono</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;margin-top:9px">
+            <span style="font-size:8px;color:var(--t3);letter-spacing:.1em;flex:1" data-i18n="accent_color">ACCENT COLOR
+              · 主色</span>
+            <input type="color" id="accentPick" value="#C0392B" oninput="setAccent(this.value)"
+              style="width:30px;height:24px;border:1px solid var(--ln);border-radius:5px;padding:0;cursor:pointer;background:none" />
+            <button onclick="setAccent(null)" title="Reset to default red"
+              style="font-size:8px;font-family:'Space Mono',monospace;color:var(--t3);background:none;border:1px solid var(--ln);border-radius:5px;padding:4px 7px;cursor:pointer"
+              data-i18n="btn_reset">RESET</button>
+          </div>
+        </div>
+      </div>
+      <!-- ALWAYS VISIBLE BOTTOM BUTTONS -->
+      <div class="sb-bot">
+        <button class="gen" id="genMain" onclick="generateMain()" data-i18n="btn_generate">GENERATE ANALYSIS ↗</button>
+        <div class="exp-row" id="exp2d">
+          <div class="ebtn" onclick="gate(exportPDF)" style="grid-column:1/-1" data-i18n="btn_report_pdf">REPORT PDF ↓
+          </div>
+        </div>
+
+        <div class="exp-row" id="exp2dL" style="margin-top:8px">
+          <div class="ebtn" onclick="gate(()=>openLayerPicker())" style="grid-column:1/-1"
+            data-i18n="btn_layered_axon_pdf">LAYERED AXON PDF ↓</div>
+        </div>
+        <div class="exp-row" id="exp3d" style="display:none">
+          <div class="ebtn" onclick="gate(()=>S3.exportReportPDF())" style="grid-column:1/-1"
+            data-i18n="btn_report_pdf">REPORT PDF ↓</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="res">
+      <div class="res-scroll">
+        <div class="empty" id="emp">
+          <div class="erule"></div>
+          <div class="etxt" data-i18n="empty_state">SELECT SITE · CHOOSE ANALYSES · GENERATE</div>
+          <div class="erule"></div>
+        </div>
+        <div id="statBar"
+          style="display:none;flex-wrap:wrap;gap:0;border:1px solid var(--ln);border-radius:12px;overflow:hidden;margin-bottom:18px;background:var(--sf)">
+        </div>
+        <div class="grid" id="rgrid" style="display:none"></div>
+      </div>
+
+      <div class="sbar">
+        <div class="sd" id="sdot"></div><span id="stxt" data-i18n="ready_status">READY</span><span
+          style="margin-left:auto">ShArch · v1.4</span>
+      </div>
+    </div>
+
+    <div class="map-column">
+      <div class="map-header">
+        <div class="lbl" data-i18n="loc">Location</div>
+        <input class="loc-in" id="locIn" data-i18n-ph="locph" placeholder="Search address or place..." />
+        <button class="srch-btn" onclick="doSearch()" data-i18n="btn_search">⌕ &nbsp;search on map</button>
+        <div class="cr">
+          <div class="cb" id="latB" data-i18n="lat_lbl">Lat —</div>
+          <div class="cb" id="lngB" data-i18n="lng_lbl">Lng —</div>
+        </div>
+        <div id="netStatus"
+          style="margin-top:7px;font-family:Space Mono,monospace;font-size:10px;color:var(--t2);display:flex;align-items:center;gap:7px;background:var(--s2);border:1px solid var(--bd);border-radius:7px;padding:7px 9px">
+          <span id="netDot"
+            style="width:9px;height:9px;border-radius:50%;background:var(--bd2);display:inline-block;flex-shrink:0"></span><span
+            id="netTxt" style="flex:1" data-i18n="net_unknown">OSM status unknown</span><button onclick="testNet()"
+            style="font-size:9px;font-family:Space Mono,monospace;background:var(--tx);border:none;border-radius:4px;padding:3px 9px;cursor:pointer;color:#fff;font-weight:700"
+            data-i18n="btn_test">TEST</button>
+        </div>
+      </div>
+      <div class="mw" id="mwrap">
+        <div id="map"></div>
+        <div id="map3d" style="position:absolute;inset:0;z-index:15;display:none"></div>
+        <div class="hud">
+          <div class="hp" id="hudTag" data-i18n="hud_click_map">CLICK MAP TO SELECT SITE</div>
+          <div class="hp" id="hudCoord" style="display:none"></div>
+        </div>
+        <div class="hint" id="hint" data-i18n="map_hint">CLICK ANYWHERE ON MAP TO DROP PIN</div>
+        <div id="dbg"
+          style="display:none;position:absolute;bottom:0;left:0;right:0;z-index:20;background:rgba(0,0,0,0.82);color:#eee;font:10px/1.6 Space Mono,monospace;padding:8px 12px;max-height:120px;overflow-y:auto">
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="app.js"></script>
+  <div id="contactModal" onclick="if(event.target===this)closeContact()"
+    style="display:none;position:fixed;inset:0;z-index:9998;background:rgba(20,22,27,.6);backdrop-filter:blur(7px);align-items:center;justify-content:center;font-family:'Inter',system-ui,sans-serif">
+    <div
+      style="background:#fff;border-radius:22px;padding:38px;max-width:420px;width:92%;box-shadow:0 30px 80px rgba(0,0,0,.3);position:relative;text-align:center">
+      <button onclick="closeContact()"
+        style="position:absolute;top:18px;right:20px;background:none;border:none;font-size:22px;color:#A8A69F;cursor:pointer">×</button>
+      <div style="font-size:28px;margin-bottom:8px">✉</div>
+      <div style="font-size:20px;font-weight:700;color:#1A1917;letter-spacing:-.01em">Contact Us · 联系我们</div>
+      <div style="font-size:12px;color:#8C8A82;margin:6px 0 24px">Questions, feedback, or collaboration — get in
+        touch.<br>有任何问题、建议 or 合作，欢迎联系。</div>
+      <a href="/cdn-cgi/l/email-protection#ed808c8a8281848c9e84998c8194ad8a808c8481c38e8280"
+        style="display:flex;align-items:center;gap:14px;text-decoration:none;border:1px solid #E8E6E0;border-radius:14px;padding:16px 18px;text-align:left">
+        <span style="font-size:20px">✉</span>
+        <span style="flex:1"><span
+            style="display:block;font-size:9px;color:#A8A69F;letter-spacing:.1em;font-family:'Space Mono',monospace">EMAIL</span><span
+            style="font-size:14px;color:#1A1917;font-weight:600"><span class="__cf_email__"
+              data-cfemail="cfa2aea8a0a3a6aebca6bbaea3b68fa8a2aea6a3e1aca0a2">[email&#160;protected]</span></span></span>
+        <span style="color:#C0392B;font-size:14px">→</span>
+      </a>
+    </div>
+  </div>
+  <div id="helpModal" onclick="if(event.target===this)closeHelp()"
+    style="display:none;position:fixed;inset:0;z-index:9998;background:rgba(20,22,27,.6);backdrop-filter:blur(7px);align-items:center;justify-content:center;font-family:'Inter',system-ui,sans-serif">
+    <div
+      style="background:#fff;border-radius:22px;padding:40px;max-width:520px;width:92%;box-shadow:0 30px 80px rgba(0,0,0,.3);position:relative">
+      <button onclick="closeHelp()"
+        style="position:absolute;top:18px;right:20px;background:none;border:none;font-size:22px;color:#A8A69F;cursor:pointer">×</button>
+      <div
+        style="font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.3em;color:#C0392B;text-transform:uppercase;margin-bottom:8px"
+        data-i18n="help_quick_start">
+        Quick Start · 快速上手</div>
+      <div style="font-size:22px;font-weight:700;color:#1A1917;letter-spacing:-.02em;margin-bottom:24px"
+        data-i18n="help_title">Four steps to a
+        finished board</div>
+      <div id="helpSteps"></div>
+      <div
+        style="margin-top:26px;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap">
+        <label style="font-size:11px;color:#A8A69F;display:flex;align-items:center;gap:6px;cursor:pointer"><input
+            type="checkbox" id="helpDont" style="cursor:pointer" /> <span data-i18n="help_dont">Don't show on startup ·
+            不再自动显示</span></label>
+        <div style="display:flex;gap:8px">
+          <button onclick="tryExample()"
+            style="font-family:'Space Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:12px 22px;border-radius:30px;background:#C0392B;color:#fff;border:none;cursor:pointer"
+            data-i18n="help_try_example">▶ Try example · 试一个</button>
+          <button onclick="closeHelp()"
+            style="font-family:'Space Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:12px 22px;border-radius:30px;background:#1A1917;color:#fff;border:none;cursor:pointer"
+            data-i18n="help_got_it">Got it →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
+  <script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447"
+    integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ=="
+    data-cf-beacon='{"version":"2024.11.0","token":"4e3f46bec9ce480f93ce97177a9ec68d","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}'
+    crossorigin="anonymous"></script>
+</body>
+
+</html>
