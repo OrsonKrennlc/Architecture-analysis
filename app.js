@@ -226,7 +226,7 @@ function drawOv(){
   const latR=lat*Math.PI/180;
   const mpL=1/111320,mpN=1/(111320*Math.cos(latR));
   function pol(dist,deg){const br=(90-deg)*Math.PI/180;return[lat+dist*Math.sin(br)*mpL,lng+dist*Math.cos(br)*mpN];}
-  function lbl(txt,col){return'<div style="font-family:Space Mono,monospace;font-size:8px;color:'+col+';background:rgba(6,6,10,.85);padding:3px 8px;border:0.5px solid rgba(255,255,255,.1);border-radius:2px;white-space:nowrap;letter-spacing:.07em;font-weight:600">'+txt+'</div>';}
+  function lbl(txt,col){return'<div style="font-family:\'Noto Sans\', \'Noto Sans SC\', sans-serif;font-size:8px;color:'+col+';background:rgba(6,6,10,.85);padding:3px 8px;border:0.5px solid rgba(255,255,255,.1);border-radius:2px;white-space:nowrap;letter-spacing:.07em;font-weight:600">'+txt+'</div>';}
   function arrowI(deg,col,sz){sz=sz||22;return L.divIcon({className:'',iconSize:[sz,sz],iconAnchor:[sz/2,sz/2],html:'<svg width="'+sz+'" height="'+sz+'" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="transform:rotate('+deg+'deg)"><polygon points="12,1 21,22 12,16 3,22" fill="'+col+'"/></svg>'});}
 
   const bds=map.getBounds();
@@ -272,7 +272,7 @@ function drawOv(){
     const p=sunPt(h,172,r*1.6);if(!p)return;
     L.circleMarker(p,{radius:h===12?5:3,color:SC,fillColor:h===12?SC:'rgba(8,8,10,.9)',fillOpacity:1,weight:1.5}).addTo(g);
     if(h===12)L.marker(p,{icon:L.divIcon({className:'',html:lbl('☀ NOON',SC),iconAnchor:[24,-8]})}).addTo(g);
-    else L.marker(p,{icon:L.divIcon({className:'',html:'<div style="font:bold 7px Space Mono,monospace;color:'+SC+';opacity:.75">'+h+'h</div>',iconAnchor:[9,-2]})}).addTo(g);
+    else L.marker(p,{icon:L.divIcon({className:'',html:'<div style="font:bold 7px \'Noto Sans\', \'Noto Sans SC\', sans-serif;color:'+SC+';opacity:.75">'+h+'h</div>',iconAnchor:[9,-2]})}).addTo(g);
   });
 
   // Wind flow
@@ -301,11 +301,11 @@ function drawOv(){
 
   // Compass
   const cl=bds.getNorth()-mH*.07,cn=bds.getEast()-mW*.07;
-  L.marker([cl,cn],{icon:L.divIcon({className:'',iconSize:[48,48],iconAnchor:[24,24],html:'<svg width="48" height="48" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="22" fill="rgba(6,6,10,.88)" stroke="rgba(255,255,255,.14)" stroke-width=".8"/><polygon points="24,4 27,24 24,19 21,24" fill="rgba(255,255,255,.90)"/><polygon points="24,44 27,24 24,29 21,24" fill="rgba(255,255,255,.22)"/><polygon points="4,24 24,21 19,24 24,27" fill="rgba(255,255,255,.22)"/><polygon points="44,24 24,21 29,24 24,27" fill="rgba(255,255,255,.22)"/><text x="24" y="11" text-anchor="middle" font-size="7" fill="rgba(255,255,255,.9)" font-family="Space Mono,monospace" font-weight="700">N</text></svg>'})}).addTo(g);
+  L.marker([cl,cn],{icon:L.divIcon({className:'',iconSize:[48,48],iconAnchor:[24,24],html:'<svg width="48" height="48" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="22" fill="rgba(6,6,10,.88)" stroke="rgba(255,255,255,.14)" stroke-width=".8"/><polygon points="24,4 27,24 24,19 21,24" fill="rgba(255,255,255,.90)"/><polygon points="24,44 27,24 24,29 21,24" fill="rgba(255,255,255,.22)"/><polygon points="4,24 24,21 19,24 24,27" fill="rgba(255,255,255,.22)"/><polygon points="44,24 24,21 29,24 24,27" fill="rgba(255,255,255,.22)"/><text x="24" y="11" text-anchor="middle" font-size="7" fill="rgba(255,255,255,.9)" font-family="\'Noto Sans\', \'Noto Sans SC\', sans-serif" font-weight="700">N</text></svg>'})}).addTo(g);
 
   // Legend
   const ll=bds.getSouth()+mH*.04,lln=bds.getWest()+mW*.02;
-  L.marker([ll,lln],{icon:L.divIcon({className:'',iconAnchor:[0,0],html:'<div style="font-family:Space Mono,monospace;font-size:7.5px;background:rgba(6,6,10,.88);padding:7px 11px;border:0.5px solid rgba(255,255,255,.1);border-radius:3px;line-height:1.95;pointer-events:none"><div style="color:rgba(255,255,255,.55);font-weight:700;margin-bottom:3px;letter-spacing:.1em">ANALYSIS</div><div><span style="color:'+RC+'">━━</span> ACCESS</div><div><span style="color:'+SC+'">━━</span> SUN PATH</div><div><span style="color:'+WC+'">━━</span> WIND</div><div><span style="color:'+VC+'">╌╌</span> VIEW AXES</div><div><span style="color:'+NC+'">○</span> NOISE</div></div>'})}).addTo(g);
+  L.marker([ll,lln],{icon:L.divIcon({className:'',iconAnchor:[0,0],html:'<div style="font-family:\'Noto Sans\', \'Noto Sans SC\', sans-serif;font-size:7.5px;background:rgba(6,6,10,.88);padding:7px 11px;border:0.5px solid rgba(255,255,255,.1);border-radius:3px;line-height:1.95;pointer-events:none"><div style="color:rgba(255,255,255,.55);font-weight:700;margin-bottom:3px;letter-spacing:.1em">ANALYSIS</div><div><span style="color:'+RC+'">━━</span> ACCESS</div><div><span style="color:'+SC+'">━━</span> SUN PATH</div><div><span style="color:'+WC+'">━━</span> WIND</div><div><span style="color:'+VC+'">╌╌</span> VIEW AXES</div><div><span style="color:'+NC+'">○</span> NOISE</div></div>'})}).addTo(g);
 }
 
 /* ════════════════════════════════════════
@@ -471,7 +471,7 @@ function showBusyMsg(){
       +'<div style="font-size:30px;margin-bottom:8px">⏳</div>'
       +'<div style="font-size:18px;font-weight:700;color:#1A1917;margin-bottom:8px">数据源繁忙，请稍后再试</div>'
       +'<div style="font-size:12px;color:#8C8A82;line-height:1.6">The map data source is busy right now — please try again in a moment.<br>同时在线人数较多时可能出错，稍等片刻重新生成即可。感谢理解 ♥</div>'
-      +'<button onclick="document.getElementById(\'busyModal\').style.display=\'none\'" style="margin-top:20px;padding:11px 28px;border-radius:30px;background:#1A1917;color:#fff;border:none;font-family:Space Mono,monospace;font-size:11px;font-weight:700;letter-spacing:.06em;cursor:pointer">RETRY LATER</button></div>';
+      +'<button onclick="document.getElementById(\'busyModal\').style.display=\'none\'" style="margin-top:20px;padding:11px 28px;border-radius:30px;background:#1A1917;color:#fff;border:none;font-family:\'Noto Sans\', \'Noto Sans SC\', sans-serif;font-size:11px;font-weight:700;letter-spacing:.06em;cursor:pointer">RETRY LATER</button></div>';
     document.body.appendChild(m);
   }
   m.style.display='flex';
@@ -565,26 +565,40 @@ function wpts(way,b){
   return s.includes('NaN')?'':s;
 }
 
-let cardShape='circle'; // 'circle' | 'rect' | 'poly'
+let cardShape='circle'; // 'circle' | 'rect' | 'square' | 'poly'
+let globalShowScale = true;
+let globalShowNorth = true;
 let sitePolygon=[]; // array of {lat,lng} when user draws a custom boundary
 let polyMode=false; // currently drawing a polygon
 let polyLayer=null; // leaflet layer for the drawn polygon
 
 function wrap(inner,leg,note,opts){
   opts=opts||{};
-  const showScale=opts.noScale!==true;
-  const showNorth=opts.noNorth!==true;
+  const showScale=(opts.noScale!==true)&&globalShowScale;
+  const showNorth=(opts.noNorth!==true)&&globalShowNorth;
   const cx=W/2,cy=H/2,cr=W/2-PAD+4;
   const uid='u'+Math.random().toString(36).slice(2,8);
   const legY=H+18;
   const nL=Math.max(leg.length,1);
-  const sw=(W-10)/nL;
+  const itemWidths=leg.map(it=>14+(it.l||'').length*3.8);
+  const sumItemWidths=itemWidths.reduce((a,b)=>a+b,0);
+  let gap=14;
+  let totalWidth=sumItemWidths+(nL-1)*gap;
+  const maxAvailW=W-12;
+  if(totalWidth>maxAvailW&&nL>1){
+    gap=(maxAvailW-sumItemWidths)/(nL-1);
+    if(gap<4)gap=4;
+    totalWidth=sumItemWidths+(nL-1)*gap;
+  }
+  let curX=(W-totalWidth)/2;
   const legS=leg.map((it,i)=>{
-    const x=5+i*sw;
-    if(it.type==='rect')return'<rect x="'+x+'" y="'+(legY-6)+'" width="11" height="7" fill="'+it.c+'" stroke="'+(it.s||it.c)+'" stroke-width=".5"/><text x="'+(x+14)+'" y="'+(legY+1)+'" font-size="6.5" fill="#A8A69F" font-family="Space Mono,monospace">'+it.l+'</text>';
-    return'<line x1="'+x+'" y1="'+(legY-2)+'" x2="'+(x+11)+'" y2="'+(legY-2)+'" stroke="'+it.c+'" stroke-width="'+(it.w||1.2)+'"'+(it.da?' stroke-dasharray="'+it.da+'"':'')+'/><text x="'+(x+14)+'" y="'+(legY+2)+'" font-size="6.5" fill="#A8A69F" font-family="Space Mono,monospace">'+it.l+'</text>';
+    const x=curX;
+    const itemW=itemWidths[i];
+    curX+=itemW+gap;
+    if(it.type==='rect')return'<rect x="'+x.toFixed(1)+'" y="'+(legY-6)+'" width="11" height="7" fill="'+it.c+'" stroke="'+(it.s||it.c)+'" stroke-width=".5"/><text x="'+(x+14).toFixed(1)+'" y="'+(legY+1)+'" font-size="6.5" fill="#A8A69F" font-family="\'Noto Sans\', \'Noto Sans SC\', sans-serif">'+it.l+'</text>';
+    return'<line x1="' + x.toFixed(1) + '" y1="' + (legY - 2) + '" x2="' + (x + 11).toFixed(1) + '" y2="' + (legY - 2) + '" stroke="' + it.c + '" stroke-width="' + (it.w || 1.2) + '"' + (it.da ? ' stroke-dasharray="' + it.da + '"' : '') + '/><text x="' + (x + 14).toFixed(1) + '" y="' + (legY + 2) + '" font-size="6.5" fill="#A8A69F" font-family="\'Noto Sans\', \'Noto Sans SC\', sans-serif">' + it.l + '</text>';
   }).join('');
-  const noteS=note?'<text x="'+(W-4)+'" y="'+(H+25)+'" text-anchor="end" font-size="5.5" fill="#D8D6D0" font-family="Space Mono,monospace">'+note+'</text>':'';
+  const noteS=note?'<text x="'+(W-4)+'" y="'+(H+25)+'" text-anchor="end" font-size="5.5" fill="#D8D6D0" font-family="\'Noto Sans\', \'Noto Sans SC\', sans-serif">'+note+'</text>':'';
   // Scale bar (bottom-left) — diagram width spans ~2*curR meters across (W-PAD*2) px
   let scaleS='';
   if(showScale)try{
@@ -596,19 +610,20 @@ function wrap(inner,leg,note,opts){
     const barPx=pick/mPerPx;
     const bx=PAD+2, by=H-6;
     const lbl=pick>=1000?(pick/1000)+'km':pick+'m';
-    scaleS='<g font-family="Space Mono,monospace">'
+    scaleS='<g font-family="\'Noto Sans\', \'Noto Sans SC\', sans-serif">'
       +'<line x1="'+bx+'" y1="'+by+'" x2="'+(bx+barPx)+'" y2="'+by+'" stroke="#8C8A82" stroke-width="1.3"/>'
       +'<line x1="'+bx+'" y1="'+(by-2.5)+'" x2="'+bx+'" y2="'+(by+2.5)+'" stroke="#8C8A82" stroke-width="1.3"/>'
       +'<line x1="'+(bx+barPx)+'" y1="'+(by-2.5)+'" x2="'+(bx+barPx)+'" y2="'+(by+2.5)+'" stroke="#8C8A82" stroke-width="1.3"/>'
       +'<text x="'+(bx+barPx/2)+'" y="'+(by-4)+'" text-anchor="middle" font-size="6" fill="#8C8A82">'+lbl+'</text></g>';
   }catch(e){}
-  // North arrow (top-right)
-  const nx=W-PAD-2, ny=PAD+4;
-  const northS=!showNorth?'':'<g font-family="Space Mono,monospace">'
+  // North arrow (bottom-right margin)
+  const nx=W-PAD-2, ny=H-18;
+  const northS=!showNorth?'':'<g font-family="\'Noto Sans\', \'Noto Sans SC\', sans-serif">'
     +'<line x1="'+nx+'" y1="'+ny+'" x2="'+nx+'" y2="'+(ny+13)+'" stroke="#8C8A82" stroke-width="1"/>'
     +'<path d="M'+nx+','+(ny-2)+' l-2.6,5 l2.6,-1.7 l2.6,1.7 z" fill="#8C8A82"/>'
     +'<text x="'+nx+'" y="'+(ny+21)+'" text-anchor="middle" font-size="6" fill="#8C8A82" font-weight="700">N</text></g>';
-  const isRect=cardShape==='rect';
+  const isRect=cardShape==='rect'||cardShape==='square';
+  const rxry=(cardShape==='rect')?' rx="18" ry="18"':'';
   const isPoly=cardShape==='poly'&&sitePolygon&&sitePolygon.length>=3;
   let polyPts='';
   if(isPoly){
@@ -618,12 +633,12 @@ function wrap(inner,leg,note,opts){
   const clipShape=isPoly
     ?'<polygon points="'+polyPts+'"/>'
     :isRect
-    ?'<rect x="'+PAD+'" y="'+PAD+'" width="'+(W-PAD*2)+'" height="'+(H-PAD*2)+'" rx="18" ry="18"/>'
+    ?'<rect x="'+PAD+'" y="'+PAD+'" width="'+(W-PAD*2)+'" height="'+(H-PAD*2)+'"'+rxry+'/>'
     :'<circle cx="'+cx+'" cy="'+cy+'" r="'+cr+'"/>';
   const borderShape=isPoly
     ?'<polygon points="'+polyPts+'" fill="none" stroke="#D8D6D0" stroke-width=".7" stroke-dasharray="3,3"/>'
     :isRect
-    ?'<rect x="'+PAD+'" y="'+PAD+'" width="'+(W-PAD*2)+'" height="'+(H-PAD*2)+'" rx="18" ry="18" fill="none" stroke="#D8D6D0" stroke-width=".7" stroke-dasharray="3,3"/>'
+    ?'<rect x="'+PAD+'" y="'+PAD+'" width="'+(W-PAD*2)+'" height="'+(H-PAD*2)+'"'+rxry+' fill="none" stroke="#D8D6D0" stroke-width=".7" stroke-dasharray="3,3"/>'
     :'<circle cx="'+cx+'" cy="'+cy+'" r="'+cr+'" fill="none" stroke="#D8D6D0" stroke-width=".7" stroke-dasharray="3,3"/>';
   return'<svg viewBox="0 0 '+W+' '+(H+28)+'" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="'+W+'" height="'+(H+28)+'">'
     +'<defs><clipPath id="'+uid+'">'+clipShape+'</clipPath></defs>'
@@ -635,14 +650,15 @@ function wrap(inner,leg,note,opts){
 
 function blank(msg){
   const cx=W/2,cy=H/2,cr=W/2-PAD+4;
-  const isRect=cardShape==='rect';
+  const isRect=cardShape==='rect'||cardShape==='square';
+  const rxry=(cardShape==='rect')?' rx="18" ry="18"':'';
   const border=isRect
-    ?'<rect x="'+PAD+'" y="'+PAD+'" width="'+(W-PAD*2)+'" height="'+(H-PAD*2)+'" rx="18" ry="18" fill="none" stroke="#D8D6D0" stroke-width=".7" stroke-dasharray="3,3"/>'
+    ?'<rect x="'+PAD+'" y="'+PAD+'" width="'+(W-PAD*2)+'" height="'+(H-PAD*2)+'"'+rxry+' fill="none" stroke="#D8D6D0" stroke-width=".7" stroke-dasharray="3,3"/>'
     :'<circle cx="'+cx+'" cy="'+cy+'" r="'+cr+'" fill="none" stroke="#D8D6D0" stroke-width=".7" stroke-dasharray="3,3"/>';
   return'<svg viewBox="0 0 '+W+' '+(H+28)+'" xmlns="http://www.w3.org/2000/svg" width="'+W+'" height="'+(H+28)+'">'
     +border
-    +'<text x="'+cx+'" y="'+(cy-6)+'" text-anchor="middle" font-size="9" fill="#C8C6C0" font-family="Space Mono,monospace">'+msg+'</text>'
-    +'<text x="'+cx+'" y="'+(cy+10)+'" text-anchor="middle" font-size="8" fill="#D8D6D0" font-family="Space Mono,monospace">TRY LARGER RADIUS</text>'
+    +'<text x="'+cx+'" y="'+(cy-6)+'" text-anchor="middle" font-size="9" fill="#C8C6C0" font-family="\'Noto Sans\', \'Noto Sans SC\', sans-serif">'+msg+'</text>'
+    +'<text x="'+cx+'" y="'+(cy+10)+'" text-anchor="middle" font-size="8" fill="#D8D6D0" font-family="\'Noto Sans\', \'Noto Sans SC\', sans-serif">TRY LARGER RADIUS</text>'
     +'</svg>';
 }
 
@@ -780,7 +796,7 @@ function drawLanduse(data,sc){
              {x:PAD+(W-PAD*2)*.52,y:PAD,w:(W-PAD*2)*.48,h:(H-PAD*2)*.48,c:s.com,l:'COMM.'},
              {x:PAD,y:PAD+(H-PAD*2)*.52,w:(W-PAD*2)*.48,h:(H-PAD*2)*.48,c:s.prk,l:'PARK'},
              {x:PAD+(W-PAD*2)*.52,y:PAD+(H-PAD*2)*.52,w:(W-PAD*2)*.48,h:(H-PAD*2)*.48,c:s.civ,l:'CIVIC'}];
-    z.forEach(z2=>sh+='<rect x="'+z2.x+'" y="'+z2.y+'" width="'+z2.w+'" height="'+z2.h+'" fill="'+z2.c+'" stroke="#C8C6BF" stroke-width=".5"/><text x="'+(z2.x+z2.w/2)+'" y="'+(z2.y+z2.h/2+3)+'" text-anchor="middle" font-size="8" fill="#6B6860" font-family="Space Mono,monospace">'+z2.l+'</text>');
+    z.forEach(z2=>sh+='<rect x="'+z2.x+'" y="'+z2.y+'" width="'+z2.w+'" height="'+z2.h+'" fill="'+z2.c+'" stroke="#C8C6BF" stroke-width=".5"/><text x="'+(z2.x+z2.w/2)+'" y="'+(z2.y+z2.h/2+3)+'" text-anchor="middle" font-size="8" fill="#6B6860" font-family="\'Noto Sans\', \'Noto Sans SC\', sans-serif">'+z2.l+'</text>');
   }
   const[sx,sy]=proj(sLat,sLng,b);
   sh+='<circle cx="'+sx+'" cy="'+sy+'" r="5" fill="#1A1917"/><circle cx="'+sx+'" cy="'+sy+'" r="2" fill="#FAFAF9"/>';
@@ -931,11 +947,11 @@ function drawSun(sc){
   function xy(az,alt){const rr=maxR*(1-Math.max(0,alt)/90),a=(az-90)*Math.PI/180;return[cx+rr*Math.cos(a),cy+rr*Math.sin(a)];}
   let inner='';
   // Altitude rings
-  [0,30,60,90].forEach(alt=>{const rr=maxR*(1-alt/90);inner+='<circle cx="'+cx+'" cy="'+cy+'" r="'+rr+'" fill="none" stroke="#ECEAE6" stroke-width="'+(alt===0?1:.5)+'"/>';if(alt>0&&alt<90)inner+='<text x="'+(cx+3)+'" y="'+(cy-rr+9)+'" font-size="5.5" fill="#C8C6C0" font-family="Space Mono,monospace">'+alt+'°</text>';});
+  [0,30,60,90].forEach(alt=>{const rr=maxR*(1-alt/90);inner+='<circle cx="'+cx+'" cy="'+cy+'" r="'+rr+'" fill="none" stroke="#ECEAE6" stroke-width="'+(alt===0?1:.5)+'"/>';if(alt>0&&alt<90)inner+='<text x="'+(cx+3)+'" y="'+(cy-rr+9)+'" font-size="5.5" fill="#C8C6C0" font-family="\'Noto Sans\', \'Noto Sans SC\', sans-serif">'+alt+'°</text>';});
   // Cardinal
   inner+='<line x1="'+cx+'" y1="'+(PAD-4)+'" x2="'+cx+'" y2="'+(H-PAD+4)+'" stroke="#ECEAE6" stroke-width=".5"/>';
   inner+='<line x1="'+(PAD-4)+'" y1="'+cy+'" x2="'+(W-PAD+4)+'" y2="'+cy+'" stroke="#ECEAE6" stroke-width=".5"/>';
-  ['N','E','S','W'].forEach((l,i)=>{const a=i*Math.PI/2-Math.PI/2;inner+='<text x="'+(cx+(maxR+10)*Math.cos(a))+'" y="'+(cy+(maxR+10)*Math.sin(a)+3)+'" text-anchor="middle" font-size="7.5" fill="#A8A69F" font-family="Space Mono,monospace" font-weight="700">'+l+'</text>';});
+  ['N','E','S','W'].forEach((l,i)=>{const a=i*Math.PI/2-Math.PI/2;inner+='<text x="'+(cx+(maxR+10)*Math.cos(a))+'" y="'+(cy+(maxR+10)*Math.sin(a)+3)+'" text-anchor="middle" font-size="7.5" fill="#A8A69F" font-family="\'Noto Sans\', \'Noto Sans SC\', sans-serif" font-weight="700">'+l+'</text>';});
   // Shadow
   const noon=sp(12,172);
   if(noon.alt>0){const[nx,ny]=xy(noon.az+180,0);inner+='<path d="M'+cx+','+cy+' L'+nx+','+ny+'" stroke="'+s.sh+'" stroke-width="10" stroke-linecap="round"/>';}
@@ -950,13 +966,13 @@ function drawSun(sc){
     const[x,y]=xy(p.az,p.alt);
     const isN=h===12;
     inner+='<circle cx="'+x+'" cy="'+y+'" r="'+(isN?5:2.5)+'" fill="'+(isN?s.su:'white')+'" stroke="'+s.su+'" stroke-width="'+(isN?0:1)+'"/>';
-    if(isN){inner+='<circle cx="'+x+'" cy="'+y+'" r="2" fill="white"/><text x="'+x+'" y="'+(y-8)+'" text-anchor="middle" font-size="6.5" fill="'+s.su+'" font-family="Space Mono,monospace" font-weight="700">NOON</text>';}
-    else inner+='<text x="'+(x+(h<12?-7:7))+'" y="'+(y-4)+'" text-anchor="middle" font-size="5.5" fill="'+s.su+'" font-family="Space Mono,monospace" opacity=".75">'+h+'h</text>';
+    if(isN){inner+='<circle cx="'+x+'" cy="'+y+'" r="2" fill="white"/><text x="'+x+'" y="'+(y-8)+'" text-anchor="middle" font-size="6.5" fill="'+s.su+'" font-family="\'Noto Sans\', \'Noto Sans SC\', sans-serif" font-weight="700">NOON</text>';}
+    else inner+='<text x="'+(x+(h<12?-7:7))+'" y="'+(y-4)+'" text-anchor="middle" font-size="5.5" fill="'+s.su+'" font-family="\'Noto Sans\', \'Noto Sans SC\', sans-serif" opacity=".75">'+h+'h</text>';
   });
   // Site box
   inner+='<rect x="'+(cx-11)+'" y="'+(cy-8)+'" width="22" height="17" rx="3" fill="white" stroke="'+s.site+'" stroke-width="1"/>';
-  inner+='<text x="'+cx+'" y="'+(cy+4)+'" text-anchor="middle" font-size="6" fill="'+s.site+'" font-family="Space Mono,monospace" font-weight="700">SITE</text>';
-  inner+='<text x="'+cx+'" y="'+(H-PAD+14)+'" text-anchor="middle" font-size="6" fill="#A8A69F" font-family="Space Mono,monospace">'+sLat.toFixed(2)+'N</text>';
+  inner+='<text x="'+cx+'" y="'+(cy+4)+'" text-anchor="middle" font-size="6" fill="'+s.site+'" font-family="\'Noto Sans\', \'Noto Sans SC\', sans-serif" font-weight="700">SITE</text>';
+  inner+='<text x="'+cx+'" y="'+(H-PAD+14)+'" text-anchor="middle" font-size="6" fill="#A8A69F" font-family="\'Noto Sans\', \'Noto Sans SC\', sans-serif">'+sLat.toFixed(2)+'N</text>';
   return wrap(inner,[{c:s.su,w:1.8,l:'SUMMER'},{c:s.eq,w:.9,l:'EQUINOX',da:'3,2'},{c:s.wi,w:.7,l:'WINTER',da:'2,3'}],null,{noScale:true,noNorth:true});
 }
 
@@ -972,12 +988,13 @@ function drawSat(sc){
   const fid='f'+Math.random().toString(36).slice(2,8);
   const uid='c'+Math.random().toString(36).slice(2,8);
   const url='https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/'+z+'/'+ty+'/'+tx;
-  const isRect=cardShape==='rect';
+  const isRect=cardShape==='rect'||cardShape==='square';
+  const rxry=(cardShape==='rect')?' rx="18" ry="18"':'';
   const clipShape=isRect
-    ?'<rect x="'+PAD+'" y="'+PAD+'" width="'+(W-PAD*2)+'" height="'+(H-PAD*2)+'" rx="18" ry="18"/>'
+    ?'<rect x="'+PAD+'" y="'+PAD+'" width="'+(W-PAD*2)+'" height="'+(H-PAD*2)+'"'+rxry+'/>'
     :'<circle cx="'+cx+'" cy="'+cy+'" r="'+cr+'"/>';
   const borderShape=isRect
-    ?'<rect x="'+PAD+'" y="'+PAD+'" width="'+(W-PAD*2)+'" height="'+(H-PAD*2)+'" rx="18" ry="18" fill="none" stroke="#D8D6D0" stroke-width=".7" stroke-dasharray="3,3"/>'
+    ?'<rect x="'+PAD+'" y="'+PAD+'" width="'+(W-PAD*2)+'" height="'+(H-PAD*2)+'"'+rxry+' fill="none" stroke="#D8D6D0" stroke-width=".7" stroke-dasharray="3,3"/>'
     :'<circle cx="'+cx+'" cy="'+cy+'" r="'+cr+'" fill="none" stroke="#D8D6D0" stroke-width=".7" stroke-dasharray="3,3"/>';
   const vgid='satv'+Math.random().toString(36).slice(2,8);
   return'<svg viewBox="0 0 '+W+' '+(H+28)+'" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="'+W+'" height="'+(H+28)+'">'
@@ -993,7 +1010,7 @@ function drawSat(sc){
     +'<circle cx="'+cx+'" cy="'+cy+'" r="2.5" fill="rgba(255,255,255,0.85)"/>'
     +'</g>'
     +borderShape
-    +'<text x="'+cx+'" y="'+(H+20)+'" text-anchor="middle" font-size="7" fill="#A8A69F" font-family="Space Mono,monospace">SATELLITE \u00b7 '+sLat.toFixed(3)+'N '+sLng.toFixed(3)+'E</text>'
+    +'<text x="'+cx+'" y="'+(H+20)+'" text-anchor="middle" font-size="7" fill="#A8A69F" font-family="\'Noto Sans\', \'Noto Sans SC\', sans-serif">SATELLITE \u00b7 '+sLat.toFixed(3)+'N '+sLng.toFixed(3)+'E</text>'
     +'</svg>';
 }
 
@@ -1005,17 +1022,18 @@ function drawContext(sc){
   const outerR=CW/2-CPAD+4;
 
   const b=getBounds();
-  const isRect=cardShape==='rect';
+  const isRect=cardShape==='rect'||cardShape==='square';
+  const rxry=(cardShape==='rect')?' rx="18" ry="18"':'';
 
   const uid='ctx'+Math.random().toString(36).slice(2,8);
   const uid2='ctx2'+Math.random().toString(36).slice(2,8);
   const uid3='ctx3'+Math.random().toString(36).slice(2,8);
 
   const outerClip=isRect
-    ?'<rect x="'+CPAD+'" y="'+CPAD+'" width="'+(CW-CPAD*2)+'" height="'+(CH-CPAD*2)+'" rx="18" ry="18"/>'
+    ?'<rect x="'+CPAD+'" y="'+CPAD+'" width="'+(CW-CPAD*2)+'" height="'+(CH-CPAD*2)+'"'+rxry+'/>'
     :'<circle cx="'+cx+'" cy="'+cy+'" r="'+outerR+'"/>';
   const outerBorder=isRect
-    ?'<rect x="'+CPAD+'" y="'+CPAD+'" width="'+(CW-CPAD*2)+'" height="'+(CH-CPAD*2)+'" rx="18" ry="18" fill="none" stroke="#D8D6D0" stroke-width=".7" stroke-dasharray="3,3"/>'
+    ?'<rect x="'+CPAD+'" y="'+CPAD+'" width="'+(CW-CPAD*2)+'" height="'+(CH-CPAD*2)+'"'+rxry+' fill="none" stroke="#D8D6D0" stroke-width=".7" stroke-dasharray="3,3"/>'
     :'<circle cx="'+cx+'" cy="'+cy+'" r="'+outerR+'" fill="none" stroke="#D8D6D0" stroke-width=".7" stroke-dasharray="3,3"/>';
 
   // Road styles same as drawRoads scheme 0
@@ -1067,10 +1085,10 @@ function drawContext(sc){
   svg+='<circle cx="'+cx+'" cy="'+cy+'" r="'+sitePxR+'" fill="none" stroke="'+s.ring+'" stroke-width="2" stroke-dasharray="'+s.dash+'"/>';
 
   // SITE label above circle
-  svg+='<text x="'+cx+'" y="'+(cy-sitePxR-7)+'" text-anchor="middle" font-size="6.5" fill="'+s.label+'" font-family="Space Mono,monospace" font-weight="700" letter-spacing=".12em">SITE</text>';
+  svg+='<text x="'+cx+'" y="'+(cy-sitePxR-7)+'" text-anchor="middle" font-size="6.5" fill="'+s.label+'" font-family="\'Noto Sans\', \'Noto Sans SC\', sans-serif" font-weight="700" letter-spacing=".12em">SITE</text>';
 
   svg+=outerBorder;
-  svg+='<text x="'+cx+'" y="'+(CH+20)+'" text-anchor="middle" font-size="5.5" fill="#A8A69F" font-family="Space Mono,monospace">'+sLat.toFixed(4)+'N · '+sLng.toFixed(4)+'E</text>';
+  svg+='<text x="'+cx+'" y="'+(CH+20)+'" text-anchor="middle" font-size="5.5" fill="#A8A69F" font-family="\'Noto Sans\', \'Noto Sans SC\', sans-serif">'+sLat.toFixed(4)+'N · '+sLng.toFixed(4)+'E</text>';
   svg+='</svg>';
   return svg;
 }
@@ -1136,22 +1154,17 @@ function drawFabric(data,sc){
 
   // wrap needs xmlns:xlink for image tag
   const uid='fab2'+Math.random().toString(36).slice(2,8);
-  const isRect=cardShape==='rect';
+  const isRect=cardShape==='rect'||cardShape==='square';
+  const rxry=(cardShape==='rect')?' rx="18" ry="18"':'';
   const clipShape=isRect
-    ?'<rect x="'+PAD+'" y="'+PAD+'" width="'+(W-PAD*2)+'" height="'+(H-PAD*2)+'" rx="18" ry="18"/>'
+    ?'<rect x="'+PAD+'" y="'+PAD+'" width="'+(W-PAD*2)+'" height="'+(H-PAD*2)+'"'+rxry+'/>'
     :'<circle cx="'+cx+'" cy="'+cy+'" r="'+cr+'"/>';
   const borderShape=isRect
-    ?'<rect x="'+PAD+'" y="'+PAD+'" width="'+(W-PAD*2)+'" height="'+(H-PAD*2)+'" rx="18" ry="18" fill="none" stroke="#D8D6D0" stroke-width=".7" stroke-dasharray="3,3"/>'
+    ?'<rect x="'+PAD+'" y="'+PAD+'" width="'+(W-PAD*2)+'" height="'+(H-PAD*2)+'"'+rxry+' fill="none" stroke="#D8D6D0" stroke-width=".7" stroke-dasharray="3,3"/>'
     :'<circle cx="'+cx+'" cy="'+cy+'" r="'+cr+'" fill="none" stroke="#D8D6D0" stroke-width=".7" stroke-dasharray="3,3"/>';
-  const legY=H+18,leg=[{type:'rect',c:s.bld,l:'BUILT MASS'},{type:'rect',c:'#F0EFED',s:'#C8C6C0',l:'VOID / STREET'}];
+  const leg=[{type:'rect',c:s.bld,l:'BUILT MASS'},{type:'rect',c:'#F0EFED',s:'#C8C6C0',l:'VOID / STREET'}];
   const note=cnt?'REAL·'+cnt:'SCHEMATIC';
-  const sw=(W-10)/leg.length;
-  const legS=leg.map((it,i)=>{const x=5+i*sw;return'<rect x="'+x+'" y="'+(legY-6)+'" width="11" height="7" fill="'+it.c+'" stroke="'+(it.s||it.c)+'" stroke-width=".5"/><text x="'+(x+14)+'" y="'+(legY+1)+'" font-size="6.5" fill="#A8A69F" font-family="Space Mono,monospace">'+it.l+'</text>';}).join('');
-  const noteS='<text x="'+(W-4)+'" y="'+(H+25)+'" text-anchor="end" font-size="5.5" fill="#D8D6D0" font-family="Space Mono,monospace">'+note+'</text>';
-  return'<svg viewBox="0 0 '+W+' '+(H+28)+'" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="'+W+'" height="'+(H+28)+'">'
-    +'<defs><clipPath id="'+uid+'">'+clipShape+'</clipPath></defs>'
-    +'<g clip-path="url(#'+uid+')">'+inner+'</g>'
-    +borderShape+legS+noteS+'</svg>';
+  return wrap(inner, leg, note);
 }
 /* ──── ORIENTATION ──── */
 function drawOrient(sc){
@@ -1189,7 +1202,7 @@ function drawOrient(sc){
     inner+='<polygon points="'+ex.toFixed(1)+','+ey.toFixed(1)+' '+p1x.toFixed(1)+','+p1y.toFixed(1)+' '+basex.toFixed(1)+','+basey.toFixed(1)+' '+p2x.toFixed(1)+','+p2y.toFixed(1)+'" fill="'+(isMain?s.accent:s.arrow)+'" stroke="none"/>';
     // Label
     const lx=cx+(len+16)*Math.cos(a), ly=cy+(len+16)*Math.sin(a);
-    inner+='<text x="'+lx.toFixed(1)+'" y="'+(ly+4).toFixed(1)+'" text-anchor="middle" font-size="'+(isMain?11:8)+'" fill="'+(isMain?s.accent:s.arrow)+'" font-family="Space Mono,monospace" font-weight="700">'+label+'</text>';
+    inner+='<text x="'+lx.toFixed(1)+'" y="'+(ly+4).toFixed(1)+'" text-anchor="middle" font-size="'+(isMain?11:8)+'" fill="'+(isMain?s.accent:s.arrow)+'" font-family="\'Noto Sans\', \'Noto Sans SC\', sans-serif" font-weight="700">'+label+'</text>';
   }
 
   // Four main arrows
@@ -1204,13 +1217,13 @@ function drawOrient(sc){
     const r1=cr*.72,r2b=cr*.82;
     inner+='<line x1="'+(cx+r1*Math.cos(a))+'" y1="'+(cy+r1*Math.sin(a))+'" x2="'+(cx+r2b*Math.cos(a))+'" y2="'+(cy+r2b*Math.sin(a))+'" stroke="'+s.arrow+'" stroke-width="1.2" opacity=".5"/>';
     const label=['NE','SE','SW','NW'][[45,135,225,315].indexOf(deg)];
-    inner+='<text x="'+(cx+(cr*.9)*Math.cos(a))+'" y="'+(cy+(cr*.9)*Math.sin(a)+3)+'" text-anchor="middle" font-size="6" fill="'+s.sub+'" font-family="Space Mono,monospace" opacity=".7">'+label+'</text>';
+    inner+='<text x="'+(cx+(cr*.9)*Math.cos(a))+'" y="'+(cy+(cr*.9)*Math.sin(a)+3)+'" text-anchor="middle" font-size="6" fill="'+s.sub+'" font-family="\'Noto Sans\', \'Noto Sans SC\', sans-serif" opacity=".7">'+label+'</text>';
   });
 
   // Lat/lon at center
   inner+='<rect x="'+(cx-28)+'" y="'+(cy-10)+'" width="56" height="20" rx="4" fill="white" stroke="'+s.ring+'" stroke-width=".8"/>';
-  inner+='<text x="'+cx+'" y="'+(cy-1)+'" text-anchor="middle" font-size="5.5" fill="'+s.sub+'" font-family="Space Mono,monospace">'+sLat.toFixed(3)+'°N</text>';
-  inner+='<text x="'+cx+'" y="'+(cy+7)+'" text-anchor="middle" font-size="5.5" fill="'+s.sub+'" font-family="Space Mono,monospace">'+sLng.toFixed(3)+'°E</text>';
+  inner+='<text x="'+cx+'" y="'+(cy-1)+'" text-anchor="middle" font-size="5.5" fill="'+s.sub+'" font-family="\'Noto Sans\', \'Noto Sans SC\', sans-serif">'+sLat.toFixed(3)+'°N</text>';
+  inner+='<text x="'+cx+'" y="'+(cy+7)+'" text-anchor="middle" font-size="5.5" fill="'+s.sub+'" font-family="\'Noto Sans\', \'Noto Sans SC\', sans-serif">'+sLng.toFixed(3)+'°E</text>';
 
   return wrap(inner,[{c:s.accent,w:2.8,l:'NORTH'},{c:s.arrow,w:1.8,l:'S / E / W'}],'LAT·'+sLat.toFixed(2)+'  LON·'+sLng.toFixed(2),{noScale:true,noNorth:true});
 }
@@ -1258,7 +1271,7 @@ function drawNoise(data,sc){
     const nl=NL[hw];if(!nl||nl.db<65)return;
     const mid=el.geometry[Math.floor(el.geometry.length/2)];
     const[x,y]=proj(mid.lat,mid.lon,b);
-    inner+='<text x="'+x+'" y="'+(y-4)+'" text-anchor="middle" font-size="5" fill="'+dbColor(nl.db)+'" font-family="Space Mono,monospace" opacity=".8">'+nl.db+'dB</text>';
+    inner+='<text x="'+x+'" y="'+(y-4)+'" text-anchor="middle" font-size="5" fill="'+dbColor(nl.db)+'" font-family="\'Noto Sans\', \'Noto Sans SC\', sans-serif" opacity=".8">'+nl.db+'dB</text>';
   });
   // Site dot
   const[sx,sy]=proj(sLat,sLng,b);
@@ -1453,7 +1466,7 @@ function drawTransit(data,sc){
     const r2=mToPx(m);
     inner+='<circle cx="'+cx+'" cy="'+cy+'" r="'+r2+'" fill="'+fill+'" stroke="'+strk+'" stroke-width="'+sw+'" stroke-dasharray="4,3"/>';
     // Label at top of ring only
-    inner+='<text x="'+cx+'" y="'+(cy-r2+8)+'" text-anchor="middle" font-size="5" fill="'+strk+'" font-family="Space Mono,monospace" opacity=".7">'+lbl+'min</text>';
+    inner+='<text x="'+cx+'" y="'+(cy-r2+8)+'" text-anchor="middle" font-size="5" fill="'+strk+'" font-family="\'Noto Sans\', \'Noto Sans SC\', sans-serif" opacity=".7">'+lbl+'min</text>';
   });
   // Transit stops — major only get name, bus gets dot only
   let cnt=0;
@@ -1470,7 +1483,7 @@ function drawTransit(data,sc){
     // Only show name for major stops (metro/rail) and only if name is short
     if(isMajor&&t.name&&t.name.length<20){
       inner+='<rect x="'+(x+r3+2)+'" y="'+(y-5)+'" width="'+(Math.min(t.name.length*3.2,60)+4)+'" height="9" rx="1.5" fill="white" opacity=".85"/>';
-      inner+='<text x="'+(x+r3+4)+'" y="'+(y+2)+'" font-size="4.5" fill="'+col+'" font-family="Space Mono,monospace" font-weight="700">'+t.name.slice(0,18)+'</text>';
+      inner+='<text x="'+(x+r3+4)+'" y="'+(y+2)+'" font-size="4.5" fill="'+col+'" font-family="\'Noto Sans\', \'Noto Sans SC\', sans-serif" font-weight="700">'+t.name.slice(0,18)+'</text>';
     }
   });
   const[sx,sy]=proj(sLat,sLng,b);
@@ -1566,7 +1579,7 @@ function drawAccess(data,sc){
     const ly=cy-r2+10;
     if(ly>PAD+4){
       inner+='<rect x="'+(cx-14)+'" y="'+(ly-8)+'" width="28" height="11" rx="2" fill="'+(isDark?'rgba(0,0,0,0.55)':'rgba(255,255,255,0.8)')+'"/>';
-      inner+='<text x="'+cx+'" y="'+ly+'" text-anchor="middle" font-size="7" font-weight="700" fill="'+col+'" font-family="Space Mono,monospace">'+lbl+'</text>';
+      inner+='<text x="'+cx+'" y="'+ly+'" text-anchor="middle" font-size="7" font-weight="700" fill="'+col+'" font-family="\'Noto Sans\', \'Noto Sans SC\', sans-serif">'+lbl+'</text>';
     }
   });
 
@@ -1751,6 +1764,10 @@ const I18N={
   shp_circle:{en:'● Circle',zh:'● 圆形范围'},
   shp_round:{en:'▢ Round',zh:'▢ 圆角方形'},
   shp_poly:{en:'⬡ Site',zh:'⬡ 场地范围'},
+  shp_square:{en:'█ Square',zh:'█ 直角矩形'},
+  display_opts:{en:'Diagram Elements',zh:'图面元素控制'},
+  opt_scale:{en:'Scale Bar',zh:'显示比例尺'},
+  opt_north:{en:'Compass',zh:'显示指北针'},
   poly_hint_text:{en:'Click on map to add boundary points (min 3) to draw your site.',zh:'点击地图添加边界点（至少3个），画出你的场地范围。'},
   btn_done:{en:'✓ DONE',zh:'✓ 完成'},
   btn_clear:{en:'✕ CLEAR',zh:'✕ 清除'},
@@ -1950,20 +1967,30 @@ function renderList(){
     return '<div class="ai '+(a.on?'on':'')+'" onclick="tog(\''+a.id+'\')"><div class="ad"></div><div style="flex:1;min-width:0"><div class="an">'+name+'</div><div class="as">'+sub+'</div></div><div class="abg">'+a.tag+'</div></div>';
   }).join('');
 }
-function setShape(sh,el){
-  cardShape=sh;
-  polyMode=false;
-  document.getElementById('polyHint').style.display='none';
-  document.querySelectorAll('#shpCircle,#shpRect,#shpPoly').forEach(b=>b.classList.remove('on'));
-  if(el)el.classList.add('on');
-  renderList();
-  // Re-render all visible cards
+function reRenderCards(){
   document.querySelectorAll('.card').forEach(card=>{
     const id=card.id.replace('card_','');
     const sc=cardSch[id]||0;
     const body=card.querySelector('.cbody');
     if(body){const s=render(id,sc);if(s)body.innerHTML=s;}
   });
+}
+function toggleScale(val){
+  globalShowScale = !!val;
+  reRenderCards();
+}
+function toggleNorth(val){
+  globalShowNorth = !!val;
+  reRenderCards();
+}
+function setShape(sh,el){
+  cardShape=sh;
+  polyMode=false;
+  document.getElementById('polyHint').style.display='none';
+  document.querySelectorAll('#shpCircle,#shpRect,#shpSquare,#shpPoly').forEach(b=>b.classList.remove('on'));
+  if(el)el.classList.add('on');
+  renderList();
+  reRenderCards();
 }
 // ── Custom polygon site boundary ──
 function startPolygon(){
@@ -2073,7 +2100,7 @@ async function generate(){
     const name = lang === 'zh' ? (a.name_zh || a.name) : a.name;
     const loadingText = lang === 'zh' ? '载入中...' : 'LOADING...';
     const subText = lang === 'zh' ? '正在获取地图数据' : 'querying openstreetmap';
-    return '<div class="card" id="card_'+a.id+'"><div class="ch"><span class="cn">'+String(i+1).padStart(2,'0')+'</span><span class="ct">'+name+'</span><span class="ctag">'+a.tag+'</span></div><div class="cbody" style="height:266px;display:flex;align-items:center;justify-content:center"><div style="font-family:Space Mono,monospace;font-size:9px;color:#C8C6C0;text-align:center">'+loadingText+'<br><span style="font-size:7px;display:block;margin-top:4px">'+subText+'</span></div></div></div>';
+    return '<div class="card" id="card_'+a.id+'"><div class="ch"><span class="cn">'+String(i+1).padStart(2,'0')+'</span><span class="ct">'+name+'</span><span class="ctag">'+a.tag+'</span></div><div class="cbody" style="height:266px;display:flex;align-items:center;justify-content:center"><div style="font-family:\'Noto Sans\', \'Noto Sans SC\', sans-serif;font-size:9px;color:#C8C6C0;text-align:center">'+loadingText+'<br><span style="font-size:7px;display:block;margin-top:4px">'+subText+'</span></div></div></div>';
   }).join('');
   const D={};
   const ids=new Set(sel.map(a=>a.id));
@@ -2258,8 +2285,8 @@ function renderStats(){
   ];
   bar.style.display='flex';
   bar.innerHTML=stats.map((s,i)=>'<div style="flex:1;min-width:120px;padding:14px 16px;'+(i<stats.length-1?'border-right:1px solid var(--ln);':'')+'">'
-    +'<div style="font-family:Space Mono,monospace;font-size:8px;letter-spacing:.1em;color:var(--t3);margin-bottom:5px">'+s[0]+'</div>'
-    +'<div style="font-family:Space Mono,monospace;font-size:18px;font-weight:700;color:var(--tx);letter-spacing:-.01em">'+s[1]+'</div></div>').join('');
+    +'<div style="font-family:\'Noto Sans\', \'Noto Sans SC\', sans-serif;font-size:8px;letter-spacing:.1em;color:var(--t3);margin-bottom:5px">'+s[0]+'</div>'
+    +'<div style="font-family:\'Noto Sans\', \'Noto Sans SC\', sans-serif;font-size:18px;font-weight:700;color:var(--tx);letter-spacing:-.01em">'+s[1]+'</div></div>').join('');
 }
 
 /* ════════════════════════════════════════
@@ -2309,21 +2336,21 @@ function exportPortfolio(){
     +'.bhead{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:2px solid #16150F;padding-bottom:10px;margin-bottom:6px}'
     +'.bhead h1{font-size:42px;font-weight:900;letter-spacing:-.03em;line-height:.9}'
     +'.bhead h1 span{color:#A8A69F;font-weight:400}'
-    +'.bhead .meta{text-align:right;font-family:Space Mono,monospace;font-size:9px;color:#8C8A82;letter-spacing:.08em;line-height:1.7}'
+    +'.bhead .meta{text-align:right;font-family:\'Noto Sans\', \'Noto Sans SC\', sans-serif;font-size:9px;color:#8C8A82;letter-spacing:.08em;line-height:1.7}'
     +'.subrow{display:flex;justify-content:space-between;align-items:center;margin:8px 0 14px;gap:20px}'
     +'.desc{font-size:11px;line-height:1.6;color:#3A3835;max-width:62%}'
     +'.metrics{display:flex;gap:0;border:1px solid #E0DDD8;border-radius:8px;overflow:hidden}'
     +'.metrics .m{padding:8px 14px;border-right:1px solid #E0DDD8;text-align:center}.metrics .m:last-child{border:none}'
-    +'.metrics .mk{font-family:Space Mono,monospace;font-size:7px;color:#A8A69F;letter-spacing:.1em}'
-    +'.metrics .mv{font-family:Space Mono,monospace;font-size:15px;font-weight:700;margin-top:2px}'
+    +'.metrics .mk{font-family:\'Noto Sans\', \'Noto Sans SC\', sans-serif;font-size:7px;color:#A8A69F;letter-spacing:.1em}'
+    +'.metrics .mv{font-family:\'Noto Sans\', \'Noto Sans SC\', sans-serif;font-size:15px;font-weight:700;margin-top:2px}'
     +'.pgrid{flex:1;display:grid;grid-template-columns:repeat(auto-fit,minmax(0,1fr));gap:10px;align-content:start}'
     +'.pcell{display:flex;flex-direction:column;border:1px solid #EEECE6;border-radius:8px;padding:8px;background:#FCFBF9}'
     +'.pcap{display:flex;align-items:center;gap:6px;margin-bottom:4px}'
-    +'.pnum{font-family:Space Mono,monospace;font-size:9px;font-weight:700;color:#C0392B}'
-    +'.pname{font-family:Space Mono,monospace;font-size:8.5px;font-weight:700;flex:1;letter-spacing:.02em}'
-    +'.ptag{font-family:Space Mono,monospace;font-size:6px;color:#A8A69F;background:#F0EEE8;padding:2px 4px;border-radius:2px}'
+    +'.pnum{font-family:\'Noto Sans\', \'Noto Sans SC\', sans-serif;font-size:9px;font-weight:700;color:#C0392B}'
+    +'.pname{font-family:\'Noto Sans\', \'Noto Sans SC\', sans-serif;font-size:8.5px;font-weight:700;flex:1;letter-spacing:.02em}'
+    +'.ptag{font-family:\'Noto Sans\', \'Noto Sans SC\', sans-serif;font-size:6px;color:#A8A69F;background:#F0EEE8;padding:2px 4px;border-radius:2px}'
     +'.psvg svg{width:100%;height:auto;display:block}'
-    +'.bfoot{margin-top:10px;padding-top:8px;border-top:1px solid #E0DDD8;display:flex;justify-content:space-between;font-family:Space Mono,monospace;font-size:8px;color:#A8A69F;letter-spacing:.08em}'
+    +'.bfoot{margin-top:10px;padding-top:8px;border-top:1px solid #E0DDD8;display:flex;justify-content:space-between;font-family:\'Noto Sans\', \'Noto Sans SC\', sans-serif;font-size:8px;color:#A8A69F;letter-spacing:.08em}'
     +'@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}'
     +'</style></head><body><div class="board">'
     +'<div class="bhead"><h1>'+title+'<br><span>SITE ANALYSIS</span></h1>'
@@ -2361,7 +2388,7 @@ function exportPDF(){
 <style>
 @page{size:${EXP_PAGE[expFormat]||'A4 portrait'};margin:12mm}
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Space Mono',monospace;background:#fff;color:#1A1917}
+body{font-family:\'Noto Sans\', \'Noto Sans SC\', sans-serif;background:#fff;color:#1A1917}
 @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap');
 .header{position:relative;width:100%;height:380px;overflow:hidden;background:${isDarkOv?'#1A1C20':'#F0EEE8'}}
 .header svg{position:absolute;inset:0;width:100%;height:100%}
@@ -2406,7 +2433,7 @@ function openLayerPicker(ev){
   if(avail.length<2){toast('GENERATE MORE ANALYSES FIRST');return;}
   const list=document.getElementById('layerList');
   list.innerHTML=avail.map((a,i)=>
-    '<label style="display:flex;align-items:center;gap:10px;padding:8px 10px;border:1px solid var(--bd);border-radius:8px;margin-bottom:6px;cursor:pointer;font-family:\'Space Mono\',monospace;font-size:10px;color:var(--t1)">'
+    '<label style="display:flex;align-items:center;gap:10px;padding:8px 10px;border:1px solid var(--bd);border-radius:8px;margin-bottom:6px;cursor:pointer;font-family:\'Noto Sans\', \'Noto Sans SC\', sans-serif;font-size:10px;color:var(--t1)">'
     +'<input type="checkbox" class="layerChk" value="'+a.id+'" '+(i<4?'checked':'')+' style="width:15px;height:15px;cursor:pointer"/>'
     +'<span style="flex:1">'+a.name+'</span>'
     +'<span style="font-size:8px;color:var(--t3)">'+a.tag+'</span>'
@@ -2427,7 +2454,8 @@ function dlLayered(ids){
   if(sel.length<2){toast('GENERATE MORE ANALYSES FIRST');return;}
   load('BUILDING LAYERED POSTER...');
 
-  const isRect=cardShape==='rect';
+  const isRect=cardShape==='rect'||cardShape==='square';
+  const rxry=(cardShape==='rect')?' rx="14"':'';
   const PW=1240, layerGap=isRect?188:150;
   const topPad=200, botPad=90;
   const PH=topPad+sel.length*layerGap+botPad+(isRect?260:160);
@@ -2439,15 +2467,15 @@ function dlLayered(ids){
 
   let svg='<svg viewBox="0 0 '+PW+' '+PH+'" xmlns="http://www.w3.org/2000/svg" width="'+PW+'" height="'+PH+'">';
   svg+='<rect width="'+PW+'" height="'+PH+'" fill="#F7F6F3"/>';
-  svg+='<text x="64" y="70" font-size="30" fill="#1A1917" font-family="Space Mono,monospace" font-weight="700" letter-spacing="-.01em">EasyMap · '+loc+'</text>';
-  svg+='<text x="64" y="94" font-size="9" fill="#A8A69F" font-family="Space Mono,monospace" letter-spacing=".08em">'+(sLat?sLat.toFixed(4)+'N · '+sLng.toFixed(4)+'E':'')+'  |  R='+curR+'m  |  '+sel.length+'-LAYER AXONOMETRIC  |  '+date+'</text>';
+  svg+='<text x="64" y="70" font-size="30" fill="#1A1917" font-family="\'Noto Sans\', \'Noto Sans SC\', sans-serif" font-weight="700" letter-spacing="-.01em">EasyMap · '+loc+'</text>';
+  svg+='<text x="64" y="94" font-size="9" fill="#A8A69F" font-family="\'Noto Sans\', \'Noto Sans SC\', sans-serif" letter-spacing=".08em">'+(sLat?sLat.toFixed(4)+'N · '+sLng.toFixed(4)+'E':'')+'  |  R='+curR+'m  |  '+sel.length+'-LAYER AXONOMETRIC  |  '+date+'</text>';
   svg+='<line x1="64" y1="112" x2="'+(PW-64)+'" y2="112" stroke="#1A1917" stroke-width="1.2"/>';
 
   let defs='<defs>';
   sel.forEach((a,idx)=>{
     // Clip shape per layer to hide the square diagram boundary
     if(isRect){
-      defs+='<clipPath id="Lclip'+idx+'"><rect x="2" y="2" width="264" height="264" rx="14"/></clipPath>';
+      defs+='<clipPath id="Lclip'+idx+'"><rect x="2" y="2" width="264" height="264"'+rxry+'/></clipPath>';
     }else{
       defs+='<clipPath id="Lclip'+idx+'"><circle cx="134" cy="134" r="132"/></clipPath>';
     }
@@ -2481,12 +2509,12 @@ function dlLayered(ids){
     const labelX=PW-440, labelY=layerY;
     svg+='<line x1="'+(cx+DS*0.5)+'" y1="'+layerY+'" x2="'+labelX+'" y2="'+labelY+'" stroke="#C8C6C0" stroke-width=".5" stroke-dasharray="2,2"/>';
     svg+='<line x1="'+labelX+'" y1="'+(labelY-1)+'" x2="'+(PW-64)+'" y2="'+(labelY-1)+'" stroke="#1A1917" stroke-width=".8"/>';
-    svg+='<text x="'+labelX+'" y="'+(labelY-8)+'" font-size="12" fill="#1A1917" font-family="Space Mono,monospace" font-weight="700" letter-spacing=".06em">'+a.name.toUpperCase()+'</text>';
-    svg+='<text x="'+labelX+'" y="'+(labelY+13)+'" font-size="7.5" fill="#8C8A82" font-family="Space Mono,monospace" letter-spacing=".04em">'+a.sub.toUpperCase()+'  ·  '+a.tag+'</text>';
-    svg+='<text x="'+(PW-64)+'" y="'+(labelY-8)+'" text-anchor="end" font-size="9" fill="#C0392B" font-family="Space Mono,monospace" font-weight="700">'+String(idx+1).padStart(2,'0')+'</text>';
+    svg+='<text x="'+labelX+'" y="'+(labelY-8)+'" font-size="12" fill="#1A1917" font-family="\'Noto Sans\', \'Noto Sans SC\', sans-serif" font-weight="700" letter-spacing=".06em">'+a.name.toUpperCase()+'</text>';
+    svg+='<text x="'+labelX+'" y="'+(labelY+13)+'" font-size="7.5" fill="#8C8A82" font-family="\'Noto Sans\', \'Noto Sans SC\', sans-serif" letter-spacing=".04em">'+a.sub.toUpperCase()+'  ·  '+a.tag+'</text>';
+    svg+='<text x="'+(PW-64)+'" y="'+(labelY-8)+'" text-anchor="end" font-size="9" fill="#C0392B" font-family="\'Noto Sans\', \'Noto Sans SC\', sans-serif" font-weight="700">'+String(idx+1).padStart(2,'0')+'</text>';
   });
 
-  svg+='<text x="64" y="'+(PH-30)+'" font-size="7.5" fill="#C8C6C0" font-family="Space Mono,monospace" letter-spacing=".06em">EasyMap · openstreetmap.org · '+date+'</text>';
+  svg+='<text x="64" y="'+(PH-30)+'" font-size="7.5" fill="#C8C6C0" font-family="\'Noto Sans\', \'Noto Sans SC\', sans-serif" letter-spacing=".06em">EasyMap · openstreetmap.org · '+date+'</text>';
   svg+='</svg>';
 
   const html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>EasyMap Layered · '+(sName||'Site')+'</title>'
@@ -2587,11 +2615,11 @@ function svgBlob(el){
   return new Blob([full],{type:'image/svg+xml;charset=utf-8'});
 }
 async function svgToPng(el,sc2){
-  sc2=sc2||2;
   return new Promise((res,rej)=>{
     const clone=el.cloneNode(true);
     const vb=(clone.getAttribute('viewBox')||'0 0 240 268').split(' ').map(Number);
     const vw=vb[2]||240,vh=vb[3]||268;
+    const actualScale=sc2||(1080/vh);
     clone.setAttribute('width',vw);clone.setAttribute('height',vh);
     // Remove external image refs that cause CORS - replace with grey rect
     clone.querySelectorAll('image').forEach(im=>{
@@ -2609,10 +2637,10 @@ async function svgToPng(el,sc2){
     const encoded='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svgStr);
     const img=new Image();
     img.onload=()=>{
-      const cv=document.createElement('canvas');cv.width=vw*sc2;cv.height=vh*sc2;
+      const cv=document.createElement('canvas');cv.width=Math.round(vw*actualScale);cv.height=Math.round(vh*actualScale);
       const ctx=cv.getContext('2d');
       ctx.fillStyle='#FAFAF9';ctx.fillRect(0,0,cv.width,cv.height);
-      ctx.scale(sc2,sc2);ctx.drawImage(img,0,0,vw,vh);
+      ctx.scale(actualScale,actualScale);ctx.drawImage(img,0,0,vw,vh);
       cv.toBlob(b2=>{if(b2)res(b2);else rej(new Error('toBlob null'));},'image/png');
     };
     img.onerror=()=>rej(new Error('img load failed'));
@@ -2650,7 +2678,7 @@ async function dlCard(id,fmt,ev){
   const date=new Date().toLocaleDateString('en-GB',{year:'numeric',month:'long',day:'numeric'});
   const html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>'+name+' · EasyMap</title>'
     +'<style>@import url(\'https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap\');'
-    +'*{margin:0;padding:0}body{background:#F5F4F2;font-family:"Space Mono",monospace;display:flex;flex-direction:column;align-items:center;padding:40px}'
+    +'*{margin:0;padding:0}body{background:#F5F4F2;font-family:"Noto Sans", "Noto Sans SC", sans-serif;display:flex;flex-direction:column;align-items:center;padding:40px}'
     +'.hd{width:520px;max-width:90vw;display:flex;justify-content:space-between;align-items:baseline;border-bottom:1.5px solid #1A1917;padding-bottom:8px;margin-bottom:16px}'
     +'.hd h1{font-size:16px;font-weight:700;color:#1A1917;letter-spacing:.05em}.hd .t{font-size:8px;color:#A8A69F;background:#F0EEE8;padding:3px 7px;border-radius:3px}'
     +'.meta{width:520px;max-width:90vw;font-size:8px;color:#A8A69F;letter-spacing:.08em;margin-bottom:20px}'
@@ -2711,14 +2739,14 @@ async function dlBoard(fmt){
     const ts=isDarkOv?'rgba(26,28,32,0.85)':'rgba(240,238,232,0.85)';
     svg+='<rect x="0" y="'+(ovH-90)+'" width="'+bW+'" height="90" fill="url(#hg)"/>';
     svg+='<defs><linearGradient id="hg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="'+(isDarkOv?'#1A1C20':'#F0EEE8')+'" stop-opacity="0"/><stop offset="100%" stop-color="'+(isDarkOv?'#1A1C20':'#F0EEE8')+'" stop-opacity=".9"/></linearGradient></defs>';
-    svg+='<text x="'+mX+'" y="'+(ovH-44)+'" font-size="28" fill="'+tc+'" font-family="Space Mono,monospace" font-weight="700" letter-spacing=".05em">SITE ANALYSE</text>';
-    svg+='<text x="'+(bW-mX)+'" y="'+(ovH-44)+'" text-anchor="end" font-size="11" fill="'+tc+'" font-family="Space Mono,monospace" opacity=".7">'+loc+'</text>';
-    svg+='<text x="'+mX+'" y="'+(ovH-20)+'" font-size="9" fill="'+tc+'" font-family="Space Mono,monospace" opacity=".6">'+coord+(coord?' · ':'')+'r='+curR+'m · '+date+' · '+curOvStyle.toUpperCase()+'</text>';
+    svg+='<text x="'+mX+'" y="'+(ovH-44)+'" font-size="28" fill="'+tc+'" font-family="\'Noto Sans\', \'Noto Sans SC\', sans-serif" font-weight="700" letter-spacing=".05em">SITE ANALYSE</text>';
+    svg+='<text x="'+(bW-mX)+'" y="'+(ovH-44)+'" text-anchor="end" font-size="11" fill="'+tc+'" font-family="\'Noto Sans\', \'Noto Sans SC\', sans-serif" opacity=".7">'+loc+'</text>';
+    svg+='<text x="'+mX+'" y="'+(ovH-20)+'" font-size="9" fill="'+tc+'" font-family="\'Noto Sans\', \'Noto Sans SC\', sans-serif" opacity=".6">'+coord+(coord?' · ':'')+'r='+curR+'m · '+date+' · '+curOvStyle.toUpperCase()+'</text>';
   } else {
     svg+='<rect x="'+mX+'" y="38" width="'+(bW-mX*2)+'" height="1.2" fill="#1A1917"/>';
-    svg+='<text x="'+mX+'" y="32" font-size="26" fill="#1A1917" font-family="Space Mono,monospace" font-weight="700" letter-spacing=".05em">SITE ANALYSE</text>';
-    svg+='<text x="'+(bW-mX)+'" y="32" text-anchor="end" font-size="10" fill="#6B6860" font-family="Space Mono,monospace">'+loc+'</text>';
-    svg+='<text x="'+mX+'" y="56" font-size="8.5" fill="#A8A69F" font-family="Space Mono,monospace">'+coord+(coord?' · ':'')+'r='+curR+'m · '+date+'</text>';
+    svg+='<text x="'+mX+'" y="32" font-size="26" fill="#1A1917" font-family="\'Noto Sans\', \'Noto Sans SC\', sans-serif" font-weight="700" letter-spacing=".05em">SITE ANALYSE</text>';
+    svg+='<text x="'+(bW-mX)+'" y="32" text-anchor="end" font-size="10" fill="#6B6860" font-family="\'Noto Sans\', \'Noto Sans SC\', sans-serif">'+loc+'</text>';
+    svg+='<text x="'+mX+'" y="56" font-size="8.5" fill="#A8A69F" font-family="\'Noto Sans\', \'Noto Sans SC\', sans-serif">'+coord+(coord?' · ':'')+'r='+curR+'m · '+date+'</text>';
   }
 
   const gridY=ovH+mT;
@@ -2726,9 +2754,9 @@ async function dlBoard(fmt){
     const col=i%COLS,row=Math.floor(i/COLS);
     const x=mX+col*cW,y=gridY+row*cH;
     svg+='<rect x="'+x+'" y="'+y+'" width="'+(W+22)+'" height="'+(H+28+42)+'" rx="3" fill="#FFF" stroke="#E8E6E2" stroke-width=".5"/>';
-    svg+='<text x="'+(x+10)+'" y="'+(y+14)+'" font-size="7" fill="#A8A69F" font-family="Space Mono,monospace">'+String(i+1).padStart(2,'0')+'</text>';
-    svg+='<text x="'+(x+26)+'" y="'+(y+14)+'" font-size="7.5" fill="#1A1917" font-family="Space Mono,monospace" letter-spacing=".09em">'+a.name.toUpperCase()+'</text>';
-    svg+='<text x="'+(x+W+10)+'" y="'+(y+14)+'" text-anchor="end" font-size="6.5" fill="#C8C6C0" font-family="Space Mono,monospace">'+a.tag+'</text>';
+    svg+='<text x="'+(x+10)+'" y="'+(y+14)+'" font-size="7" fill="#A8A69F" font-family="\'Noto Sans\', \'Noto Sans SC\', sans-serif">'+String(i+1).padStart(2,'0')+'</text>';
+    svg+='<text x="'+(x+26)+'" y="'+(y+14)+'" font-size="7.5" fill="#1A1917" font-family="\'Noto Sans\', \'Noto Sans SC\', sans-serif" letter-spacing=".09em">'+a.name.toUpperCase()+'</text>';
+    svg+='<text x="'+(x+W+10)+'" y="'+(y+14)+'" text-anchor="end" font-size="6.5" fill="#C8C6C0" font-family="\'Noto Sans\', \'Noto Sans SC\', sans-serif">'+a.tag+'</text>';
     svg+='<line x1="'+(x+6)+'" y1="'+(y+20)+'" x2="'+(x+W+16)+'" y2="'+(y+20)+'" stroke="#F0EEE8" stroke-width=".5"/>';
     let diag=render(a.id,cardSch[a.id]||0);
     diag=diag
@@ -2741,8 +2769,8 @@ async function dlBoard(fmt){
   });
 
   svg+='<rect x="'+mX+'" y="'+(bH-mB+8)+'" width="'+(bW-mX*2)+'" height=".5" fill="#E0DDD8"/>';
-  svg+='<text x="'+mX+'" y="'+(bH-mB+24)+'" font-size="7.5" fill="#C8C6C0" font-family="Space Mono,monospace">EasyMap \u00b7 openstreetmap.org \u00b7 '+date+'</text>';
-  svg+='<text x="'+(bW-mX)+'" y="'+(bH-mB+24)+'" text-anchor="end" font-size="7.5" fill="#C8C6C0" font-family="Space Mono,monospace">'+coord+'</text>';
+  svg+='<text x="'+mX+'" y="'+(bH-mB+24)+'" font-size="7.5" fill="#C8C6C0" font-family="\'Noto Sans\', \'Noto Sans SC\', sans-serif">EasyMap \u00b7 openstreetmap.org \u00b7 '+date+'</text>';
+  svg+='<text x="'+(bW-mX)+'" y="'+(bH-mB+24)+'" text-anchor="end" font-size="7.5" fill="#C8C6C0" font-family="\'Noto Sans\', \'Noto Sans SC\', sans-serif">'+coord+'</text>';
   svg+='</svg>';
 
   const fname='easymap_board_'+(sName||'site').toLowerCase().replace(/\s+/g,'_');
@@ -2927,7 +2955,7 @@ const S3=(function(){
     ctx.strokeStyle='#C0392B';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();
     const ah=14;ctx.fillStyle='#C0392B';ctx.beginPath();ctx.moveTo(x2,y2);ctx.lineTo(x2-ah*Math.cos(ang-0.4),y2-ah*Math.sin(ang-0.4));ctx.lineTo(x2-ah*Math.cos(ang+0.4),y2-ah*Math.sin(ang+0.4));ctx.closePath();ctx.fill();
     ctx.fillStyle='#FFB300';ctx.strokeStyle='#C0392B';ctx.lineWidth=2;ctx.beginPath();ctx.arc(x1,y1,9,0,Math.PI*2);ctx.fill();ctx.stroke();
-    ctx.textAlign='center';const txt='AZ '+Math.round(az)+'\u00b0 \u00b7 ALT '+Math.round(alt)+'\u00b0';ctx.font='700 14px "Space Mono",monospace';const tw=ctx.measureText(txt).width;
+    ctx.textAlign='center';const txt='AZ '+Math.round(az)+'\u00b0 \u00b7 ALT '+Math.round(alt)+'\u00b0';ctx.font='700 14px "Noto Sans", "Noto Sans SC", sans-serif';const tw=ctx.measureText(txt).width;
     ctx.fillStyle='rgba(255,255,255,0.85)';ctx.fillRect(cx-tw/2-8,OUT-46,tw+16,24);ctx.fillStyle='#1A1917';ctx.fillText(txt,cx,OUT-29);ctx.textAlign='left';
   }
   function buildSkyline(){
@@ -2937,14 +2965,14 @@ const S3=(function(){
     const N=46,bins=new Array(N).fill(0);const b=map3.getBounds();
     feats.forEach(f=>{const p=f.properties||{};const h=+(p.render_height||p.height||0);if(h<=0)return;let cxg=0,cnt=0;const walk=co=>{if(typeof co[0]==='number'){cxg+=co[0];cnt++;}else co.forEach(walk);};if(f.geometry&&f.geometry.coordinates)walk(f.geometry.coordinates);if(!cnt)return;const t=(cxg/cnt-b.getWest())/(b.getEast()-b.getWest());const bi=Math.max(0,Math.min(N-1,Math.floor(t*N)));if(h>bins[bi])bins[bi]=h;});
     const maxH=Math.max(...bins,30),baseY=OUT*0.78,topY=OUT*0.18,plotW=OUT*0.82,plotX=OUT*0.10;
-    ctx.strokeStyle='#A8A69F';ctx.fillStyle='#A8A69F';ctx.font='9px "Space Mono",monospace';
+    ctx.strokeStyle='#A8A69F';ctx.fillStyle='#A8A69F';ctx.font='9px "Noto Sans", "Noto Sans SC", sans-serif';
     for(let i=0;i<=4;i++){const hv=Math.round(maxH*i/4),yy=baseY-(baseY-topY)*i/4;ctx.setLineDash([2,3]);ctx.beginPath();ctx.moveTo(plotX,yy);ctx.lineTo(plotX+plotW,yy);ctx.stroke();ctx.setLineDash([]);ctx.fillText(hv+'m',plotX-2,yy-2);}
     const colW=plotW/N;let pk=0;bins.forEach((h,i)=>{if(h>bins[pk])pk=i;});
     ctx.beginPath();ctx.moveTo(plotX,baseY);bins.forEach((h,i)=>{const bh=(baseY-topY)*Math.min(h/maxH,1),x0=plotX+i*colW;ctx.lineTo(x0,baseY-bh);ctx.lineTo(x0+colW,baseY-bh);});ctx.lineTo(plotX+plotW,baseY);ctx.closePath();ctx.fillStyle='#1A1917';ctx.fill();
-    const ph=(baseY-topY)*Math.min(bins[pk]/maxH,1);ctx.fillStyle='#C0392B';ctx.fillRect(plotX+pk*colW,baseY-ph,colW,ph);ctx.font='700 11px "Space Mono",monospace';ctx.fillText(Math.round(bins[pk])+'m',plotX+pk*colW-6,baseY-ph-6);
+    const ph=(baseY-topY)*Math.min(bins[pk]/maxH,1);ctx.fillStyle='#C0392B';ctx.fillRect(plotX+pk*colW,baseY-ph,colW,ph);ctx.font='700 11px "Noto Sans", "Noto Sans SC", sans-serif';ctx.fillText(Math.round(bins[pk])+'m',plotX+pk*colW-6,baseY-ph-6);
     ctx.strokeStyle='#1A1917';ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(plotX,baseY);ctx.lineTo(plotX+plotW,baseY);ctx.stroke();
-    ctx.fillStyle='#6B6860';ctx.font='8px "Space Mono",monospace';ctx.fillText('WEST',plotX,baseY+14);ctx.fillText('EAST',plotX+plotW-24,baseY+14);
-    ctx.fillStyle='#1A1917';ctx.font='700 10px "Space Mono",monospace';ctx.fillText('SKYLINE \u00b7 '+feats.length+' bldgs',plotX,topY-6);
+    ctx.fillStyle='#6B6860';ctx.font='8px "Noto Sans", "Noto Sans SC", sans-serif';ctx.fillText('WEST',plotX,baseY+14);ctx.fillText('EAST',plotX+plotW-24,baseY+14);
+    ctx.fillStyle='#1A1917';ctx.font='700 10px "Noto Sans", "Noto Sans SC", sans-serif';ctx.fillText('SKYLINE \u00b7 '+feats.length+' bldgs',plotX,topY-6);
     ctx.restore();ctx.strokeStyle='#D8D6D0';ctx.lineWidth=1;ctx.setLineDash([4,4]);maskPath(ctx,OUT);ctx.stroke();ctx.setLineDash([]);
     return c.toDataURL('image/png');
   }
@@ -2971,7 +2999,7 @@ const S3=(function(){
     document.getElementById('emp').style.display='none';
     const grid=document.getElementById('rgrid');
     grid.style.display='grid';
-    grid.innerHTML='<div style="grid-column:1/-1;display:flex;justify-content:space-between;align-items:baseline;border-bottom:1.5px solid var(--tx);padding-bottom:8px;margin-bottom:6px"><div style="font-family:Space Mono,monospace;font-size:13px;font-weight:700;color:var(--tx)">3D MASSING \u00b7 '+(sName||"SITE").toUpperCase()+'</div><div style="display:flex;gap:6px"><button onclick="gate(()=>S3.exportReportPDF())" style="padding:7px 14px;font-family:Space Mono,monospace;font-size:9px;background:var(--tx);color:#fff;border:none;border-radius:7px;cursor:pointer;font-weight:700">REPORT PDF \u2193</button></div></div>'
+    grid.innerHTML='<div style="grid-column:1/-1;display:flex;justify-content:space-between;align-items:baseline;border-bottom:1.5px solid var(--tx);padding-bottom:8px;margin-bottom:6px"><div style="font-family:\'Noto Sans\', \'Noto Sans SC\', sans-serif;font-size:13px;font-weight:700;color:var(--tx)">3D MASSING \u00b7 '+(sName||"SITE").toUpperCase()+'</div><div style="display:flex;gap:6px"><button onclick="gate(()=>S3.exportReportPDF())" style="padding:7px 14px;font-family:\'Noto Sans\', \'Noto Sans SC\', sans-serif;font-size:9px;background:var(--tx);color:#fff;border:none;border-radius:7px;cursor:pointer;font-weight:700">REPORT PDF \u2193</button></div></div>'
       +cards.map((c,i)=>'<div class="card"><div class="ch"><span class="ct">'+String(i+1).padStart(2,"0")+' '+c.name.toUpperCase()+'</span><span class="ctag">'+c.tag+'</span></div><div class="cbody" style="padding:10px"><img src="'+c.img+'" style="width:100%;display:block;border-radius:5px"/><div style="display:flex;flex-wrap:wrap;gap:4px 10px;margin-top:9px;padding-top:8px;border-top:1px solid var(--s2)">'+(c.leg||[]).map(l=>'<span style="display:flex;align-items:center;gap:4px;font-size:8px;color:var(--t2)"><b style="width:8px;height:8px;border-radius:2px;background:'+l.c+';display:inline-block"></b>'+l.v+'</span>').join('')+'</div></div></div>').join('');
   }
 
@@ -2989,7 +3017,7 @@ const S3=(function(){
     });
     const html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>EasyMap 3D · '+loc+'</title>'
       +'<style>@import url(\'https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap\');'
-      +'*{box-sizing:border-box;margin:0;padding:0}body{font-family:"Space Mono",monospace;background:#fff;color:#1A1917;padding:40px}'
+      +'*{box-sizing:border-box;margin:0;padding:0}body{font-family:"Noto Sans", "Noto Sans SC", sans-serif;background:#fff;color:#1A1917;padding:40px}'
       +'.cv{border-bottom:1.5px solid #1A1917;padding-bottom:12px;margin-bottom:24px}'
       +'.cv h1{font-size:24px;font-weight:700;letter-spacing:.04em}.cv h1 span{font-weight:400;color:#A8A69F}'
       +'.cv p{font-size:9px;color:#A8A69F;letter-spacing:.08em;margin-top:6px}'
@@ -3016,16 +3044,31 @@ const S3=(function(){
     const W=pad*2+cols*cardW+(cols-1)*gap,Hp=headH+pad+rows*cardH+(rows-1)*gap+pad;
     const c=document.createElement('canvas');c.width=W;c.height=Hp;const ctx=c.getContext('2d');
     ctx.fillStyle='#F5F4F2';ctx.fillRect(0,0,W,Hp);
-    ctx.fillStyle='#1A1917';ctx.font='700 32px "Space Mono",monospace';ctx.fillText('SITE ANALYSE \u00b7 '+loc.toUpperCase(),pad,60);
-    ctx.fillStyle='#A8A69F';ctx.font='400 13px "Space Mono",monospace';ctx.fillText((sLat||0).toFixed(5)+'\u00b0N \u00b7 '+(sLng||0).toFixed(5)+'\u00b0E   |   3D MASSING   |   '+date,pad,84);
+    ctx.fillStyle='#1A1917';ctx.font='700 32px "Noto Sans", "Noto Sans SC", sans-serif';ctx.fillText('SITE ANALYSE \u00b7 '+loc.toUpperCase(),pad,60);
+    ctx.fillStyle='#A8A69F';ctx.font='400 13px "Noto Sans", "Noto Sans SC", sans-serif';ctx.fillText((sLat||0).toFixed(5)+'\u00b0N \u00b7 '+(sLng||0).toFixed(5)+'\u00b0E   |   3D MASSING   |   '+date,pad,84);
     ctx.fillStyle='#1A1917';ctx.fillRect(pad,100,W-pad*2,1.5);
     let loaded=0;
     cards.forEach((card,i)=>{
       const col=i%cols,row=(i/cols)|0,x=pad+col*(cardW+gap),y=headH+pad+row*(cardH+gap);
       ctx.fillStyle='#fff';ctx.strokeStyle='#E8E6E2';ctx.lineWidth=1;rr(ctx,x,y,cardW,cardH,10);ctx.fill();ctx.stroke();
-      ctx.fillStyle='#1A1917';ctx.font='700 14px "Space Mono",monospace';ctx.fillText(String(i+1).padStart(2,'0')+' '+card.name.toUpperCase(),x+16,y+26);
-      ctx.fillStyle='#A8A69F';ctx.font='400 9px "Space Mono",monospace';ctx.textAlign='right';ctx.fillText(card.tag,x+cardW-16,y+26);ctx.textAlign='left';
-      let lx=x+16;const ly=y+cardW+58;(card.leg||[]).forEach(l=>{ctx.fillStyle=l.c;rr(ctx,lx,ly-8,9,9,2);ctx.fill();ctx.fillStyle='#6B6860';ctx.font='9px "Space Mono",monospace';ctx.fillText(l.v,lx+13,ly);lx+=24+ctx.measureText(l.v).width;});
+      ctx.fillStyle='#1A1917';ctx.font='700 14px "Noto Sans", "Noto Sans SC", sans-serif';ctx.fillText(String(i+1).padStart(2,'0')+' '+card.name.toUpperCase(),x+16,y+26);
+      ctx.fillStyle='#A8A69F';ctx.font='400 9px "Noto Sans", "Noto Sans SC", sans-serif';ctx.textAlign='right';ctx.fillText(card.tag,x+cardW-16,y+26);ctx.textAlign='left';
+      ctx.font='9px "Noto Sans", "Noto Sans SC", sans-serif';
+      let totalLegW=0;
+      (card.leg||[]).forEach((l,li)=>{
+        totalLegW+=13+ctx.measureText(l.v).width;
+        if(li<card.leg.length-1)totalLegW+=12;
+      });
+      let lx=x+(cardW-totalLegW)/2;
+      const ly=y+cardW+58;
+      (card.leg||[]).forEach(l=>{
+        ctx.fillStyle=l.c;
+        rr(ctx,lx,ly-8,9,9,2);
+        ctx.fill();
+        ctx.fillStyle='#6B6860';
+        ctx.fillText(l.v,lx+13,ly);
+        lx+=13+ctx.measureText(l.v).width+12;
+      });
       const img=new Image();img.onload=()=>{ctx.drawImage(img,x+16,y+38,cardW-32,cardW-32);loaded++;if(loaded===cards.length){const a=document.createElement('a');a.download='site3d-poster-'+Date.now()+'.png';a.href=c.toDataURL('image/png');a.click();unload();toast('3D POSTER SAVED');}};img.src=card.img;
     });
   }
@@ -3094,7 +3137,7 @@ function renderHelpSteps(){
     const title = lang === 'zh' ? s[1].zh : s[1].en;
     const desc = lang === 'zh' ? s[2].zh : s[2].en;
     return '<div style="display:flex;gap:16px;padding:13px 0;border-top:1px solid #EEECE6">'
-      +'<div style="font-family:\'Space Mono\',monospace;font-size:15px;font-weight:700;color:#C0392B;flex-shrink:0;width:24px">'+s[0]+'</div>'
+      +'<div style="font-family:\'Noto Sans\', \'Noto Sans SC\', sans-serif;font-size:15px;font-weight:700;color:#C0392B;flex-shrink:0;width:24px">'+s[0]+'</div>'
       +'<div><div style="font-size:14px;font-weight:700;color:#1A1917;margin-bottom:3px">'+title+'</div>'
       +'<div style="font-size:12px;color:#6A675E;line-height:1.5">'+desc+'</div></div></div>';
   }).join('');

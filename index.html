@@ -10,7 +10,7 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <link href="https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet" />
   <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Space+Mono:wght@400;700&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Noto+Sans+SC:wght@300;400;500;700&family=Noto+Sans:wght@300;400;500;700&family=Space+Mono:wght@400;700&display=swap"
     rel="stylesheet" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
@@ -136,9 +136,10 @@
         </div>
         <div class="sec" id="secShape">
           <div class="lbl" data-i18n="shape">Diagram Shape</div>
-          <div class="ms" style="grid-template-columns:1fr 1fr 1fr">
+          <div class="ms" style="grid-template-columns:1fr 1fr; gap:6px;">
             <div class="mb on" id="shpCircle" onclick="setShape('circle',this)" data-i18n="shp_circle">● Circle</div>
             <div class="mb" id="shpRect" onclick="setShape('rect',this)" data-i18n="shp_round">▢ Round</div>
+            <div class="mb" id="shpSquare" onclick="setShape('square',this)" data-i18n="shp_square">█ Square</div>
             <div class="mb" id="shpPoly" onclick="startPolygon()" data-i18n="shp_poly">⬡ Site</div>
           </div>
           <div id="polyHint"
@@ -154,6 +155,19 @@
                 data-i18n="btn_clear">✕
                 CLEAR</button>
             </div>
+          </div>
+        </div>
+        <div class="sec" id="secDisplay">
+          <div class="lbl" data-i18n="display_opts">Diagram Elements</div>
+          <div style="display:flex;gap:12px;margin-top:6px">
+            <label style="font-family:'Noto Sans', 'Noto Sans SC', sans-serif;font-size:10px;color:var(--t2);cursor:pointer;display:flex;align-items:center;gap:6px">
+              <input type="checkbox" id="showScaleChk" checked onchange="toggleScale(this.checked)" style="cursor:pointer"/>
+              <span data-i18n="opt_scale">Scale Bar</span>
+            </label>
+            <label style="font-family:'Noto Sans', 'Noto Sans SC', sans-serif;font-size:10px;color:var(--t2);cursor:pointer;display:flex;align-items:center;gap:6px">
+              <input type="checkbox" id="showNorthChk" checked onchange="toggleNorth(this.checked)" style="cursor:pointer"/>
+              <span data-i18n="opt_north">Compass</span>
+            </label>
           </div>
         </div>
         <div class="sec" id="secTheme">
