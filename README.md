@@ -20,6 +20,7 @@
 - **💾 专业格式输出**：
   - 单张卡片导出：**1080P 高清 PNG (New)**、矢量编辑 SVG（支持 AI 导入二次修改）、PDF。
   - 组合图册导出：**A4 报告 PDF**、**A3 作品集排版图纸**，以及 **3D 爆炸叠合图 (Layered Axonometric PDF)**。
+- **🫧 泡泡图场地分析 (Bubble Analysis) (New)**：内置完全独立的泡泡图互动生成引擎，支持物理力导向布局、关系线绘制、多种气泡样式及配色自定义，支持导出高分辨率无水印 PNG，帮助设计师快速梳理建筑功能关系。
 
 ---
 
@@ -59,7 +60,13 @@
 
 ## 📈 历代版本更新内容 (Changelog)
 
-### v1.2.1 (当前版本)
+### v1.2.2 (当前版本)
+- **🫧 新增泡泡图场地分析子项目**：在 `bubble-analysis/` 目录下完整复刻了高阶泡泡图 (Bubble Diagram) 生成引擎，支持物理引擎排斥与连线、多种泡泡样式与高阶属性编辑，所有高级功能完全免费解锁且无水印。
+- **🎨 配色与 UI 系统融入**：将泡泡图的左侧工具栏、控制面板与主项目配色系统（冷灰色调及深蓝色主色）进行统一设计，保持一致的视觉体验。
+- **🔗 工具栏无缝互联**：在主项目的左侧工具栏顶部新增了“Bubble Analysis”快捷跳转入口，支持中英双语国际化切换。
+- **📖 泡泡图技术 Wiki**：编写了专门的 [bubble-wiki.md](file:///c:/Users/HP/Documents/GitHub/Architecture-analysis/bubble-analysis/bubble-wiki.md)，详细阐述了泡泡图物理引擎（如斥力、引力、库仑定律模型）及 SVG 渲染层实现机制。
+
+### v1.2.1
 - **🎨 自定义导出背景**：在图面元素控制区新增“Export Background”选项。用户可为单张导出的 PNG 和 SVG 文件自由选择“Theme Default”、“Transparent (透明)”或任意自定义颜色。同时，PDF 导出页面的底色也会同步应用。
 - **🌐 深度国际化支持**：进一步补全了诸如“城市肌理分析”等图纸的底层中文翻译，并优化了 SVG、PNG 与单页 PDF 导出时的文件名与图纸内大标题，使其与当前工具栏所选择的中英双语状态完全一致。
 - **🧹 代码结构精简**：移除了冗余的 Help 与 Contact 模态框，清理了不必要的外部分析与追踪脚本，使得单页 HTML 更加轻量纯粹。
@@ -101,5 +108,5 @@
 
 ## 📖 开发者与 AI 助手 Wiki
 
-如果你是开发者或 AI 助手 (LLM)，请阅读 [WIKI.md](file:///c:/Users/HP/Documents/GitHub/Architecture-analysis/WIKI.md) 以快速了解本项目的系统架构、2D/3D 渲染引擎实现细节、Overpass API 合并查询机制以及如何扩展新的分析图层。
+如果你是开发者或 AI 助手 (LLM)，请阅读 [WIKI.md](file:///c:/Users/HP/Documents/GitHub/Architecture-analysis/WIKI.md) 以快速了解本项目的系统架构、2D/3D 渲染引擎实现细节、Overpass API 合并查询机制以及如何扩展新的分析图层；阅读 [bubble-wiki.md](file:///c:/Users/HP/Documents/GitHub/Architecture-analysis/bubble-analysis/bubble-wiki.md) 了解泡泡图引擎的物理和图形渲染系统实现。
 

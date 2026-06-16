@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bubble Analysis · Program Concept Diagram Generator</title>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;700;800;900&family=Space+Mono:wght@400;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="bubble-analysis.css">
+</head>
+<body>
+
+<div class="app">
+  <!-- LEFT SIDEBAR -->
+  <aside class="sb">
+    <div class="sb-top">
+      <div class="sb-mark">BA</div>
+      <div style="flex:1">
+        <div class="sb-name">Bubble<span>Analysis</span></div>
+        <div class="sb-sub">PROGRAM CONCEPT DIAGRAM</div>
+      </div>
+    </div>
+    <div class="sb-body">
+      <!-- Section 1: Pick spaces -->
+      <div class="sec">
+        <div class="lbl">Pick spaces · 选择功能空间</div>
+        <div class="preset" id="presetBox"></div>
+        <div class="addrow">
+          <input class="in" id="customIn" placeholder="custom · 自定义" />
+          <button class="btn ghost" id="customBtn">+ ADD</button>
+        </div>
+      </div>
+      
+      <!-- Section 2: Look -->
+      <div class="sec">
+        <div class="lbl">Look · 外观</div>
+        <div class="seg" id="styleSeg">
+          <div class="so on" data-st="contour">等高线</div>
+          <div class="so" data-st="flat">平涂</div>
+          <div class="so" data-st="water">水泡</div>
+        </div>
+        <div class="row on" id="boundaryRow" style="margin-top:8px">
+          <span class="rk">Site boundary · 场地红线</span>
+          <span class="rt"></span>
+        </div>
+        <div class="row" id="sketchRow" style="margin-top:6px">
+          <span class="rk">Sketch hand-drawn · 手绘草图</span>
+          <span class="rt"></span>
+        </div>
+      </div>
+      
+      <!-- Section 3: Palette -->
+      <div class="sec">
+        <div class="lbl">Palette · 配色</div>
+        <div id="paletteBox" style="display:grid;grid-template-columns:1fr 1fr;gap:6px"></div>
+      </div>
+      
+      <!-- Section 4: On canvas -->
+      <div class="sec">
+        <div class="lbl">On canvas · 画面中 (<span id="spCount">0</span>)</div>
+        <div class="spaces" id="spList"></div>
+      </div>
+      
+      <!-- Section 5: Flow links -->
+      <div class="sec">
+        <div class="lbl">Flow · 流线</div>
+        <button class="btn ghost" id="linkBtn" style="width:100%">↳ DRAW FLOW · 画流线</button>
+        <div class="hint" style="margin-top:7px">点"画流线"后，依次点两个气泡画箭头。再点同一对可反向/删除。<br>Click two spaces to draw a flow arrow.</div>
+        <button class="btn ghost" id="noteBtn" style="width:100%;margin-top:8px">T 添加文字标注 · TEXT NOTE</button>
+        <div class="row" id="areaRow" style="margin-top:6px">
+          <span class="rk">Show area · 面积标注</span>
+          <span class="rt"></span>
+        </div>
+      </div>
+      
+      <!-- Section 6: Base Image -->
+      <div class="sec">
+        <div class="lbl">Base image · 底图</div>
+        <button class="btn ghost" id="bgUpBtn" style="width:100%">⬆ UPLOAD BASE 上传底图</button>
+        <div id="bgCtrl" style="display:none;margin-top:8px">
+          <div style="display:flex;align-items:center;gap:8px;font-size:11px;color:var(--t2);font-family:'Space Mono',monospace">
+            <span>透明 Opacity</span>
+            <input type="range" id="bgOpacity" min="0" max="100" value="55" style="flex:1"/>
+            <span id="bgOpacityVal">55%</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:11px;color:var(--t2);font-family:'Space Mono',monospace;margin-top:6px">
+            <span>大小 Scale</span>
+            <input type="range" id="bgScale" min="30" max="300" value="100" style="flex:1"/>
+            <span id="bgScaleVal">100%</span>
+          </div>
+          <div class="hint" style="margin-top:5px">直接拖动底图可移动位置 · Drag the image to move it.</div>
+          <button class="btn ghost" id="bgRemoveBtn" style="width:100%;margin-top:6px">✕ REMOVE 移除底图</button>
+          <div class="hint" style="margin-top:6px">底图垫在气泡下方，可作为平面图/场地参考。<br>Base sits under bubbles as reference.</div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Sidebar Bottom Controls -->
+    <div style="padding:16px 20px;border-top:1px solid var(--bd);display:flex;flex-direction:column;gap:8px;background:var(--sf)">
+      <div class="addrow" style="margin:0;gap:6px">
+        <button class="btn ghost" id="arrangeBtn" style="flex:1" title="按类别聚合">⊙ 聚类</button>
+        <button class="btn ghost" id="radialBtn" style="flex:1" title="核心居中放射">◎ 放射</button>
+        <button class="btn ghost" id="linearBtn" style="flex:1" title="沿线排开">— 线性</button>
+      </div>
+      <div class="addrow" style="margin:0;gap:6px">
+        <button class="btn ghost" id="clearBtn" style="flex:0.7">CLEAR</button>
+        <button class="btn" id="pngBtn" style="flex:1">PNG ↓</button>
+        <button class="btn" id="svgBtn" style="flex:1">SVG ↓</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- RIGHT MAIN STAGE -->
+  <main class="stage">
+    <div class="topbar">
+      <div class="ttl">PROGRAM DIAGRAM</div>
+      <div class="viewtabs">
+        <div class="vt on" data-v="bubble">Bubble 气泡</div>
+        <div class="vt" data-v="zone">Zoning 分区</div>
+      </div>
+      <input class="in" id="projName" placeholder="Project · 项目名" style="margin-left:auto;flex:0 0 170px" />
+    </div>
+    
+    <div class="linkbanner" id="linkBanner">FLOW MODE · click two spaces · 点两个气泡 · ESC exit</div>
+    
+    <!-- Bubble Inspector Panel -->
+    <div class="inspector" id="inspector">
+      <div class="ins-head">
+        <span class="ins-name" id="insName">—</span>
+        <span class="ins-close" id="insClose">×</span>
+      </div>
+      <div class="ins-cat">
+        <span class="cdot" id="insDot"></span>
+        <span id="insCat"></span>
+      </div>
+      <div class="ins-ctl">
+        <label>Size · 大小 <b id="insSizeV">80</b></label>
+        <input type="range" id="insSize" min="40" max="190" />
+      </div>
+      <div class="ins-ctl">
+        <label>Shape · 形状 <b id="insWobV">0.20</b></label>
+        <input type="range" id="insWob" min="4" max="46" />
+      </div>
+      <div class="ins-ctl">
+        <label>Area m² · 面积（可改）</label>
+        <input class="in" type="number" id="insArea" placeholder="auto" style="font-size:11px;padding:5px 8px;width:100%" />
+      </div>
+      <div class="lk-cat" style="margin-top:2px">SUB-SPACES · 子空间</div>
+      <div id="insChildList" class="childlist"></div>
+      <div class="addrow" style="margin:7px 0 11px;gap:6px">
+        <input class="in" id="insChildIn" placeholder="子空间名 child" style="font-size:11px;padding:6px 8px" />
+        <button class="btn ghost" id="insChildAdd">+</button>
+      </div>
+      <div class="ins-row">
+        <button class="btn ghost" id="insReroll" style="flex:1">⟳ 换形状</button>
+        <button class="btn ghost" id="insDel">删除</button>
+      </div>
+    </div>
+    
+    <!-- Flow Inspector Panel -->
+    <div class="inspector" id="linkInspector">
+      <div class="ins-head">
+        <span class="ins-name">Flow · 流线</span>
+        <span class="ins-close" id="linkClose">×</span>
+      </div>
+      <div class="ins-cat">STYLE · 形状</div>
+      <div class="seg" id="linkStyleSeg" style="margin-bottom:11px">
+        <div class="so on" data-ls="line">线</div>
+        <div class="so" data-ls="ribbon">色带</div>
+        <div class="so" data-ls="dashed">虚线</div>
+        <div class="so" data-ls="dotted">点</div>
+      </div>
+      <div class="ins-ctl">
+        <label>Width · 粗细 <b id="lkWv">3</b></label>
+        <input type="range" id="lkW" min="1" max="12" />
+      </div>
+      <div class="lk-cat">LABEL · 标注</div>
+      <input class="in" id="lkLabel" placeholder="人流 / 视线 / car..." style="font-size:11px;padding:6px 8px;margin-bottom:10px;width:100%" />
+      <div class="lk-cat">COLOR · 颜色</div>
+      <div class="swatches" id="lkSwatch"></div>
+      <button class="btn ghost" id="lkDel" style="width:100%;margin-top:12px">删除流线</button>
+    </div>
+    
+    <div class="canv-wrap" id="canvWrap">
+      <svg class="canvas" id="canvas" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid meet"></svg>
+    </div>
+    
+    <div class="empty" id="empty">
+      <div class="e1">Pick spaces from the left to begin</div>
+      <div class="e2">从左侧点选功能空间，自动生成概念图</div>
+    </div>
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="bubble-analysis.js"></script>
+</body>
+</html>

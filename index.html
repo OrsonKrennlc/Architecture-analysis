@@ -69,6 +69,16 @@
         <div class="sb-sub" data-i18n="sb_sub" style="flex-basis:100%;margin-top:2px">ARCHITECTURAL SITE ANALYSIS</div>
       </div>
       <div class="sb-mid">
+        <!-- Diagram Tools Link Section -->
+        <div class="sec" id="secBubbleLink">
+          <div class="lbl" data-i18n="bubble_tool_title">Diagram Tools</div>
+          <a href="bubble-analysis/bubble-analysis.html" style="text-decoration: none; display: block;">
+            <div class="mb on" style="margin: 0; font-weight: 600;" data-i18n="bubble_tool_btn">
+              Bubble Diagram Generator ↗
+            </div>
+          </a>
+        </div>
+
         <!-- Location moved to map column -->
         <div class="sec">
           <div class="lbl" data-i18n="viewmode">View Mode</div>
@@ -183,7 +193,8 @@
         <div class="sec" id="secExportBg">
           <div class="lbl" data-i18n="export_bg">Export Background</div>
           <div style="display:flex;align-items:center;gap:8px;margin-top:6px">
-            <select id="bgSelect" onchange="setExportBg(this.value)" style="font-size:10px;border:1px solid var(--ln);border-radius:5px;padding:4px;cursor:pointer;background:var(--sf);color:var(--tx);flex:1">
+            <select id="bgSelect" onchange="setExportBg(this.value)"
+              style="font-size:10px;border:1px solid var(--ln);border-radius:5px;padding:4px;cursor:pointer;background:var(--sf);color:var(--tx);flex:1">
               <option value="theme" data-i18n="bg_theme" selected>Theme Default</option>
               <option value="transparent" data-i18n="bg_transparent">Transparent</option>
               <option value="custom" data-i18n="bg_custom">Custom</option>
@@ -246,7 +257,7 @@
 
       <div class="sbar">
         <div class="sd" id="sdot"></div><span id="stxt" data-i18n="ready_status">READY</span><span
-          style="margin-left:auto">ShArch · v1.2.1</span>
+          style="margin-left:auto">ShArch · v1.2.2</span>
       </div>
     </div>
 
