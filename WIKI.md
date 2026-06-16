@@ -8,7 +8,7 @@
 
 项目是一个**纯前端的单页面应用 (SPA)**，无后端服务器依赖，所有的数据处理、地图渲染和排版导出均在浏览器客户端完成。
 
-- 🌐 [index.html](file:///c:/Users/HP/Documents/GitHub/Architecture-analysis/index.html)：定义项目 UI 的基本 HTML5 骨架、控制面板、各类弹出式模态框 (Modal) 以及引入的外部三方库。
+- 🌐 [index.html](file:///c:/Users/HP/Documents/GitHub/Architecture-analysis/index.html)：定义项目 UI 的基本 HTML5 骨架、控制面板以及引入的外部三方库（在 v1.2.1 版本中已移除冗余的联系/帮助模态框及外部分析脚本，使结构更加精简纯粹）。
 - 🎨 [styles.css](file:///c:/Users/HP/Documents/GitHub/Architecture-analysis/styles.css)：定义应用的全局样式系统。采用现代 CSS 变量进行亮暗色模式和色板切换，实现响应式三栏式布局、毛玻璃 HUD 与按钮微动画。
 - ⚙️ [app.js](file:///c:/Users/HP/Documents/GitHub/Architecture-analysis/app.js)：应用的核心逻辑。包含 2D SVG 渲染引擎、3D Maplibre GL 渲染模块、Overpass API 实时数据请求打包与解析、多格式排版导出系统及多语言 i18n 逻辑。
 - 📖 [README.md](file:///c:/Users/HP/Documents/GitHub/Architecture-analysis/README.md)：针对最终用户的项目简介、核心特性及更新日志。
