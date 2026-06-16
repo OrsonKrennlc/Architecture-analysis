@@ -1361,8 +1361,8 @@ function drawFabric(data,sc){
   const borderShape=isRect
     ?'<rect x="'+PAD+'" y="'+PAD+'" width="'+(W-PAD*2)+'" height="'+(H-PAD*2)+'"'+rxry+' fill="none" stroke="#D8D6D0" stroke-width=".7" stroke-dasharray="3,3"/>'
     :'<circle cx="'+cx+'" cy="'+cy+'" r="'+cr+'" fill="none" stroke="#D8D6D0" stroke-width=".7" stroke-dasharray="3,3"/>';
-  const leg=[{type:'rect',c:s.bld,l:'BUILT MASS'},{type:'rect',c:'#F0EFED',s:'#C8C6C0',l:'VOID / STREET'}];
-  const note=cnt?'REAL·'+cnt:'SCHEMATIC';
+  const leg=[{type:'rect',c:s.bld,l:lang==='zh'?'建筑体量':'BUILT MASS'},{type:'rect',c:'#F0EFED',s:'#C8C6C0',l:lang==='zh'?'虚空 / 街道':'VOID / STREET'}];
+  const note=cnt?(lang==='zh'?'实际·'+cnt:'REAL·'+cnt):(lang==='zh'?'示意图':'SCHEMATIC');
   return wrap(inner, leg, note);
 }
 /* ──── ORIENTATION ──── */
@@ -1923,6 +1923,22 @@ function render(id,sc){
   return applyAccent(out);
 }
 let userAccent=null; // null = default red; otherwise a hex string
+let exportBgColor='theme';
+function setExportBg(val, isCustom){
+  const customPick=document.getElementById('exportBgPick');
+  const select=document.getElementById('bgSelect');
+  if(val==='custom' && !isCustom){
+    customPick.style.display='inline-block';
+    exportBgColor=customPick.value;
+  }else if(isCustom){
+    exportBgColor=val;
+    select.value='custom';
+    customPick.style.display='inline-block';
+  }else{
+    customPick.style.display='none';
+    exportBgColor=val;
+  }
+}
 // ── i18n (lightweight bilingual) ──
 let lang='zh';
 try{lang=localStorage.getItem('em_lang')||'';}catch(e){}
@@ -1972,6 +1988,10 @@ const I18N={
   btn_done:{en:'✓ DONE',zh:'✓ 完成'},
   btn_clear:{en:'✕ CLEAR',zh:'✕ 清除'},
   color_theme:{en:'Color Theme',zh:'配色方案'},
+  export_bg: {en:'EXPORT BG', zh:'导出背景颜色'},
+  bg_theme: {en:'Theme Default', zh:'主题默认'},
+  bg_transparent: {en:'Transparent', zh:'透明'},
+  bg_custom: {en:'Custom', zh:'自定义'},
   applies_all:{en:'applies to all',zh:'应用到全部'},
   theme_warm:{en:'Warm',zh:'暖色系'},
   theme_cool:{en:'Cool',zh:'冷色系'},
@@ -2588,8 +2608,8 @@ function addPrintPromptHelper(html) {
 <div class="print-prompt-banner" id="printPrompt">
   <div class="print-prompt-header">💡 How to Export as PDF / 如何导出为 PDF</div>
   <div class="print-prompt-body">
-    <strong>中文提示：</strong>当前网页的排版已为打印进行了优化。请在浏览器中按 <strong>Ctrl + P</strong> (Mac 上为 <strong>Cmd + P</strong>)，将目标打印机设为<strong>“另存为 PDF”</strong>，并务必在设置中勾选<strong>“背景图形”</strong>以显示完整的颜色和背景，然后点击“保存”即可。<br>
-    <strong>English Guide:</strong> The layout is optimized. Press <strong>Ctrl + P</strong> (<strong>Cmd + P</strong> on Mac), set the printer to <strong>"Save as PDF"</strong>, and ensure the <strong>"Background graphics"</strong> option is checked to render colors properly.
+    <strong>中文提示：</strong>当前网页的排版已为打印进行了优化。请在浏览器中按 <strong>Ctrl + P</strong> (Mac 上为 <strong>Cmd + P</strong>)，将目标打印机设为<strong>“另存为 PDF”</strong>，并根据需求在设置中勾选<strong>“背景图形”</strong>以显示背景色或使用透明背景，然后点击“保存”即可。<br>
+    <strong>English Guide:</strong> The layout is optimized. Press <strong>Ctrl + P</strong> (<strong>Cmd + P</strong> on Mac), set the printer to <strong>"Save as PDF"</strong>, and optionally check the <strong>"Background graphics"</strong> option to show background colors or use a transparent background.
   </div>
   <div class="print-prompt-actions">
     <button class="print-prompt-btn print-prompt-btn-secondary" onclick="document.getElementById('printPrompt').remove()">Dismiss / 关闭提示</button>
@@ -2620,7 +2640,6 @@ function exportPortfolio(){
   const sel=ANALYSES.filter(a=>a.on&&document.getElementById('card_'+a.id));
   if(sel.length<1){toast('GENERATE ANALYSES FIRST');return;}
   const date=new Date().toLocaleDateString('en-GB',{year:'numeric',month:'long',day:'numeric'});
-  const lang=(navigator.language||'en').toLowerCase().indexOf('zh')===0?'zh':'en';
   const desc=buildSiteDescription(lang);
   // stats
   const R=curR,areaKm2=(Math.PI*R*R)/1e6;
@@ -2631,15 +2650,17 @@ function exportPortfolio(){
   // diagram cards
   const cells=sel.map((a,i)=>{
     const svg=render(a.id,cardSch[a.id]||0);
-    const nm=cardName[a.id]||a.name;
+    const defName=lang==='zh'?(a.name_zh||a.name):a.name;
+    const nm=cardName[a.id]||defName;
     return '<div class="pcell"><div class="pcap"><span class="pnum">'+String(i+1).padStart(2,'0')+'</span><span class="pname">'+nm.toUpperCase()+'</span><span class="ptag">'+a.tag+'</span></div><div class="psvg">'+svg+'</div></div>';
   }).join('');
   const title=(sName||'Site').toUpperCase();
+  const bgcPortfolio = exportBgColor === 'theme' ? '#fff' : (exportBgColor === 'transparent' ? '#ffffff' : exportBgColor);
   const html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>ShArch · '+title+' · Portfolio Board</title>'
     +'<style>@import url(\'https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Archivo:wght@400;600;700;800;900&display=swap\');'
     +'@page{size:A3 landscape;margin:0}'
     +'*{margin:0;padding:0;box-sizing:border-box}'
-    +'body{font-family:Archivo,sans-serif;background:#fff;color:#16150F}'
+    +'body{font-family:Archivo,sans-serif;background:'+bgcPortfolio+';color:#16150F}'
     +'.board{width:420mm;height:297mm;padding:18mm 18mm 14mm;display:flex;flex-direction:column;position:relative}'
     +'.bhead{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:2px solid #16150F;padding-bottom:10px;margin-bottom:6px}'
     +'.bhead h1{font-size:42px;font-weight:900;letter-spacing:-.03em;line-height:.9}'
@@ -2692,11 +2713,12 @@ function exportPDF(){
   const ovSVG=curOvStyle?buildOverlaySVG(curOvStyle,PW,PH):'';
   const isDarkOv=curOvStyle==='dark';
   const ovLabel=curOvStyle?`${curOvStyle.toUpperCase()} OVERLAY`:'';
+  const bgcPDF = exportBgColor === 'theme' ? '#fff' : (exportBgColor === 'transparent' ? '#ffffff' : exportBgColor);
   const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>ShArch · ${sName||'Site'}</title>
 <style>
 @page{size:${EXP_PAGE[expFormat]||'A4 portrait'};margin:12mm}
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:\'Noto Sans\', \'Noto Sans SC\', sans-serif;background:#fff;color:#1A1917}
+body{font-family:\'Noto Sans\', \'Noto Sans SC\', sans-serif;background:${bgcPDF};color:#1A1917}
 @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap');
 .header{position:relative;width:100%;height:380px;overflow:hidden;background:${isDarkOv?'#1A1C20':'#F0EEE8'}}
 .header svg{position:absolute;inset:0;width:100%;height:100%}
@@ -2953,7 +2975,10 @@ async function svgToPng(el,sc2){
     img.onload=()=>{
       const cv=document.createElement('canvas');cv.width=Math.round(vw*actualScale);cv.height=Math.round(vh*actualScale);
       const ctx=cv.getContext('2d');
-      ctx.fillStyle='#FAFAF9';ctx.fillRect(0,0,cv.width,cv.height);
+      if (exportBgColor !== 'transparent') {
+        ctx.fillStyle = exportBgColor === 'theme' ? (typeof curStyle !== 'undefined' && curStyle==='dark' ? '#1A1C20' : '#FAFAF9') : exportBgColor;
+        ctx.fillRect(0,0,cv.width,cv.height);
+      }
       ctx.scale(actualScale,actualScale);ctx.drawImage(img,0,0,vw,vh);
       cv.toBlob(b2=>{if(b2)res(b2);else rej(new Error('toBlob null'));},'image/png');
     };
@@ -2968,19 +2993,29 @@ async function dlCard(id,fmt,ev){
   const el=document.querySelector('#card_'+id+' .cbody svg');
   if(!el){toast('NO DIAGRAM');return;}
   const a=ANALYSES.find(x=>x.id===id);
-  const name=cardName[id]||(a?a.name:id);
+  const defName=a?(lang==='zh'?(a.name_zh||a.name):a.name):id;
+  const name=cardName[id]||defName;
   const tag=a?a.tag:'';
   if(fmt==='svg'){
     // Vector SVG export — editable in Illustrator
-    let s='<?xml version="1.0" encoding="UTF-8"?>\n'+new XMLSerializer().serializeToString(el);
-    dlBlob(new Blob([s],{type:'image/svg+xml'}),'sharch_tools_'+id+'.svg');
+    let elClone = el.cloneNode(true);
+    if (exportBgColor !== 'transparent') {
+      const bgc = exportBgColor === 'theme' ? (typeof curStyle !== 'undefined' && curStyle==='dark' ? '#1A1C20' : '#FAFAF9') : exportBgColor;
+      const rect = document.createElementNS('http://www.w3.org/2000/svg','rect');
+      rect.setAttribute('width','100%');
+      rect.setAttribute('height','100%');
+      rect.setAttribute('fill',bgc);
+      elClone.insertBefore(rect, elClone.firstChild);
+    }
+    let s='<?xml version="1.0" encoding="UTF-8"?>\n'+new XMLSerializer().serializeToString(elClone);
+    dlBlob(new Blob([s],{type:'image/svg+xml'}), name+'.svg');
     toast('VECTOR SVG SAVED');
     return;
   }
   if(fmt==='png'){
     try {
       const blob = await svgToPng(el);
-      dlBlob(blob, 'sharch_tools_'+id+'.png');
+      dlBlob(blob, name+'.png');
       toast('PNG SAVED');
     } catch(e){
       toast('PNG EXPORT FAILED');
@@ -2990,9 +3025,10 @@ async function dlCard(id,fmt,ev){
   // default: PDF (printable HTML page)
   let svgStr=new XMLSerializer().serializeToString(el);
   const date=new Date().toLocaleDateString('en-GB',{year:'numeric',month:'long',day:'numeric'});
+  const bgc = exportBgColor === 'theme' ? '#F5F4F2' : (exportBgColor === 'transparent' ? '#ffffff' : exportBgColor);
   const html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>'+name+' · ShArch</title>'
     +'<style>@import url(\'https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap\');'
-    +'*{margin:0;padding:0}body{background:#F5F4F2;font-family:"Noto Sans", "Noto Sans SC", sans-serif;display:flex;flex-direction:column;align-items:center;padding:40px}'
+    +'*{margin:0;padding:0}body{background:'+bgc+';font-family:"Noto Sans", "Noto Sans SC", sans-serif;display:flex;flex-direction:column;align-items:center;padding:40px}'
     +'.hd{width:520px;max-width:90vw;display:flex;justify-content:space-between;align-items:baseline;border-bottom:1.5px solid #1A1917;padding-bottom:8px;margin-bottom:16px}'
     +'.hd h1{font-size:16px;font-weight:700;color:#1A1917;letter-spacing:.05em}.hd .t{font-size:8px;color:#A8A69F;background:#F0EEE8;padding:3px 7px;border-radius:3px}'
     +'.meta{width:520px;max-width:90vw;font-size:8px;color:#A8A69F;letter-spacing:.08em;margin-bottom:20px}'

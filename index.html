@@ -160,18 +160,36 @@
         <div class="sec" id="secDisplay">
           <div class="lbl" data-i18n="display_opts">Diagram Elements</div>
           <div style="display:flex;gap:12px;margin-top:6px;flex-wrap:wrap">
-            <label style="font-family:'Noto Sans', 'Noto Sans SC', sans-serif;font-size:10px;color:var(--t2);cursor:pointer;display:flex;align-items:center;gap:6px">
-              <input type="checkbox" id="showScaleChk" checked onchange="toggleScale(this.checked)" style="cursor:pointer"/>
+            <label
+              style="font-family:'Noto Sans', 'Noto Sans SC', sans-serif;font-size:10px;color:var(--t2);cursor:pointer;display:flex;align-items:center;gap:6px">
+              <input type="checkbox" id="showScaleChk" checked onchange="toggleScale(this.checked)"
+                style="cursor:pointer" />
               <span data-i18n="opt_scale">Scale Bar</span>
             </label>
-            <label style="font-family:'Noto Sans', 'Noto Sans SC', sans-serif;font-size:10px;color:var(--t2);cursor:pointer;display:flex;align-items:center;gap:6px">
-              <input type="checkbox" id="showNorthChk" checked onchange="toggleNorth(this.checked)" style="cursor:pointer"/>
+            <label
+              style="font-family:'Noto Sans', 'Noto Sans SC', sans-serif;font-size:10px;color:var(--t2);cursor:pointer;display:flex;align-items:center;gap:6px">
+              <input type="checkbox" id="showNorthChk" checked onchange="toggleNorth(this.checked)"
+                style="cursor:pointer" />
               <span data-i18n="opt_north">Compass</span>
             </label>
-            <label style="font-family:'Noto Sans', 'Noto Sans SC', sans-serif;font-size:10px;color:var(--t2);cursor:pointer;display:flex;align-items:center;gap:6px">
-              <input type="checkbox" id="legendZhChk" checked onchange="toggleLegendZh(this.checked)" style="cursor:pointer"/>
+            <label
+              style="font-family:'Noto Sans', 'Noto Sans SC', sans-serif;font-size:10px;color:var(--t2);cursor:pointer;display:flex;align-items:center;gap:6px">
+              <input type="checkbox" id="legendZhChk" checked onchange="toggleLegendZh(this.checked)"
+                style="cursor:pointer" />
               <span data-i18n="opt_legend_zh">Chinese Legend</span>
             </label>
+          </div>
+        </div>
+        <div class="sec" id="secExportBg">
+          <div class="lbl" data-i18n="export_bg">Export Background</div>
+          <div style="display:flex;align-items:center;gap:8px;margin-top:6px">
+            <select id="bgSelect" onchange="setExportBg(this.value)" style="font-size:10px;border:1px solid var(--ln);border-radius:5px;padding:4px;cursor:pointer;background:var(--sf);color:var(--tx);flex:1">
+              <option value="theme" data-i18n="bg_theme" selected>Theme Default</option>
+              <option value="transparent" data-i18n="bg_transparent">Transparent</option>
+              <option value="custom" data-i18n="bg_custom">Custom</option>
+            </select>
+            <input type="color" id="exportBgPick" value="#ffffff" oninput="setExportBg(this.value, true)"
+              style="width:30px;height:24px;border:1px solid var(--ln);border-radius:5px;padding:0;cursor:pointer;background:none;display:none" />
           </div>
         </div>
         <div class="sec" id="secTheme">
@@ -228,7 +246,7 @@
 
       <div class="sbar">
         <div class="sd" id="sdot"></div><span id="stxt" data-i18n="ready_status">READY</span><span
-          style="margin-left:auto">ShArch · v1.4</span>
+          style="margin-left:auto">ShArch · v1.2.1</span>
       </div>
     </div>
 
@@ -265,63 +283,6 @@
     </div>
   </div>
   <script src="app.js"></script>
-  <div id="contactModal" onclick="if(event.target===this)closeContact()"
-    style="display:none;position:fixed;inset:0;z-index:9998;background:rgba(20,22,27,.6);backdrop-filter:blur(7px);align-items:center;justify-content:center;font-family:'Inter',system-ui,sans-serif">
-    <div
-      style="background:#fff;border-radius:22px;padding:38px;max-width:420px;width:92%;box-shadow:0 30px 80px rgba(0,0,0,.3);position:relative;text-align:center">
-      <button onclick="closeContact()"
-        style="position:absolute;top:18px;right:20px;background:none;border:none;font-size:22px;color:#A8A69F;cursor:pointer">×</button>
-      <div style="font-size:28px;margin-bottom:8px">✉</div>
-      <div style="font-size:20px;font-weight:700;color:#1A1917;letter-spacing:-.01em">Contact Us · 联系我们</div>
-      <div style="font-size:12px;color:#8C8A82;margin:6px 0 24px">Questions, feedback, or collaboration — get in
-        touch.<br>有任何问题、建议 or 合作，欢迎联系。</div>
-      <a href="/cdn-cgi/l/email-protection#ed808c8a8281848c9e84998c8194ad8a808c8481c38e8280"
-        style="display:flex;align-items:center;gap:14px;text-decoration:none;border:1px solid #E8E6E0;border-radius:14px;padding:16px 18px;text-align:left">
-        <span style="font-size:20px">✉</span>
-        <span style="flex:1"><span
-            style="display:block;font-size:9px;color:#A8A69F;letter-spacing:.1em;font-family:'Space Mono',monospace">EMAIL</span><span
-            style="font-size:14px;color:#1A1917;font-weight:600"><span class="__cf_email__"
-              data-cfemail="cfa2aea8a0a3a6aebca6bbaea3b68fa8a2aea6a3e1aca0a2">[email&#160;protected]</span></span></span>
-        <span style="color:#C0392B;font-size:14px">→</span>
-      </a>
-    </div>
-  </div>
-  <div id="helpModal" onclick="if(event.target===this)closeHelp()"
-    style="display:none;position:fixed;inset:0;z-index:9998;background:rgba(20,22,27,.6);backdrop-filter:blur(7px);align-items:center;justify-content:center;font-family:'Inter',system-ui,sans-serif">
-    <div
-      style="background:#fff;border-radius:22px;padding:40px;max-width:520px;width:92%;box-shadow:0 30px 80px rgba(0,0,0,.3);position:relative">
-      <button onclick="closeHelp()"
-        style="position:absolute;top:18px;right:20px;background:none;border:none;font-size:22px;color:#A8A69F;cursor:pointer">×</button>
-      <div
-        style="font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.3em;color:#C0392B;text-transform:uppercase;margin-bottom:8px"
-        data-i18n="help_quick_start">
-        Quick Start · 快速上手</div>
-      <div style="font-size:22px;font-weight:700;color:#1A1917;letter-spacing:-.02em;margin-bottom:24px"
-        data-i18n="help_title">Four steps to a
-        finished board</div>
-      <div id="helpSteps"></div>
-      <div
-        style="margin-top:26px;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap">
-        <label style="font-size:11px;color:#A8A69F;display:flex;align-items:center;gap:6px;cursor:pointer"><input
-            type="checkbox" id="helpDont" style="cursor:pointer" /> <span data-i18n="help_dont">Don't show on startup ·
-            不再自动显示</span></label>
-        <div style="display:flex;gap:8px">
-          <button onclick="tryExample()"
-            style="font-family:'Space Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:12px 22px;border-radius:30px;background:#C0392B;color:#fff;border:none;cursor:pointer"
-            data-i18n="help_try_example">▶ Try example · 试一个</button>
-          <button onclick="closeHelp()"
-            style="font-family:'Space Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:12px 22px;border-radius:30px;background:#1A1917;color:#fff;border:none;cursor:pointer"
-            data-i18n="help_got_it">Got it →</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
-  <script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447"
-    integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ=="
-    data-cf-beacon='{"version":"2024.11.0","token":"4e3f46bec9ce480f93ce97177a9ec68d","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}'
-    crossorigin="anonymous"></script>
 </body>
 
 </html>
