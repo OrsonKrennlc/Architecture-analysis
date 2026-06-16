@@ -130,7 +130,9 @@ const mkPin=(dark)=>L.divIcon({className:'',iconSize:[12,12],iconAnchor:[6,6],
 
 map.on('click',e=>{
   if(polyMode){addPolyPoint(e.latlng.lat,e.latlng.lng);return;}
-  sLat=e.latlng.lat;sLng=e.latlng.lng;dropPin();document.getElementById('hint').style.opacity='0';revGeo();if(curStyle==='dark')drawOv();
+  const unified = unifyToWGS84(e.latlng.lat, e.latlng.lng);
+  sLat=unified[0];sLng=unified[1];
+  dropPin();document.getElementById('hint').style.opacity='0';revGeo();if(curStyle==='dark')drawOv();
 });
 
 function dropPin(){
@@ -192,7 +194,8 @@ async function doSearch(){
     if(!r.ok){toast(t('ts_search_error')+' '+r.status);return;}
     const d=await r.json();
     if(!d.length){toast(t('ts_not_found'));return;}
-    sLat=parseFloat(d[0].lat);sLng=parseFloat(d[0].lon);
+    const unified = unifyToWGS84(parseFloat(d[0].lat), parseFloat(d[0].lon));
+    sLat=unified[0];sLng=unified[1];
     map.setView([sLat,sLng],15,{animate:true});
     dropPin();revGeo();
     toast(t('ts_found')+' · '+(d[0].display_name||'').split(',')[0]);
@@ -553,12 +556,112 @@ function getBounds(){
   const d=curR/111320,dl=curR/(111320*Math.cos(sLat*Math.PI/180));
   return{mnLat:sLat-d,mxLat:sLat+d,mnLng:sLng-dl,mxLng:sLng+dl};
 }
-function proj(lat,lng,b){
-  if(!b||b.mxLng===b.mnLng||b.mxLat===b.mnLat)return[W/2,H/2];
-  const x=PAD+(lng-b.mnLng)/(b.mxLng-b.mnLng)*(W-PAD*2);
-  const y=PAD+(b.mxLat-lat)/(b.mxLat-b.mnLat)*(H-PAD*2);
-  return[isFinite(x)?x:W/2, isFinite(y)?y:H/2];
+
+/* ════════════════════════════════════════
+   COORDINATE TRANSFORMATION (GCJ02/BD09/WGS84)
+════════════════════════════════════════ */
+const PI = Math.PI;
+const a_ee = 6378245.0;
+const ee = 0.00669342162296594323;
+
+function transformLat(x, y) {
+  let ret = -100.0 + 2.0 * x + 3.0 * y + 0.2 * y * y + 0.1 * x * y + 0.2 * Math.sqrt(Math.abs(x));
+  ret += (20.0 * Math.sin(6.0 * x * PI) + 20.0 * Math.sin(2.0 * x * PI)) * 2.0 / 3.0;
+  ret += (20.0 * Math.sin(y * PI) + 40.0 * Math.sin(y / 3.0 * PI)) * 2.0 / 3.0;
+  ret += (160.0 * Math.sin(y / 12.0 * PI) + 320 * Math.sin(y * PI / 30.0)) * 2.0 / 3.0;
+  return ret;
 }
+
+function transformLon(x, y) {
+  let ret = 300.0 + x + 2.0 * y + 0.1 * x * x + 0.1 * x * y + 0.1 * Math.sqrt(Math.abs(x));
+  ret += (20.0 * Math.sin(6.0 * x * PI) + 20.0 * Math.sin(2.0 * x * PI)) * 2.0 / 3.0;
+  ret += (20.0 * Math.sin(x * PI) + 40.0 * Math.sin(x / 3.0 * PI)) * 2.0 / 3.0;
+  ret += (150.0 * Math.sin(x / 12.0 * PI) + 300.0 * Math.sin(x / 30.0 * PI)) * 2.0 / 3.0;
+  return ret;
+}
+
+function outOfChina(lat, lng) {
+  return !(lng > 73.66 && lng < 135.05 && lat > 3.86 && lat < 53.55);
+}
+
+function gcj02towgs84(lat, lng) {
+  if (outOfChina(lat, lng)) return [lat, lng];
+  let dlat = transformLat(lng - 105.0, lat - 35.0);
+  let dlng = transformLon(lng - 105.0, lat - 35.0);
+  let radlat = lat / 180.0 * PI;
+  let magic = Math.sin(radlat);
+  magic = 1 - ee * magic * magic;
+  let sqrtmagic = Math.sqrt(magic);
+  dlat = (dlat * 180.0) / ((a_ee * (1 - ee)) / (magic * sqrtmagic) * PI);
+  dlng = (dlng * 180.0) / (a_ee / sqrtmagic * Math.cos(radlat) * PI);
+  let mglat = lat + dlat;
+  let mglng = lng + dlng;
+  return [lat * 2 - mglat, lng * 2 - mglng];
+}
+
+// Convert input coordinate to WGS84 to ensure data source alignment
+function unifyToWGS84(lat, lng) {
+  // If the user uses a domestic map that gives GCJ-02, we can convert it here
+  // For now, assume we convert from GCJ02 to WGS84 if in China and suspected shifted
+  // Note: if it's already WGS84, applying this will unshift it incorrectly.
+  // Actually, since OSM data is strictly WGS84, we just need to make sure the projection mapping is perfectly aligned.
+  return [lat, lng];
+}
+
+function latLngToMeters(lat, lng) {
+  const x = lng * 20037508.34 / 180;
+  let y = Math.log(Math.tan((90 + lat) * Math.PI / 360)) / (Math.PI / 180);
+  y = y * 20037508.34 / 180;
+  return [x, y];
+}
+
+function proj(lat, lng, b) {
+  if (!b || b.mxLng === b.mnLng || b.mxLat === b.mnLat) return [W / 2, H / 2];
+  const [mx, my] = latLngToMeters(lat, lng);
+  const [minX, minY] = latLngToMeters(b.mnLat, b.mnLng);
+  const [maxX, maxY] = latLngToMeters(b.mxLat, b.mxLng);
+  const x = PAD + (mx - minX) / (maxX - minX) * (W - PAD * 2);
+  const y = PAD + (maxY - my) / (maxY - minY) * (H - PAD * 2);
+  return [isFinite(x) ? x : W / 2, isFinite(y) ? y : H / 2];
+}
+
+function getTileUrl(style, z, tx, ty) {
+  let t = '';
+  if (style === 'dark') t = 'https://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png';
+  else if (style === 'light') t = 'https://a.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png';
+  else if (style === 'sat') t = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}';
+  else t = style;
+  return t.replace('{z}', z).replace('{x}', tx).replace('{y}', ty);
+}
+
+function getTileImagesSVG(b, z, style) {
+  const minX_z = ((b.mnLng + 180) / 360) * 256 * Math.pow(2, z);
+  const maxX_z = ((b.mxLng + 180) / 360) * 256 * Math.pow(2, z);
+  const minY_z = (1 - Math.log(Math.tan(b.mxLat*Math.PI/180) + 1 / Math.cos(b.mxLat*Math.PI/180)) / Math.PI) / 2 * 256 * Math.pow(2, z);
+  const maxY_z = (1 - Math.log(Math.tan(b.mnLat*Math.PI/180) + 1 / Math.cos(b.mnLat*Math.PI/180)) / Math.PI) / 2 * 256 * Math.pow(2, z);
+  
+  const scaleX = (W - PAD * 2) / (maxX_z - minX_z);
+  const scaleY = (H - PAD * 2) / (maxY_z - minY_z);
+  
+  const tMinX = Math.floor(minX_z / 256);
+  const tMaxX = Math.floor(maxX_z / 256);
+  const tMinY = Math.floor(minY_z / 256);
+  const tMaxY = Math.floor(maxY_z / 256);
+  
+  let svgs = '';
+  for (let tx = tMinX; tx <= tMaxX; tx++) {
+    for (let ty = tMinY; ty <= tMaxY; ty++) {
+      const imgX = PAD + (tx * 256 - minX_z) * scaleX;
+      const imgY = PAD + (ty * 256 - minY_z) * scaleY;
+      const imgW = 256 * scaleX;
+      const imgH = 256 * scaleY;
+      const url = getTileUrl(style, z, tx, ty);
+      svgs += '<image xlink:href="' + url + '" x="' + imgX.toFixed(1) + '" y="' + imgY.toFixed(1) + '" width="' + (imgW + 0.8).toFixed(1) + '" height="' + (imgH + 0.8).toFixed(1) + '" preserveAspectRatio="none" opacity=".85"/>';
+    }
+  }
+  return svgs;
+}
+
 function wpts(way,b){
   if(!way.geometry||!way.geometry.length)return'';
   const s=way.geometry.map(n=>proj(n.lat,n.lon,b).join(',')).join(' ');
@@ -572,6 +675,100 @@ let sitePolygon=[]; // array of {lat,lng} when user draws a custom boundary
 let polyMode=false; // currently drawing a polygon
 let polyLayer=null; // leaflet layer for the drawn polygon
 
+let legendZh = true;
+const LEG_I18N = {
+  // 2D legends
+  'PRIMARY': { en: 'PRIMARY', zh: '一级路网' },
+  'SEC.': { en: 'SEC.', zh: '二级路网' },
+  'PATH': { en: 'PATH', zh: '人行步道' },
+  'RESID': { en: 'RESID', zh: '住宅用地' },
+  'CIVIC': { en: 'CIVIC', zh: '公共用地' },
+  'COMM': { en: 'COMM', zh: '商业用地' },
+  'GREEN': { en: 'GREEN', zh: '绿地' },
+  'WATER': { en: 'WATER', zh: '水体' },
+  'SECONDARY': { en: 'SECONDARY', zh: '二级路网' },
+  'MINOR': { en: 'MINOR', zh: '支路' },
+  'SUMMER': { en: 'SUMMER', zh: '夏至日照' },
+  'EQUINOX': { en: 'EQUINOX', zh: '春秋分日照' },
+  'WINTER': { en: 'WINTER', zh: '冬至日照' },
+  'NORTH': { en: 'NORTH', zh: '正北' },
+  'S / E / W': { en: 'S / E / W', zh: '南/东/西' },
+  'HIGH ≥70dB': { en: 'HIGH ≥70dB', zh: '高噪音 ≥70dB' },
+  'MED 62-70dB': { en: 'MED 62-70dB', zh: '中噪音 62-70dB' },
+  'LOW <62dB': { en: 'LOW <62dB', zh: '低噪音 <62dB' },
+  'COMMERCE': { en: 'COMMERCE', zh: '商业服务' },
+  'CULTURE': { en: 'CULTURE', zh: '文化设施' },
+  'TRANSIT': { en: 'TRANSIT', zh: '交通设施' },
+  'LOW': { en: 'LOW', zh: '低密度' },
+  'MED': { en: 'MED', zh: '中密度' },
+  'HIGH': { en: 'HIGH', zh: '高密度' },
+  'VERY HIGH': { en: 'VERY HIGH', zh: '极高密度' },
+  'FOOD': { en: 'FOOD', zh: '餐饮美食' },
+  'SHOP': { en: 'SHOP', zh: '生活购物' },
+  'EDU': { en: 'EDU', zh: '教育科研' },
+  'HEALTH': { en: 'HEALTH', zh: '医疗健康' },
+  'LEISURE': { en: 'LEISURE', zh: '休闲娱乐' },
+  'BUILT': { en: 'BUILT', zh: '建筑体量' },
+  'ROADS': { en: 'ROADS', zh: '道路网' },
+  'METRO/RAIL': { en: 'METRO/RAIL', zh: '地铁/铁路' },
+  'TRAM': { en: 'TRAM', zh: '有轨电车' },
+  'BUS': { en: 'BUS', zh: '公共汽车' },
+  'FOOTWAY': { en: 'FOOTWAY', zh: '步行道' },
+  'CYCLEWAY': { en: 'CYCLEWAY', zh: '自行车道' },
+  'PLAZA': { en: 'PLAZA', zh: '广场' },
+  '0–5 MIN': { en: '0–5 MIN', zh: '0–5 分钟' },
+  '5–10 MIN': { en: '5–10 MIN', zh: '5–10 分钟' },
+  '10–15 MIN': { en: '10–15 MIN', zh: '10–15 分钟' },
+  '15–20 MIN': { en: '15–20 MIN', zh: '15–20 分钟' },
+  '0-5 MIN': { en: '0-5 MIN', zh: '0-5 分钟' },
+  '5-10 MIN': { en: '5-10 MIN', zh: '5-10 分钟' },
+  '10-15 MIN': { en: '10-15 MIN', zh: '10-15 分钟' },
+  '15-20 MIN': { en: '15-20 MIN', zh: '15-20 分钟' },
+
+  // 3D legends
+  'Building mass': { en: 'Building mass', zh: '建筑体量' },
+  'Shadow face': { en: 'Shadow face', zh: '阴影面' },
+  '<6m': { en: '<6m', zh: '<6米' },
+  '12-25m': { en: '12-25m', zh: '12-25米' },
+  '40-60m': { en: '40-60m', zh: '40-60米' },
+  '80m+': { en: '80m+', zh: '80米+' },
+  'Landmark': { en: 'Landmark', zh: '地标建筑' },
+  'Residential': { en: 'Residential', zh: '住宅用地' },
+  'Mixed': { en: 'Mixed', zh: '混合用地' },
+  'Commercial': { en: 'Commercial', zh: '商业用地' },
+  'Office': { en: 'Office', zh: '办公用地' },
+  'Very low': { en: 'Very low', zh: '极低' },
+  'Mid-low': { en: 'Mid-low', zh: '中低' },
+  'Medium': { en: 'Medium', zh: '中等' },
+  'High': { en: 'High', zh: '高' },
+  'Very high': { en: 'Very high', zh: '极高' },
+  'Sunlit': { en: 'Sunlit', zh: '受光面' },
+  'Shaded': { en: 'Shaded', zh: '阴影面' },
+  'Sun dir →': { en: 'Sun dir →', zh: '太阳方向 →' },
+  'Silhouette': { en: 'Silhouette', zh: '天际线轮廓' },
+  'Peak': { en: 'Peak', zh: '最高点' },
+  'Ruler': { en: 'Ruler', zh: '标尺' }
+};
+
+function tLeg(text) {
+  if (!legendZh) return text;
+  const match = LEG_I18N[text];
+  return match ? (match.zh || match.en) : text;
+}
+
+function legTextWidth(text) {
+  let w = 0;
+  for (let i = 0; i < text.length; i++) {
+    const c = text.charCodeAt(i);
+    if (c > 127) {
+      w += 7.2;
+    } else {
+      w += 3.8;
+    }
+  }
+  return w;
+}
+
 function wrap(inner,leg,note,opts){
   opts=opts||{};
   const showScale=(opts.noScale!==true)&&globalShowScale;
@@ -580,7 +777,7 @@ function wrap(inner,leg,note,opts){
   const uid='u'+Math.random().toString(36).slice(2,8);
   const legY=H+18;
   const nL=Math.max(leg.length,1);
-  const itemWidths=leg.map(it=>14+(it.l||'').length*3.8);
+  const itemWidths=leg.map(it=>14+legTextWidth(tLeg(it.l)));
   const sumItemWidths=itemWidths.reduce((a,b)=>a+b,0);
   let gap=14;
   let totalWidth=sumItemWidths+(nL-1)*gap;
@@ -595,8 +792,8 @@ function wrap(inner,leg,note,opts){
     const x=curX;
     const itemW=itemWidths[i];
     curX+=itemW+gap;
-    if(it.type==='rect')return'<rect x="'+x.toFixed(1)+'" y="'+(legY-6)+'" width="11" height="7" fill="'+it.c+'" stroke="'+(it.s||it.c)+'" stroke-width=".5"/><text x="'+(x+14).toFixed(1)+'" y="'+(legY+1)+'" font-size="6.5" fill="#A8A69F" font-family="\'Noto Sans\', \'Noto Sans SC\', sans-serif">'+it.l+'</text>';
-    return'<line x1="' + x.toFixed(1) + '" y1="' + (legY - 2) + '" x2="' + (x + 11).toFixed(1) + '" y2="' + (legY - 2) + '" stroke="' + it.c + '" stroke-width="' + (it.w || 1.2) + '"' + (it.da ? ' stroke-dasharray="' + it.da + '"' : '') + '/><text x="' + (x + 14).toFixed(1) + '" y="' + (legY + 2) + '" font-size="6.5" fill="#A8A69F" font-family="\'Noto Sans\', \'Noto Sans SC\', sans-serif">' + it.l + '</text>';
+    if(it.type==='rect')return'<rect x="'+x.toFixed(1)+'" y="'+(legY-6)+'" width="11" height="7" fill="'+it.c+'" stroke="'+(it.s||it.c)+'" stroke-width=".5"/><text x="'+(x+14).toFixed(1)+'" y="'+(legY+1)+'" font-size="6.5" fill="#A8A69F" font-family="\'Noto Sans\', \'Noto Sans SC\', sans-serif">'+tLeg(it.l)+'</text>';
+    return'<line x1="' + x.toFixed(1) + '" y1="' + (legY - 2) + '" x2="' + (x + 11).toFixed(1) + '" y2="' + (legY - 2) + '" stroke="' + it.c + '" stroke-width="' + (it.w || 1.2) + '"' + (it.da ? ' stroke-dasharray="' + it.da + '"' : '') + '/><text x="' + (x + 14).toFixed(1) + '" y="' + (legY + 2) + '" font-size="6.5" fill="#A8A69F" font-family="\'Noto Sans\', \'Noto Sans SC\', sans-serif">' + tLeg(it.l) + '</text>';
   }).join('');
   const noteS=note?'<text x="'+(W-4)+'" y="'+(H+25)+'" text-anchor="end" font-size="5.5" fill="#D8D6D0" font-family="\'Noto Sans\', \'Noto Sans SC\', sans-serif">'+note+'</text>':'';
   // Scale bar (bottom-left) — diagram width spans ~2*curR meters across (W-PAD*2) px
@@ -882,12 +1079,7 @@ function drawNodes(poisData,roadsData,sc){
   const b=getBounds();const cx=W/2,cy=H/2,clipR=W/2-PAD+4;
   const uid='n'+Math.random().toString(36).slice(2,8);
   // Use colored CARTO map tile as background
-  const z=15;
-  const tx=Math.floor((sLng+180)/360*Math.pow(2,z));
-  const latR2=sLat*Math.PI/180;
-  const ty=Math.floor((1-Math.log(Math.tan(latR2)+1/Math.cos(latR2))/Math.PI)/2*Math.pow(2,z));
-  const tileUrl='https://a.basemaps.cartocdn.com/dark_all/'+z+'/'+tx+'/'+ty+'.png';
-  let inner='<image xlink:href="'+tileUrl+'" x="'+(cx-128)+'" y="'+(cy-128)+'" width="256" height="256" preserveAspectRatio="xMidYMid slice" opacity=".85"/>';
+  let inner='<g opacity=".85">' + getTileImagesSVG(b, 15, 'dark') + '</g>';
   // POIs
   const pois=[];
   (poisData.elements||[]).forEach(el=>{
@@ -938,11 +1130,23 @@ function drawSun(sc){
   const cx=W/2,cy=H/2,maxR=W/2-PAD;
   const latR=sLat*Math.PI/180;
   function sp(h,doy){
-    const decl=.409*Math.sin(2*Math.PI/365*(doy-80));
-    const ha=(h-12)*15*Math.PI/180;
-    const alt=Math.asin(Math.sin(latR)*Math.sin(decl)+Math.cos(latR)*Math.cos(decl)*Math.cos(ha));
-    const az=Math.atan2(-Math.cos(decl)*Math.sin(ha),Math.sin(decl)*Math.cos(latR)-Math.cos(decl)*Math.cos(ha)*Math.sin(latR));
-    return{alt:alt*180/Math.PI,az:az*180/Math.PI+180};
+    const year = new Date().getFullYear();
+    const date = new Date(year, 0, doy);
+    const utcHour = h - (sLng / 15);
+    date.setUTCHours(Math.floor(utcHour));
+    date.setUTCMinutes((utcHour % 1) * 60);
+    date.setUTCSeconds(0);
+    if (typeof SunCalc !== 'undefined') {
+      const pos = SunCalc.getPosition(date, sLat, sLng);
+      return { alt: pos.altitude * 180 / Math.PI, az: pos.azimuth * 180 / Math.PI + 180 };
+    } else {
+      // Fallback if SunCalc is missing
+      const decl=.409*Math.sin(2*Math.PI/365*(doy-80));
+      const ha=(h-12)*15*Math.PI/180;
+      const alt=Math.asin(Math.sin(latR)*Math.sin(decl)+Math.cos(latR)*Math.cos(decl)*Math.cos(ha));
+      const az=Math.atan2(-Math.cos(decl)*Math.sin(ha),Math.sin(decl)*Math.cos(latR)-Math.cos(decl)*Math.cos(ha)*Math.sin(latR));
+      return { alt: alt * 180 / Math.PI, az: az * 180 / Math.PI + 180 };
+    }
   }
   function xy(az,alt){const rr=maxR*(1-Math.max(0,alt)/90),a=(az-90)*Math.PI/180;return[cx+rr*Math.cos(a),cy+rr*Math.sin(a)];}
   let inner='';
@@ -981,13 +1185,8 @@ function drawSat(sc){
   const sats=['0.38','0.18','0.62'];
   const sat=sats[sc||0];
   const cx=W/2,cy=H/2,cr=W/2-PAD+4;
-  const z=15;
-  const tx=Math.floor((sLng+180)/360*Math.pow(2,z));
-  const latR=sLat*Math.PI/180;
-  const ty=Math.floor((1-Math.log(Math.tan(latR)+1/Math.cos(latR))/Math.PI)/2*Math.pow(2,z));
   const fid='f'+Math.random().toString(36).slice(2,8);
   const uid='c'+Math.random().toString(36).slice(2,8);
-  const url='https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/'+z+'/'+ty+'/'+tx;
   const isRect=cardShape==='rect'||cardShape==='square';
   const rxry=(cardShape==='rect')?' rx="18" ry="18"':'';
   const clipShape=isRect
@@ -997,6 +1196,9 @@ function drawSat(sc){
     ?'<rect x="'+PAD+'" y="'+PAD+'" width="'+(W-PAD*2)+'" height="'+(H-PAD*2)+'"'+rxry+' fill="none" stroke="#D8D6D0" stroke-width=".7" stroke-dasharray="3,3"/>'
     :'<circle cx="'+cx+'" cy="'+cy+'" r="'+cr+'" fill="none" stroke="#D8D6D0" stroke-width=".7" stroke-dasharray="3,3"/>';
   const vgid='satv'+Math.random().toString(36).slice(2,8);
+  
+  const tileSvgs = getTileImagesSVG(getBounds(), 15, 'sat');
+
   return'<svg viewBox="0 0 '+W+' '+(H+28)+'" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="'+W+'" height="'+(H+28)+'">'
     +'<defs><clipPath id="'+uid+'">'+clipShape+'</clipPath>'
     +'<filter id="'+fid+'"><feColorMatrix type="saturate" values="'+sat+'"/></filter>'
@@ -1004,7 +1206,7 @@ function drawSat(sc){
     +'</defs>'
     +'<g clip-path="url(#'+uid+')">'
     +'<rect x="'+PAD+'" y="'+PAD+'" width="'+(W-PAD*2)+'" height="'+(H-PAD*2)+'" fill="#2C2A28"/>'
-    +'<image xlink:href="'+url+'" x="'+(cx-128)+'" y="'+(cy-128)+'" width="256" height="256" filter="url(#'+fid+')" preserveAspectRatio="xMidYMid slice"/>'
+    +'<g filter="url(#'+fid+')">' + tileSvgs + '</g>'
     +'<rect width="'+W+'" height="'+H+'" fill="url(#'+vgid+')" pointer-events="none"/>'
     +'<circle cx="'+cx+'" cy="'+cy+'" r="6" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="1.5"/>'
     +'<circle cx="'+cx+'" cy="'+cy+'" r="2.5" fill="rgba(255,255,255,0.85)"/>'
@@ -1105,17 +1307,14 @@ function drawFabric(data,sc){
   const cx=W/2,cy=H/2,cr=W/2-PAD+4;
   // Use CARTO light tile as base, fully desaturated → gives road/block structure
   // then overlay building footprints as black masses
-  const z=15;
-  const tx=Math.floor((sLng+180)/360*Math.pow(2,z));
-  const latR=sLat*Math.PI/180;
-  const ty=Math.floor((1-Math.log(Math.tan(latR)+1/Math.cos(latR))/Math.PI)/2*Math.pow(2,z));
-  const tileUrl='https://a.basemaps.cartocdn.com/light_all/'+z+'/'+tx+'/'+ty+'.png';
   const fid='fab'+Math.random().toString(36).slice(2,8);
+
+  const tileSvgs = getTileImagesSVG(b, 15, 'light');
 
   // Start inner with tile (will be clipped by wrap)
   let inner='<defs><filter id="'+fid+'"><feColorMatrix type="saturate" values="0"/><feComponentTransfer><feFuncR type="linear" slope="1.15" intercept="-0.07"/><feFuncG type="linear" slope="1.15" intercept="-0.07"/><feFuncB type="linear" slope="1.15" intercept="-0.07"/></feComponentTransfer></filter></defs>';
   inner+='<rect width="'+W+'" height="'+H+'" fill="#F0EFED"/>';
-  inner+='<image xlink:href="'+tileUrl+'" x="'+(cx-128)+'" y="'+(cy-128)+'" width="256" height="256" filter="url(#'+fid+')" preserveAspectRatio="xMidYMid slice"/>';
+  inner+='<g filter="url(#'+fid+')">' + tileSvgs + '</g>';
 
   let cnt=0;
   // Overlay buildings as solid dark masses
@@ -1148,9 +1347,9 @@ function drawFabric(data,sc){
 
   // Site marker
   const[sx,sy]=proj(sLat,sLng,b);
-  inner+='<line x1="'+(sx-9)+'" y1="'+sy+'" x2="'+(sx+9)+'" y2="'+sy+'" stroke="'+s.site+'" stroke-width="1.8"/>';
-  inner+='<line x1="'+sx+'" y1="'+(sy-9)+'" x2="'+sx+'" y2="'+(sy+9)+'" stroke="'+s.site+'" stroke-width="1.8"/>';
-  inner+='<circle cx="'+sx+'" cy="'+sy+'" r="4" fill="none" stroke="'+s.site+'" stroke-width="1.2"/>';
+  inner+='<line x1="'+(sx-4.5)+'" y1="'+sy+'" x2="'+(sx+4.5)+'" y2="'+sy+'" stroke="'+s.site+'" stroke-width="1.8"/>';
+  inner+='<line x1="'+sx+'" y1="'+(sy-4.5)+'" x2="'+sx+'" y2="'+(sy+4.5)+'" stroke="'+s.site+'" stroke-width="1.8"/>';
+  inner+='<circle cx="'+sx+'" cy="'+sy+'" r="2" fill="none" stroke="'+s.site+'" stroke-width="1.2"/>';
 
   // wrap needs xmlns:xlink for image tag
   const uid='fab2'+Math.random().toString(36).slice(2,8);
@@ -1768,6 +1967,7 @@ const I18N={
   display_opts:{en:'Diagram Elements',zh:'图面元素控制'},
   opt_scale:{en:'Scale Bar',zh:'显示比例尺'},
   opt_north:{en:'Compass',zh:'显示指北针'},
+  opt_legend_zh:{en:'Chinese Legend',zh:'使用中文图例'},
   poly_hint_text:{en:'Click on map to add boundary points (min 3) to draw your site.',zh:'点击地图添加边界点（至少3个），画出你的场地范围。'},
   btn_done:{en:'✓ DONE',zh:'✓ 完成'},
   btn_clear:{en:'✕ CLEAR',zh:'✕ 清除'},
@@ -1832,6 +2032,9 @@ const I18N={
   ts_osm_busy_status:{en:'OSM busy / limit ⚠',zh:'OSM 繁忙 / 受限 ⚠'},
   ts_osm_offline:{en:'OSM offline ✕',zh:'OSM 离线 ✕'},
   ts_osm_testing:{en:'Testing...',zh:'测试中...'},
+  ts_select_min2:{en:'SELECT AT LEAST 2',zh:'请选择至少 2 个图层'},
+  ts_select_max8:{en:'MAX 8 LAYERS',zh:'最多选择 8 个图层'},
+  ts_building_layered:{en:'BUILDING LAYERED POSTER...',zh:'正在组装轴测叠加海报...'},
 };
 function t(key){const e=I18N[key];return e?(e[lang]||e.en):key;}
 function applyLang(){
@@ -1887,12 +2090,21 @@ function applyLang(){
   
   // Update help steps if help modal is open
   if (typeof renderHelpSteps === 'function') renderHelpSteps();
+  
+  // Sync legend checkbox
+  const legendZhChk = document.getElementById('legendZhChk');
+  if (legendZhChk) legendZhChk.checked = legendZh;
 }
 function setLang(l){
   lang=l;
   try{localStorage.setItem('em_lang',l);}catch(e){}
   const lp=document.getElementById('langPick');if(lp)lp.style.display='none';
+  legendZh = (l === 'zh');
   applyLang();
+  reRenderCards();
+  if (curView === '3d' && window.S3) {
+    S3.SM(S3.getCurMode());
+  }
 }
 function toggleLang(){
   setLang(lang === 'zh' ? 'en' : 'zh');
@@ -1900,6 +2112,7 @@ function toggleLang(){
 // On first load: if no language chosen yet, show the picker
 function initLang(){
   try{lang=localStorage.getItem('em_lang')||'zh';}catch(e){lang='zh';}
+  legendZh = (lang === 'zh');
   applyLang();
 }
 
@@ -1982,6 +2195,13 @@ function toggleScale(val){
 function toggleNorth(val){
   globalShowNorth = !!val;
   reRenderCards();
+}
+function toggleLegendZh(val){
+  legendZh = !!val;
+  reRenderCards();
+  if(curView==='3d'&&window.S3) {
+    S3.SM(S3.getCurMode());
+  }
 }
 function setShape(sh,el){
   cardShape=sh;
@@ -2292,6 +2512,94 @@ function renderStats(){
 /* ════════════════════════════════════════
    EXPORT
 ════════════════════════════════════════ */
+function addPrintPromptHelper(html) {
+  const promptHtml = `
+<style>
+.print-prompt-banner {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 999999;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12), 0 1px 3px rgba(0, 0, 0, 0.05);
+  border-radius: 12px;
+  padding: 16px 20px;
+  width: 90%;
+  max-width: 550px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans SC", sans-serif;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  color: #1e293b;
+  text-align: left;
+}
+.print-prompt-header {
+  font-weight: 700;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #c0392b;
+}
+.print-prompt-body {
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: #475569;
+}
+.print-prompt-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 4px;
+}
+.print-prompt-btn {
+  padding: 6px 14px;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  font-family: inherit;
+  transition: all 0.15s ease;
+}
+.print-prompt-btn-primary {
+  background: #c0392b;
+  color: #ffffff;
+}
+.print-prompt-btn-primary:hover {
+  background: #a93226;
+}
+.print-prompt-btn-secondary {
+  background: #f1f5f9;
+  color: #334155;
+  border-color: #cbd5e1;
+}
+.print-prompt-btn-secondary:hover {
+  background: #e2e8f0;
+}
+@media print {
+  .print-prompt-banner {
+    display: none !important;
+  }
+}
+</style>
+<div class="print-prompt-banner" id="printPrompt">
+  <div class="print-prompt-header">💡 How to Export as PDF / 如何导出为 PDF</div>
+  <div class="print-prompt-body">
+    <strong>中文提示：</strong>当前网页的排版已为打印进行了优化。请在浏览器中按 <strong>Ctrl + P</strong> (Mac 上为 <strong>Cmd + P</strong>)，将目标打印机设为<strong>“另存为 PDF”</strong>，并务必在设置中勾选<strong>“背景图形”</strong>以显示完整的颜色和背景，然后点击“保存”即可。<br>
+    <strong>English Guide:</strong> The layout is optimized. Press <strong>Ctrl + P</strong> (<strong>Cmd + P</strong> on Mac), set the printer to <strong>"Save as PDF"</strong>, and ensure the <strong>"Background graphics"</strong> option is checked to render colors properly.
+  </div>
+  <div class="print-prompt-actions">
+    <button class="print-prompt-btn print-prompt-btn-secondary" onclick="document.getElementById('printPrompt').remove()">Dismiss / 关闭提示</button>
+    <button class="print-prompt-btn print-prompt-btn-primary" onclick="window.print()">Print or Save / 立即打印或保存</button>
+  </div>
+</div>
+`;
+  return html.replace('</body>', promptHtml + '</body>');
+}
+
 /* ════════════════════════════════════════
    ONE-CLICK PORTFOLIO LAYOUT (A3 board)
 ════════════════════════════════════════ */
@@ -2327,7 +2635,7 @@ function exportPortfolio(){
     return '<div class="pcell"><div class="pcap"><span class="pnum">'+String(i+1).padStart(2,'0')+'</span><span class="pname">'+nm.toUpperCase()+'</span><span class="ptag">'+a.tag+'</span></div><div class="psvg">'+svg+'</div></div>';
   }).join('');
   const title=(sName||'Site').toUpperCase();
-  const html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>EasyMap · '+title+' · Portfolio Board</title>'
+  const html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>ShArch · '+title+' · Portfolio Board</title>'
     +'<style>@import url(\'https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Archivo:wght@400;600;700;800;900&display=swap\');'
     +'@page{size:A3 landscape;margin:0}'
     +'*{margin:0;padding:0;box-sizing:border-box}'
@@ -2358,9 +2666,9 @@ function exportPortfolio(){
     +'<div class="subrow"><div class="desc">'+desc+'</div>'
     +'<div class="metrics">'+metrics.map(m=>'<div class="m"><div class="mk">'+m[0]+'</div><div class="mv">'+m[1]+'</div></div>').join('')+'</div></div>'
     +'<div class="pgrid" style="grid-template-columns:repeat('+Math.min(sel.length,Math.ceil(Math.sqrt(sel.length*1.6)))+',1fr)">'+cells+'</div>'
-    +'<div class="bfoot"><span>EasyMap · Architectural Site Analysis</span><span>Data © OpenStreetMap contributors · '+date+'</span></div>'
+    +'<div class="bfoot"><span>ShArch · Architectural Site Analysis</span><span>Data © OpenStreetMap contributors · '+date+'</span></div>'
     +'</div></body></html>';
-  const blob=new Blob([html],{type:'text/html'});
+  const blob=new Blob([addPrintPromptHelper(html)],{type:'text/html'});
   const url=URL.createObjectURL(blob);
   const an=document.createElement('a');an.href=url;an.target='_blank';an.rel='noopener';
   document.body.appendChild(an);an.click();document.body.removeChild(an);
@@ -2384,7 +2692,7 @@ function exportPDF(){
   const ovSVG=curOvStyle?buildOverlaySVG(curOvStyle,PW,PH):'';
   const isDarkOv=curOvStyle==='dark';
   const ovLabel=curOvStyle?`${curOvStyle.toUpperCase()} OVERLAY`:'';
-  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>EasyMap · ${sName||'Site'}</title>
+  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>ShArch · ${sName||'Site'}</title>
 <style>
 @page{size:${EXP_PAGE[expFormat]||'A4 portrait'};margin:12mm}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -2408,14 +2716,14 @@ body{font-family:\'Noto Sans\', \'Noto Sans SC\', sans-serif;background:#fff;col
 <div class="header">
 ${ovSVG||''}
 <div class="header-meta">
-<h1>Easy<span>Map</span> &nbsp;·&nbsp; ${(sName||'SITE').toUpperCase()}</h1>
+<h1>ShArch &nbsp;·&nbsp; ${(sName||'SITE').toUpperCase()}</h1>
 <p>${sLat?.toFixed(5)}°N &nbsp;·&nbsp; ${sLng?.toFixed(5)}°E &nbsp;&nbsp;|&nbsp;&nbsp; R=${curR}m &nbsp;&nbsp;|&nbsp;&nbsp; ${new Date().toLocaleDateString('en-GB',{year:'numeric',month:'long',day:'numeric'})}</p>
 </div>
 ${ovLabel?`<div class="header-tag">${ovLabel}</div>`:''}
 </div>
 <div class="grid">${rows}</div>
 </body></html>`;
-  const blob=new Blob([html],{type:'text/html'});
+  const blob=new Blob([addPrintPromptHelper(html)],{type:'text/html'});
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');
   a.href=url;a.target='_blank';a.rel='noopener';
@@ -2430,29 +2738,30 @@ function openLayerPicker(ev){
   ev&&ev.stopPropagation();
   document.querySelectorAll('.emenu').forEach(m=>m.classList.remove('open'));
   const avail=ANALYSES.filter(a=>a.on&&document.getElementById('card_'+a.id));
-  if(avail.length<2){toast('GENERATE MORE ANALYSES FIRST');return;}
+  if(avail.length<2){toast(t('ts_gen_more'));return;}
   const list=document.getElementById('layerList');
-  list.innerHTML=avail.map((a,i)=>
-    '<label style="display:flex;align-items:center;gap:10px;padding:8px 10px;border:1px solid var(--bd);border-radius:8px;margin-bottom:6px;cursor:pointer;font-family:\'Noto Sans\', \'Noto Sans SC\', sans-serif;font-size:10px;color:var(--t1)">'
+  list.innerHTML=avail.map((a,i)=>{
+    const nameStr = (lang==='zh' && a.name_zh) ? a.name_zh : a.name;
+    return '<label style="display:flex;align-items:center;gap:10px;padding:8px 10px;border:1px solid var(--bd);border-radius:8px;margin-bottom:6px;cursor:pointer;font-family:\'Noto Sans\', \'Noto Sans SC\', sans-serif;font-size:10px;color:var(--t1)">'
     +'<input type="checkbox" class="layerChk" value="'+a.id+'" '+(i<4?'checked':'')+' style="width:15px;height:15px;cursor:pointer"/>'
-    +'<span style="flex:1">'+a.name+'</span>'
+    +'<span style="flex:1">'+nameStr+'</span>'
     +'<span style="font-size:8px;color:var(--t3)">'+a.tag+'</span>'
-    +'</label>'
-  ).join('');
+    +'</label>';
+  }).join('');
   document.getElementById('layerModal').style.display='flex';
 }
 function closeLayerPicker(){document.getElementById('layerModal').style.display='none';}
 function runLayered(){
   const ids=Array.from(document.querySelectorAll('.layerChk:checked')).map(c=>c.value);
-  if(ids.length<2){toast('SELECT AT LEAST 2');return;}
-  if(ids.length>8){toast('MAX 8 LAYERS');return;}
+  if(ids.length<2){toast(t('ts_select_min2'));return;}
+  if(ids.length>8){toast(t('ts_select_max8'));return;}
   closeLayerPicker();
   dlLayered(ids);
 }
 function dlLayered(ids){
   const sel=ids.map(id=>ANALYSES.find(a=>a.id===id)).filter(a=>a&&document.getElementById('card_'+a.id));
-  if(sel.length<2){toast('GENERATE MORE ANALYSES FIRST');return;}
-  load('BUILDING LAYERED POSTER...');
+  if(sel.length<2){toast(t('ts_gen_more'));return;}
+  load(t('ts_building_layered'));
 
   const isRect=cardShape==='rect'||cardShape==='square';
   const rxry=(cardShape==='rect')?' rx="14"':'';
@@ -2467,8 +2776,11 @@ function dlLayered(ids){
 
   let svg='<svg viewBox="0 0 '+PW+' '+PH+'" xmlns="http://www.w3.org/2000/svg" width="'+PW+'" height="'+PH+'">';
   svg+='<rect width="'+PW+'" height="'+PH+'" fill="#F7F6F3"/>';
-  svg+='<text x="64" y="70" font-size="30" fill="#1A1917" font-family="\'Noto Sans\', \'Noto Sans SC\', sans-serif" font-weight="700" letter-spacing="-.01em">EasyMap · '+loc+'</text>';
-  svg+='<text x="64" y="94" font-size="9" fill="#A8A69F" font-family="\'Noto Sans\', \'Noto Sans SC\', sans-serif" letter-spacing=".08em">'+(sLat?sLat.toFixed(4)+'N · '+sLng.toFixed(4)+'E':'')+'  |  R='+curR+'m  |  '+sel.length+'-LAYER AXONOMETRIC  |  '+date+'</text>';
+  svg+='<text x="64" y="70" font-size="30" fill="#1A1917" font-family="\'Noto Sans\', \'Noto Sans SC\', sans-serif" font-weight="700" letter-spacing="-.01em">ShArch · '+loc+'</text>';
+  const subtitle = lang === 'zh'
+    ? (sLat?sLat.toFixed(4)+'N · '+sLng.toFixed(4)+'E':'')+'  |  半径='+curR+'m  |  '+sel.length+'层轴测叠加图  |  '+date
+    : (sLat?sLat.toFixed(4)+'N · '+sLng.toFixed(4)+'E':'')+'  |  R='+curR+'m  |  '+sel.length+'-LAYER AXONOMETRIC  |  '+date;
+  svg+='<text x="64" y="94" font-size="9" fill="#A8A69F" font-family="\'Noto Sans\', \'Noto Sans SC\', sans-serif" letter-spacing=".08em">'+subtitle+'</text>';
   svg+='<line x1="64" y1="112" x2="'+(PW-64)+'" y2="112" stroke="#1A1917" stroke-width="1.2"/>';
 
   let defs='<defs>';
@@ -2509,26 +2821,28 @@ function dlLayered(ids){
     const labelX=PW-440, labelY=layerY;
     svg+='<line x1="'+(cx+DS*0.5)+'" y1="'+layerY+'" x2="'+labelX+'" y2="'+labelY+'" stroke="#C8C6C0" stroke-width=".5" stroke-dasharray="2,2"/>';
     svg+='<line x1="'+labelX+'" y1="'+(labelY-1)+'" x2="'+(PW-64)+'" y2="'+(labelY-1)+'" stroke="#1A1917" stroke-width=".8"/>';
-    svg+='<text x="'+labelX+'" y="'+(labelY-8)+'" font-size="12" fill="#1A1917" font-family="\'Noto Sans\', \'Noto Sans SC\', sans-serif" font-weight="700" letter-spacing=".06em">'+a.name.toUpperCase()+'</text>';
-    svg+='<text x="'+labelX+'" y="'+(labelY+13)+'" font-size="7.5" fill="#8C8A82" font-family="\'Noto Sans\', \'Noto Sans SC\', sans-serif" letter-spacing=".04em">'+a.sub.toUpperCase()+'  ·  '+a.tag+'</text>';
+    const nameStr = (lang==='zh' && a.name_zh) ? a.name_zh : a.name;
+    const subStr = (lang==='zh' && a.sub_zh) ? a.sub_zh : a.sub;
+    svg+='<text x="'+labelX+'" y="'+(labelY-8)+'" font-size="12" fill="#1A1917" font-family="\'Noto Sans\', \'Noto Sans SC\', sans-serif" font-weight="700" letter-spacing=".06em">'+nameStr.toUpperCase()+'</text>';
+    svg+='<text x="'+labelX+'" y="'+(labelY+13)+'" font-size="7.5" fill="#8C8A82" font-family="\'Noto Sans\', \'Noto Sans SC\', sans-serif" letter-spacing=".04em">'+subStr.toUpperCase()+'  ·  '+a.tag+'</text>';
     svg+='<text x="'+(PW-64)+'" y="'+(labelY-8)+'" text-anchor="end" font-size="9" fill="#C0392B" font-family="\'Noto Sans\', \'Noto Sans SC\', sans-serif" font-weight="700">'+String(idx+1).padStart(2,'0')+'</text>';
   });
 
-  svg+='<text x="64" y="'+(PH-30)+'" font-size="7.5" fill="#C8C6C0" font-family="\'Noto Sans\', \'Noto Sans SC\', sans-serif" letter-spacing=".06em">EasyMap · openstreetmap.org · '+date+'</text>';
+  svg+='<text x="64" y="'+(PH-30)+'" font-size="7.5" fill="#C8C6C0" font-family="\'Noto Sans\', \'Noto Sans SC\', sans-serif" letter-spacing=".06em">ShArch · openstreetmap.org · '+date+'</text>';
   svg+='</svg>';
 
-  const html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>EasyMap Layered · '+(sName||'Site')+'</title>'
+  const html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>ShArch Layered · '+(sName||'Site')+'</title>'
     +'<style>*{margin:0;padding:0}body{background:#F7F6F3}svg{width:100%;height:auto;display:block}'
     +'@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}</style></head><body>'
     +svg+'</body></html>';
-  const blob=new Blob([html],{type:'text/html'});
+  const blob=new Blob([addPrintPromptHelper(html)],{type:'text/html'});
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');
   a.href=url;a.target='_blank';a.rel='noopener';
   document.body.appendChild(a);a.click();document.body.removeChild(a);
   setTimeout(()=>URL.revokeObjectURL(url),8000);
   unload();
-  toast(sel.length+'-LAYER POSTER OPENED');
+  toast(lang === 'zh' ? sel.length + ' 层轴测叠加海报已打开' : sel.length + '-LAYER POSTER OPENED');
 }
 function buildOverlaySVG(key,PW,PH){
   if(!key||!sLat)return'';
@@ -2659,14 +2973,14 @@ async function dlCard(id,fmt,ev){
   if(fmt==='svg'){
     // Vector SVG export — editable in Illustrator
     let s='<?xml version="1.0" encoding="UTF-8"?>\n'+new XMLSerializer().serializeToString(el);
-    dlBlob(new Blob([s],{type:'image/svg+xml'}),'easymap_'+id+'.svg');
+    dlBlob(new Blob([s],{type:'image/svg+xml'}),'sharch_tools_'+id+'.svg');
     toast('VECTOR SVG SAVED');
     return;
   }
   if(fmt==='png'){
     try {
       const blob = await svgToPng(el);
-      dlBlob(blob, 'easymap_'+id+'.png');
+      dlBlob(blob, 'sharch_tools_'+id+'.png');
       toast('PNG SAVED');
     } catch(e){
       toast('PNG EXPORT FAILED');
@@ -2676,7 +2990,7 @@ async function dlCard(id,fmt,ev){
   // default: PDF (printable HTML page)
   let svgStr=new XMLSerializer().serializeToString(el);
   const date=new Date().toLocaleDateString('en-GB',{year:'numeric',month:'long',day:'numeric'});
-  const html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>'+name+' · EasyMap</title>'
+  const html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>'+name+' · ShArch</title>'
     +'<style>@import url(\'https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap\');'
     +'*{margin:0;padding:0}body{background:#F5F4F2;font-family:"Noto Sans", "Noto Sans SC", sans-serif;display:flex;flex-direction:column;align-items:center;padding:40px}'
     +'.hd{width:520px;max-width:90vw;display:flex;justify-content:space-between;align-items:baseline;border-bottom:1.5px solid #1A1917;padding-bottom:8px;margin-bottom:16px}'
@@ -2687,7 +3001,7 @@ async function dlCard(id,fmt,ev){
     +'<div class="hd"><h1>'+name.toUpperCase()+'</h1><span class="t">'+tag+'</span></div>'
     +'<div class="meta">'+(sLat?sLat.toFixed(5)+'°N · '+sLng.toFixed(5)+'°E':'')+'  |  '+(sName||'SITE').toUpperCase()+'  |  R='+curR+'m  |  '+date+'</div>'
     +svgStr+'</body></html>';
-  const blob=new Blob([html],{type:'text/html'});
+  const blob=new Blob([addPrintPromptHelper(html)],{type:'text/html'});
   const url=URL.createObjectURL(blob);
   const an=document.createElement('a');an.href=url;an.target='_blank';an.rel='noopener';
   document.body.appendChild(an);an.click();document.body.removeChild(an);
@@ -2769,17 +3083,17 @@ async function dlBoard(fmt){
   });
 
   svg+='<rect x="'+mX+'" y="'+(bH-mB+8)+'" width="'+(bW-mX*2)+'" height=".5" fill="#E0DDD8"/>';
-  svg+='<text x="'+mX+'" y="'+(bH-mB+24)+'" font-size="7.5" fill="#C8C6C0" font-family="\'Noto Sans\', \'Noto Sans SC\', sans-serif">EasyMap \u00b7 openstreetmap.org \u00b7 '+date+'</text>';
+  svg+='<text x="'+mX+'" y="'+(bH-mB+24)+'" font-size="7.5" fill="#C8C6C0" font-family="\'Noto Sans\', \'Noto Sans SC\', sans-serif">ShArch \u00b7 openstreetmap.org \u00b7 '+date+'</text>';
   svg+='<text x="'+(bW-mX)+'" y="'+(bH-mB+24)+'" text-anchor="end" font-size="7.5" fill="#C8C6C0" font-family="\'Noto Sans\', \'Noto Sans SC\', sans-serif">'+coord+'</text>';
   svg+='</svg>';
 
-  const fname='easymap_board_'+(sName||'site').toLowerCase().replace(/\s+/g,'_');
+  const fname='sharch_board_'+(sName||'site').toLowerCase().replace(/\s+/g,'_');
   // Output as PDF-ready printable HTML page
-  const html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>EasyMap Poster · '+(sName||'Site')+'</title>'
+  const html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>ShArch Poster · '+(sName||'Site')+'</title>'
     +'<style>*{margin:0;padding:0}body{background:#F5F4F2;display:flex;justify-content:center;padding:20px}svg{width:100%;height:auto;max-width:1400px;display:block}'
     +'@media print{body{padding:0;-webkit-print-color-adjust:exact;print-color-adjust:exact}}</style></head><body>'
     +svg+'</body></html>';
-  const blob=new Blob([html],{type:'text/html'});
+  const blob=new Blob([addPrintPromptHelper(html)],{type:'text/html'});
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');
   a.href=url;a.target='_blank';a.rel='noopener';
@@ -2833,6 +3147,18 @@ const S3=(function(){
   let inited=false, solarAz=null, solarAlt=null;
   let cards=[];
 
+  const t3D = (name) => {
+    if (lang === 'zh') {
+      if (name === 'White Model') return '素模分析';
+      if (name === 'Building Height') return '高度分析';
+      if (name === 'Land Use Zoning') return '地带分区';
+      if (name === 'Building Density') return '密度分析';
+      if (name === 'Solar Study') return '阴影分析';
+      if (name === 'Skyline Profile') return '天际线分析';
+    }
+    return name;
+  };
+
   const MODES=[
     {m:'white',name:'White Model',tag:'MASS',leg:[{c:'#e8e2d4',v:'Building mass'},{c:'#c8bfb0',v:'Shadow face'}]},
     {m:'height',name:'Building Height',tag:'GIS',leg:[{c:'#EDF8E9',v:'<6m'},{c:'#74C476',v:'12-25m'},{c:'#FFEDA0',v:'40-60m'},{c:'#FC4E2A',v:'80m+'},{c:'#BD0026',v:'Landmark'}]},
@@ -2882,7 +3208,7 @@ const S3=(function(){
   function setLt(c,i,az,alt){if(map3)try{map3.setLight({anchor:'map',color:c,intensity:i,position:[1.5,az,alt]});}catch(x){}}
 
   function legHTML(items){
-    return '<div style="display:flex;flex-wrap:wrap;gap:4px 10px">'+items.map(i=>'<span style="display:flex;align-items:center;gap:4px;font-size:8px;color:var(--t2)"><b style="width:8px;height:8px;border-radius:2px;background:'+i.c+';display:inline-block"></b>'+i.v+'</span>').join('')+'</div>';
+    return '<div style="display:flex;flex-wrap:wrap;gap:4px 10px">'+items.map(i=>'<span style="display:flex;align-items:center;gap:4px;font-size:8px;color:var(--t2)"><b style="width:8px;height:8px;border-radius:2px;background:'+i.c+';display:inline-block"></b>'+tLeg(i.v)+'</span>').join('')+'</div>';
   }
   function showLeg(m){
     const md=MODES.find(x=>x.m===m);
@@ -2955,7 +3281,9 @@ const S3=(function(){
     ctx.strokeStyle='#C0392B';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();
     const ah=14;ctx.fillStyle='#C0392B';ctx.beginPath();ctx.moveTo(x2,y2);ctx.lineTo(x2-ah*Math.cos(ang-0.4),y2-ah*Math.sin(ang-0.4));ctx.lineTo(x2-ah*Math.cos(ang+0.4),y2-ah*Math.sin(ang+0.4));ctx.closePath();ctx.fill();
     ctx.fillStyle='#FFB300';ctx.strokeStyle='#C0392B';ctx.lineWidth=2;ctx.beginPath();ctx.arc(x1,y1,9,0,Math.PI*2);ctx.fill();ctx.stroke();
-    ctx.textAlign='center';const txt='AZ '+Math.round(az)+'\u00b0 \u00b7 ALT '+Math.round(alt)+'\u00b0';ctx.font='700 14px "Noto Sans", "Noto Sans SC", sans-serif';const tw=ctx.measureText(txt).width;
+    ctx.textAlign='center';
+    const txt=legendZh ? ('方位角 '+Math.round(az)+'\u00b0 \u00b7 高度角 '+Math.round(alt)+'\u00b0') : ('AZ '+Math.round(az)+'\u00b0 \u00b7 ALT '+Math.round(alt)+'\u00b0');
+    ctx.font='700 14px "Noto Sans", "Noto Sans SC", sans-serif';const tw=ctx.measureText(txt).width;
     ctx.fillStyle='rgba(255,255,255,0.85)';ctx.fillRect(cx-tw/2-8,OUT-46,tw+16,24);ctx.fillStyle='#1A1917';ctx.fillText(txt,cx,OUT-29);ctx.textAlign='left';
   }
   function buildSkyline(){
@@ -3000,7 +3328,7 @@ const S3=(function(){
     const grid=document.getElementById('rgrid');
     grid.style.display='grid';
     grid.innerHTML='<div style="grid-column:1/-1;display:flex;justify-content:space-between;align-items:baseline;border-bottom:1.5px solid var(--tx);padding-bottom:8px;margin-bottom:6px"><div style="font-family:\'Noto Sans\', \'Noto Sans SC\', sans-serif;font-size:13px;font-weight:700;color:var(--tx)">3D MASSING \u00b7 '+(sName||"SITE").toUpperCase()+'</div><div style="display:flex;gap:6px"><button onclick="gate(()=>S3.exportReportPDF())" style="padding:7px 14px;font-family:\'Noto Sans\', \'Noto Sans SC\', sans-serif;font-size:9px;background:var(--tx);color:#fff;border:none;border-radius:7px;cursor:pointer;font-weight:700">REPORT PDF \u2193</button></div></div>'
-      +cards.map((c,i)=>'<div class="card"><div class="ch"><span class="ct">'+String(i+1).padStart(2,"0")+' '+c.name.toUpperCase()+'</span><span class="ctag">'+c.tag+'</span></div><div class="cbody" style="padding:10px"><img src="'+c.img+'" style="width:100%;display:block;border-radius:5px"/><div style="display:flex;flex-wrap:wrap;gap:4px 10px;margin-top:9px;padding-top:8px;border-top:1px solid var(--s2)">'+(c.leg||[]).map(l=>'<span style="display:flex;align-items:center;gap:4px;font-size:8px;color:var(--t2)"><b style="width:8px;height:8px;border-radius:2px;background:'+l.c+';display:inline-block"></b>'+l.v+'</span>').join('')+'</div></div></div>').join('');
+      +cards.map((c,i)=>'<div class="card"><div class="ch"><span class="ct">'+String(i+1).padStart(2,"0")+' '+t3D(c.name).toUpperCase()+'</span><span class="ctag">'+c.tag+'</span></div><div class="cbody" style="padding:10px"><img src="'+c.img+'" style="width:100%;display:block;border-radius:5px"/><div style="display:flex;flex-wrap:wrap;gap:4px 10px;margin-top:9px;padding-top:8px;border-top:1px solid var(--s2)">'+(c.leg||[]).map(l=>'<span style="display:flex;align-items:center;gap:4px;font-size:8px;color:var(--t2)"><b style="width:8px;height:8px;border-radius:2px;background:'+l.c+';display:inline-block"></b>'+tLeg(l.v)+'</span>').join('')+'</div></div></div>').join('');
   }
 
   // Export 3D analysis as printable PDF (HTML page, like 2D REPORT PDF)
@@ -3010,12 +3338,12 @@ const S3=(function(){
     const date=new Date().toLocaleDateString('en-GB',{year:'numeric',month:'long',day:'numeric'});
     let rows='';
     cards.forEach((c,i)=>{
-      const leg=(c.leg||[]).map(l=>'<span style="display:inline-flex;align-items:center;gap:4px;font-size:7px;color:#6B6860;margin-right:10px"><b style="width:8px;height:8px;border-radius:2px;background:'+l.c+';display:inline-block"></b>'+l.v+'</span>').join('');
-      rows+='<div class="pc"><div class="ph"><span class="pn">'+String(i+1).padStart(2,'0')+' '+c.name.toUpperCase()+'</span><span class="pt">'+c.tag+'</span></div>'
+      const leg=(c.leg||[]).map(l=>'<span style="display:inline-flex;align-items:center;gap:4px;font-size:7px;color:#6B6860;margin-right:10px"><b style="width:8px;height:8px;border-radius:2px;background:'+l.c+';display:inline-block"></b>'+tLeg(l.v)+'</span>').join('');
+      rows+='<div class="pc"><div class="ph"><span class="pn">'+String(i+1).padStart(2,'0')+' '+t3D(c.name).toUpperCase()+'</span><span class="pt">'+c.tag+'</span></div>'
         +'<img src="'+c.img+'" style="width:100%;display:block;border-radius:5px"/>'
         +'<div style="display:flex;flex-wrap:wrap;margin-top:8px;padding-top:7px;border-top:1px solid #F0EEE8">'+leg+'</div></div>';
     });
-    const html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>EasyMap 3D · '+loc+'</title>'
+    const html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>ShArch 3D · '+loc+'</title>'
       +'<style>@import url(\'https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap\');'
       +'*{box-sizing:border-box;margin:0;padding:0}body{font-family:"Noto Sans", "Noto Sans SC", sans-serif;background:#fff;color:#1A1917;padding:40px}'
       +'.cv{border-bottom:1.5px solid #1A1917;padding-bottom:12px;margin-bottom:24px}'
@@ -3025,10 +3353,10 @@ const S3=(function(){
       +'.pc{break-inside:avoid}.ph{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #E8E6E2;padding-bottom:6px;margin-bottom:9px}'
       +'.pn{font-size:8px;font-weight:700;letter-spacing:.06em}.pt{font-size:6px;color:#A8A69F;background:#F0EEE8;padding:2px 5px;border-radius:2px}'
       +'@media print{body{padding:20px;-webkit-print-color-adjust:exact;print-color-adjust:exact}}</style></head><body>'
-      +'<div class="cv"><h1>Easy<span>Map</span> · '+loc.toUpperCase()+'</h1>'
+      +'<div class="cv"><h1>ShArch · '+loc.toUpperCase()+'</h1>'
       +'<p>'+(sLat||0).toFixed(5)+'°N · '+(sLng||0).toFixed(5)+'°E &nbsp;|&nbsp; 3D MASSING ANALYSIS &nbsp;|&nbsp; '+shape.toUpperCase()+' &nbsp;|&nbsp; '+date+'</p></div>'
       +'<div class="grid">'+rows+'</div></body></html>';
-    const blob=new Blob([html],{type:'text/html'});
+    const blob=new Blob([addPrintPromptHelper(html)],{type:'text/html'});
     const url=URL.createObjectURL(blob);
     const a=document.createElement('a');a.href=url;a.target='_blank';a.rel='noopener';
     document.body.appendChild(a);a.click();document.body.removeChild(a);
@@ -3051,12 +3379,12 @@ const S3=(function(){
     cards.forEach((card,i)=>{
       const col=i%cols,row=(i/cols)|0,x=pad+col*(cardW+gap),y=headH+pad+row*(cardH+gap);
       ctx.fillStyle='#fff';ctx.strokeStyle='#E8E6E2';ctx.lineWidth=1;rr(ctx,x,y,cardW,cardH,10);ctx.fill();ctx.stroke();
-      ctx.fillStyle='#1A1917';ctx.font='700 14px "Noto Sans", "Noto Sans SC", sans-serif';ctx.fillText(String(i+1).padStart(2,'0')+' '+card.name.toUpperCase(),x+16,y+26);
+      ctx.fillStyle='#1A1917';ctx.font='700 14px "Noto Sans", "Noto Sans SC", sans-serif';ctx.fillText(String(i+1).padStart(2,'0')+' '+t3D(card.name).toUpperCase(),x+16,y+26);
       ctx.fillStyle='#A8A69F';ctx.font='400 9px "Noto Sans", "Noto Sans SC", sans-serif';ctx.textAlign='right';ctx.fillText(card.tag,x+cardW-16,y+26);ctx.textAlign='left';
       ctx.font='9px "Noto Sans", "Noto Sans SC", sans-serif';
       let totalLegW=0;
       (card.leg||[]).forEach((l,li)=>{
-        totalLegW+=13+ctx.measureText(l.v).width;
+        totalLegW+=13+ctx.measureText(tLeg(l.v)).width;
         if(li<card.leg.length-1)totalLegW+=12;
       });
       let lx=x+(cardW-totalLegW)/2;
@@ -3066,8 +3394,9 @@ const S3=(function(){
         rr(ctx,lx,ly-8,9,9,2);
         ctx.fill();
         ctx.fillStyle='#6B6860';
-        ctx.fillText(l.v,lx+13,ly);
-        lx+=13+ctx.measureText(l.v).width+12;
+        const txt=tLeg(l.v);
+        ctx.fillText(txt,lx+13,ly);
+        lx+=13+ctx.measureText(txt).width+12;
       });
       const img=new Image();img.onload=()=>{ctx.drawImage(img,x+16,y+38,cardW-32,cardW-32);loaded++;if(loaded===cards.length){const a=document.createElement('a');a.download='site3d-poster-'+Date.now()+'.png';a.href=c.toDataURL('image/png');a.click();unload();toast('3D POSTER SAVED');}};img.src=card.img;
     });
@@ -3075,6 +3404,7 @@ const S3=(function(){
   function rr(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
 
   return {ensureMap,flyTo,SM,setShape,generateSet,exportPoster,exportReportPDF,updateSolar,
+    getCurMode:()=>curMode,
     resize:()=>{if(map3)map3.resize();}};
 })();
 

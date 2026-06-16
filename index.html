@@ -159,7 +159,7 @@
         </div>
         <div class="sec" id="secDisplay">
           <div class="lbl" data-i18n="display_opts">Diagram Elements</div>
-          <div style="display:flex;gap:12px;margin-top:6px">
+          <div style="display:flex;gap:12px;margin-top:6px;flex-wrap:wrap">
             <label style="font-family:'Noto Sans', 'Noto Sans SC', sans-serif;font-size:10px;color:var(--t2);cursor:pointer;display:flex;align-items:center;gap:6px">
               <input type="checkbox" id="showScaleChk" checked onchange="toggleScale(this.checked)" style="cursor:pointer"/>
               <span data-i18n="opt_scale">Scale Bar</span>
@@ -167,6 +167,10 @@
             <label style="font-family:'Noto Sans', 'Noto Sans SC', sans-serif;font-size:10px;color:var(--t2);cursor:pointer;display:flex;align-items:center;gap:6px">
               <input type="checkbox" id="showNorthChk" checked onchange="toggleNorth(this.checked)" style="cursor:pointer"/>
               <span data-i18n="opt_north">Compass</span>
+            </label>
+            <label style="font-family:'Noto Sans', 'Noto Sans SC', sans-serif;font-size:10px;color:var(--t2);cursor:pointer;display:flex;align-items:center;gap:6px">
+              <input type="checkbox" id="legendZhChk" checked onchange="toggleLegendZh(this.checked)" style="cursor:pointer"/>
+              <span data-i18n="opt_legend_zh">Chinese Legend</span>
             </label>
           </div>
         </div>
