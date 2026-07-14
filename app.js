@@ -487,21 +487,22 @@ async function testNet() {
   const txt = document.getElementById('netTxt');
   if (!dot || !txt) return;
   dot.style.background = '#B45309'; txt.textContent = t('ts_osm_testing');
-  try {
-    // lightweight reachability ping; any response (even empty) means the chain works
-    const r = await fetch(OPS[0], {
-      method: 'POST',
-      body: 'data=' + encodeURIComponent('[out:json][timeout:10];node(48.85,2.29,48.86,2.30);out 1;'),
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      signal: (() => { const ac = new AbortController(); setTimeout(() => ac.abort(), 20000); return ac.signal; })()
-    });
-    if (r.ok) { dot.style.background = '#4A7C59'; txt.textContent = t('ts_osm_reachable'); }
-    else { dot.style.background = '#C0392B'; txt.textContent = t('ts_osm_busy_status') + ' ' + r.status; }
-  } catch (e) {
-    // network/timeout — show warning
-    dot.style.background = '#B45309';
-    txt.textContent = t('ts_osm_offline');
+  // Try all endpoints; any one ok means reachable
+  for (let i = 0; i < OPS.length; i++) {
+    try {
+      const ac = new AbortController();
+      const tid = setTimeout(() => ac.abort(), 15000);
+      const r = await fetch(OPS[i], {
+        method: 'POST',
+        body: 'data=' + encodeURIComponent('[out:json][timeout:10];node(48.85,2.29,48.86,2.30);out 1;'),
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        signal: ac.signal
+      });
+      clearTimeout(tid);
+      if (r.ok) { dot.style.background = '#4A7C59'; txt.textContent = t('ts_osm_reachable'); return; }
+    } catch (e) { /* try next */ }
   }
+  dot.style.background = '#C0392B'; txt.textContent = t('ts_osm_offline');
 }
 
 function dbgLog(msg) {
@@ -1955,6 +1956,16 @@ try { lang = localStorage.getItem('em_lang') || ''; } catch (e) { }
 const I18N = {
   bubble_tool_title: { en: 'Diagram Tools', zh: '设计图表工具' },
   bubble_tool_btn: { en: 'Bubble Diagram Generator ↗', zh: '功能分区气泡图生成器 ↗' },
+  // Studio Tools sidebar section
+  studio_tool_title: { en: 'Studio Tools', zh: '工作室工具' },
+  tool_bubble_link: { en: '◌ Bubble Diagram ↗', zh: '◌ 泡泡图 / 功能关系图 ↗' },
+  tool_strategy_link: { en: '◇ Site Strategy ↗', zh: '◇ 场地策略图 ↗' },
+  tool_floorplan_link: { en: '▣ Floorplan / AXO ↗', zh: '▣ 平面绘制 / 轴测 ↗' },
+  tool_flow_link: { en: '➤ Flow Analysis ↗', zh: '➤ 流线分析 ↗' },
+  tool_parti_link: { en: '◆ Parti Studio ↗', zh: '◆ Parti 概念演变 ↗' },
+  tool_planrender_link: { en: '▦ Plan Render ↗', zh: '▦ 总平上色 ↗' },
+  tool_elevation_link: { en: '△ Elevation / Section ↗', zh: '△ 立面 / 剖面渲染 ↗' },
+  tool_layout_link: { en: '▥ Portfolio Layout ↗', zh: '▥ 作品集排版 ↗' },
   loc: { en: 'Location', zh: '场地定位' },
   locph: { en: 'Search address or place...', zh: '搜索地址或地点...' },
   viewmode: { en: 'View Mode', zh: '视图模式' },

@@ -11,6 +11,8 @@
 - 🌐 [index.html](file:///c:/Users/HP/Documents/GitHub/Architecture-analysis/index.html)：定义项目 UI 的基本 HTML5 骨架、控制面板以及引入的外部三方库（在 v1.2.1 版本中已移除冗余的联系/帮助模态框及外部分析脚本，使结构更加精简纯粹）。
 - 🎨 [styles.css](file:///c:/Users/HP/Documents/GitHub/Architecture-analysis/styles.css)：定义应用的全局样式系统。采用现代 CSS 变量进行亮暗色模式和色板切换，实现响应式三栏式布局、毛玻璃 HUD 与按钮微动画。
 - ⚙️ [app.js](file:///c:/Users/HP/Documents/GitHub/Architecture-analysis/app.js)：应用的核心逻辑。包含 2D SVG 渲染引擎、3D Maplibre GL 渲染模块、Overpass API 实时数据请求打包与解析、多格式排版导出系统及多语言 i18n 逻辑。
+- 🫧 [bubble-analysis/](file:///c:/Users/HP/Documents/GitHub/Architecture-analysis/bubble-analysis/)：泡泡图子项目（v1.2.2 引入）。独立 HTML/CSS/JS 实现，含物理力导向布局引擎，详见 [bubble-wiki.md](file:///c:/Users/HP/Documents/GitHub/Architecture-analysis/bubble-analysis/bubble-wiki.md)。
+- 🏗️ [studio/](file:///c:/Users/HP/Documents/GitHub/Architecture-analysis/studio/)：建筑工作室工具集合（v1.3 引入）。每个工具均为独立的单页 HTML 应用，覆盖从场地策略到作品集排版的设计全流程，详见下方 §6 章节。
 - 📖 [README.md](file:///c:/Users/HP/Documents/GitHub/Architecture-analysis/README.md)：针对最终用户的项目简介、核心特性及更新日志。
 
 ---
@@ -108,6 +110,82 @@ graph TD
 
 ---
 
+## 🏗️ Studio 工作室工具集 (`studio/` 目录)
+
+v1.3 引入的 Studio 工具集是从 `easymap-clone` 项目迁移并本地化整合的七大独立单页应用，与主项目通过左侧工具栏的 **Studio Tools** 区块进行导航互联。所有工具的 UI 外观已统一对齐主项目 `styles.css` 的冷灰 + 深蓝（`#2563EB`）配色系统（v1.3.1），品牌标识统一为 "ShArch" / "SA" 方块；各工具内部的功能绘图配色盘（THEMES / SCHEMES / PALETTES）保持独立不受影响。通过左下角悬浮 "← ShArch" 按钮回链至主项目 [index.html](file:///c:/Users/HP/Documents/GitHub/Architecture-analysis/index.html)。
+
+### 全站双语 i18n 系统 (v1.3.1)
+
+每个 Studio 工具均内置独立的 i18n 字典与切换控件，统一共享 `localStorage` 键 `em_lang`（`'zh'` / `'en'`），跨页面保持语言偏好一致：
+
+| 工具 | i18n 字典 | 切换函数 | 翻译条目数 |
+| :--- | :--- | :--- | :--- |
+| strategy.html | `ST_I18N` | `stToggleLang()` | ~95 |
+| floorplan.html | `FP_I18N` | `fpToggleLang()` | ~55 |
+| flow.html | `FL_I18N` | `flToggleLang()` | ~95 |
+| layout.html | `LY_I18N` | `lyToggleLang()` | ~33 + 动态字段 |
+| planstudio.html | `PS_I18N` | `psToggleLang()` | ~110 |
+| elevation.html | `EM_ZH` | `setLang()` | ~150 |
+| parti.html | `T` (zh/en) | `toggleLang()` | ~80 |
+
+i18n 实现模式：
+- HTML 静态文本通过 `data-{prefix}-i18n="key"` 属性标记，`applyLang()` 遍历更新 `textContent`
+- 输入框占位符通过 `data-{prefix}-i18n-ph="key"` 属性标记
+- JS 动态生成内容（如 buildRail、initThemes）在渲染时调用 `xxT(key)` 选择对应语言字符串
+- JS 数据对象（如 `THEMES`、`PALETTE`、`TOOLS`）添加 `_zh` 字段，渲染时按 `LANG` 变量选择
+- 所有 `toast()` / `prompt()` / `confirm()` 调用均已包装为 `xxT()` 查找，实现消息双语化
+
+### 工具清单与依赖
+
+| 文件 | 工具名 | 第三方依赖 | 渲染方式 |
+| :--- | :--- | :--- | :--- |
+| [strategy.html](file:///c:/Users/HP/Documents/GitHub/Architecture-analysis/studio/strategy/strategy.html) | 场地策略 Site Strategy | Leaflet 1.9.4 (CDN) | SVG + Leaflet 真实底图 |
+| [floorplan.html](file:///c:/Users/HP/Documents/GitHub/Architecture-analysis/studio/floorplan/floorplan.html) | 平面绘制 Floorplan / AXO | Three.js r128 (CDN) | SVG 平面 + Three.js 轴测 3D |
+| [flow.html](file:///c:/Users/HP/Documents/GitHub/Architecture-analysis/studio/flow/flow.html) | 流线分析 Flow Analysis | 无 | 纯 SVG 矢量 |
+| [parti.html](file:///c:/Users/HP/Documents/GitHub/Architecture-analysis/studio/parti/parti.html) | 概念演变 Parti Studio | 无 | 纯 SVG 等轴测序列 |
+| [planstudio.html](file:///c:/Users/HP/Documents/GitHub/Architecture-analysis/studio/planstudio/planstudio.html) | 总平上色 Plan Render | 无 | Canvas 2D 栅格化 |
+| [elevation.html](file:///c:/Users/HP/Documents/GitHub/Architecture-analysis/studio/elevation/elevation.html) | 立面与剖面 Elevation / Section | 无 | Canvas 2D + 自绘配景 |
+| [layout.html](file:///c:/Users/HP/Documents/GitHub/Architecture-analysis/studio/layout/layout.html) | 作品集排版 Portfolio Layout | 无 | SVG 排版 + 打印 PDF |
+
+### 工具间数据传递
+- **URL Query 传递**：`strategy.html` 与主项目 `app.js` 之间通过 URL Query String 传递底图截图与场地元数据（`?basemap=...&kind=...`），实现“主项目生成分析图 → 一键进入 Strategy 上叠加策略元素”的联动。
+- **LocalStorage 隔离**：每个 Studio 工具的本地存储键命名空间独立（如 `em_lang`），与主项目的 `localStorage` 键互不冲突。
+- **回链导航**：每个 Studio 工具 HTML 末尾注入 `<a href="../index.html">` 悬浮按钮，确保用户随时可返回主项目工具栏。
+
+### 与主项目重合功能的处理策略
+为保证“无缝迁入且保留原有”的原则，以下重合功能维持主项目原实现不变：
+1. **地图分析**：`easymap-clone/app.html` 不迁入；主项目 `index.html + app.js` 保留为唯一地图分析入口。
+2. **泡泡图**：`easymap-clone/bubble.html` 不迁入；主项目已有的 `bubble-analysis/` 子项目保留为唯一泡泡图入口。
+3. **作品集排版**：主项目原有的 `exportPortfolio` (A3) 与 `exportPDF` (A4) 保留不变；新 `studio/layout/layout.html` 作为独立的高级排版工具并存，提供 A1/A2/A3 多尺寸、模板与批量填图等增强能力，互不影响。
+
+### 目录结构
+每个 Studio 工具独立存放在 `studio/<tool-name>/` 子文件夹中，便于未来扩展每个工具的独立资源（如配景素材、字体、JSON 预设）：
+```
+studio/
+├── strategy/strategy.html      # 场地策略
+├── floorplan/floorplan.html    # 平面绘制 / 轴测
+├── flow/flow.html              # 流线分析
+├── parti/parti.html            # 概念演变
+├── planstudio/planstudio.html  # 总平上色
+├── elevation/elevation.html    # 立面 / 剖面
+└── layout/layout.html          # 作品集排版
+```
+
+### 添加新的 Studio 工具
+1. 在 `studio/` 目录下新建子文件夹 `studio/your-tool/`，并在其中创建 `your-tool.html`，遵循现有工具的单文件结构（HTML + 内联 CSS + 内联 JS）。
+2. 若需要第三方库，统一使用 CDN 引用（与主项目 `index.html` 头部保持一致）。
+3. 在文件末尾 `</body>` 之前注入标准的悬浮回链按钮（注意因位于子文件夹，回链路径为 `../../index.html`）：
+   ```html
+   <a href="../../index.html" style="position:fixed;left:18px;bottom:18px;z-index:9999;...">← <span>ShArch</span></a>
+   ```
+4. 若引用主项目共享资源（如 `easymap-clone/favicon.png`），路径需写作 `../../easymap-clone/favicon.png`。
+5. 在主项目 [index.html](file:///c:/Users/HP/Documents/GitHub/Architecture-analysis/index.html) 的 `secStudioLink` 区块中添加新的 `<a>` + `<div class="mb">` 链接项。
+6. 在 [app.js I18N](file:///c:/Users/HP/Documents/GitHub/Architecture-analysis/app.js#L1955) 字典中新增 `tool_your_tool_link` 等中英双语条目。
+7. **UI 设计语言对齐 (v1.3.1)**：新工具的 `:root` CSS 变量应使用主项目冷灰 + 深蓝配色（`--accent:#2563EB` 等），品牌标识使用 "ShArch" + "SA" 方块，字体使用 Inter / Space Mono，Toast 样式遵循 `padding:12px 24px; border-radius:8px; font:500 13px Inter`。功能绘图配色盘（THEMES / PALETTES）可保持工具自定义。
+8. **i18n 接入 (v1.3.1)**：为新工具创建独立的 i18n 字典（如 `YT_I18N`）与切换函数（`ytToggleLang()`），共享 `localStorage` 键 `em_lang`。所有可见文本通过 `data-yt-i18n="key"` 属性标记，所有 `toast()` 调用包装为 `ytT()` 查找。参考现有工具（如 `planstudio.html`）的实现模式。
+
+---
+
 ## 💡 给开发者的扩展与调试指南 (Developer Guide)
 
 ### 如何添加一种全新的 2D 分析图层
@@ -117,4 +195,17 @@ graph TD
 4. 在 [renderRaw](file:///c:/Users/HP/Documents/GitHub/Architecture-analysis/app.js#L1914) 分发器中捕获您的 `id`，编写专属的绘图函数（例如 `drawMyNewLayer(data, sc)`），并在其中根据要素坐标完成 `proj` 投影和 `wpts` 连线，最后通过 `wrap` 包装成标准卡片返回。
 
 ### 调试 Overpass API 查询
-若遇到“数据源繁忙”或生成失败，可以在控制台直接调用 [testNet](file:///c:/Users/HP/Documents/GitHub/Architecture-analysis/app.js#L480) 检查 Overpass 节点的健康状态，或在 `app.js` 约 502 行将 `dbgLog` 函数中的 `console.log('[dbg]', msg)` 的注释面板放开，即可在页面底部直观查看到发出的 Overpass QL 语句和节点的详细返回信息。
+若遇到"数据源繁忙"或生成失败，可以在控制台直接调用 [testNet](file:///c:/Users/HP/Documents/GitHub/Architecture-analysis/app.js#L480) 检查 Overpass 节点的健康状态，或在 `app.js` 约 502 行将 `dbgLog` 函数中的 `console.log('[dbg]', msg)` 的注释面板放开，即可在页面底部直观查看到发出的 Overpass QL 语句和节点的详细返回信息。
+
+### OSM API 请求头规范 (v1.3.1)
+调用 Nominatim 与 Overpass API 时需严格遵循以下请求头规范，否则会收到 406 Not Acceptable：
+
+| API | 方法 | 必需请求头 | 禁用请求头 |
+| :--- | :--- | :--- | :--- |
+| Nominatim `/search` | GET | `Accept-Language: zh-CN,zh;q=0.9` | `Accept: application/json`（会触发 406） |
+| Overpass `/interpreter` | POST | `Content-Type: application/x-www-form-urlencoded` | `Accept: application/json`（多余但无害） |
+
+- 返回格式通过 URL 参数 `format=json`（Nominatim）或 QL 语句 `[out:json]`（Overpass）指定，**不要**通过 `Accept` 头进行内容协商
+- `testNet()` 会依次遍历 `OPS` 数组中所有端点，任一可用即判定为连接正常，避免单端点限流导致误报"离线"
+- 浏览器从 `file://` 协议直接打开页面时不发送 Referer，OSM 服务器会拒绝请求；需通过 HTTP 服务器（如 `python -m http.server`）访问
+- `strategy.html` 的底图瓦片使用 OSM 官方标准瓦片 `{s}.tile.openstreetmap.org/{z}/{x}/{y}.png`，Overpass 端点列表为 `[overpass-api.de, overpass.openstreetmap.fr, kumi.systems]`

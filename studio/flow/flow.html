@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>EasyMap · 流线分析 Circulation</title>
+<link rel="icon" type="image/png" href="../../easymap-clone/favicon.png">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;700;800;900&family=Space+Mono:wght@400;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#FAFAFA;--sf:#FFFFFF;--s2:#F3F4F6;--s3:#E5E7EB;--bd:#E5E7EB;--bd2:#D1D5DB;--tx:#111827;--t2:#4B5563;--t3:#9CA3AF;--ac:#2563EB}
+html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--tx)}
+.app{display:grid;grid-template-columns:320px 1fr;height:100vh}
+.sb{background:var(--sf);border-right:1px solid var(--bd);display:flex;flex-direction:column;height:100vh;overflow:hidden;box-shadow:2px 0 8px rgba(0,0,0,0.02)}
+.sb-top{display:flex;align-items:center;gap:12px;padding:20px;border-bottom:1px solid var(--bd);flex-shrink:0}
+.sb-mark{width:32px;height:32px;border-radius:8px;background:var(--ac);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:14px;overflow:hidden}
+.sb-name{font-family:'Inter',sans-serif;font-weight:700;font-size:16px;letter-spacing:0}
+.sb-name span{color:var(--ac)}
+.sb-sub{font-size:11px;letter-spacing:.05em;color:var(--t3);font-family:'Inter',sans-serif;margin-top:2px;text-transform:uppercase}
+.sb-body{flex:1;overflow-y:auto;padding:20px}
+.sb-body::-webkit-scrollbar{width:4px}
+.sb-body::-webkit-scrollbar-thumb{background:var(--bd2);border-radius:4px}
+.grp{margin-bottom:16px}
+.lbl{font-size:11px;letter-spacing:.05em;color:var(--t2);margin-bottom:12px;font-family:'Inter',sans-serif;text-transform:uppercase;font-weight:600}
+.btn{padding:8px 11px;font-family:'Space Mono',monospace;font-size:10px;background:var(--tx);border:1px solid var(--tx);border-radius:7px;color:#fff;cursor:pointer;transition:all .15s}
+.btn:hover{opacity:.86}
+.btn.ghost{background:var(--s2);color:var(--tx);border-color:var(--bd)}
+.btn.ghost:hover{background:var(--s3)}
+.in{flex:1;padding:7px 10px;font-size:12px;background:var(--s2);border:1px solid var(--bd);border-radius:7px;color:var(--tx);outline:none}
+.in:focus{border-color:var(--bd2)}
+.tchip{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--s2);border:1px solid var(--bd);border-radius:8px;cursor:pointer;margin-bottom:5px;transition:all .12s;user-select:none}
+.tchip:hover{background:var(--s3)}
+.tchip.on{border-color:var(--tx);box-shadow:0 0 0 1px var(--tx) inset}
+.tchip .dot{width:13px;height:13px;border-radius:4px;flex-shrink:0}
+.tchip .nm{font-size:12px;font-weight:500;flex:1}
+.tchip .del{color:var(--t3);font-size:13px;cursor:pointer}
+.tchip .del:hover{color:var(--ac)}
+.ent{display:flex;gap:6px}
+.ent .eb{flex:1;padding:8px 4px;font-size:10px;text-align:center;background:var(--s2);border:1px solid var(--bd);border-radius:7px;cursor:pointer;transition:all .12s}
+.ent .eb:hover{background:var(--s3)}
+.ent .eb.on{border-color:var(--tx);box-shadow:0 0 0 1px var(--tx) inset}
+.row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:9px;font-size:11px;color:var(--t2)}
+.row select,.row input[type=number]{font-size:11px;padding:5px 7px;background:var(--s2);border:1px solid var(--bd);border-radius:6px;color:var(--tx);outline:none}
+.tog{display:flex;align-items:center;justify-content:space-between;padding:7px 9px;background:var(--s2);border:1px solid var(--bd);border-radius:7px;cursor:pointer;user-select:none;margin-bottom:6px;font-size:11px}
+.tog .box{width:30px;height:17px;border-radius:10px;background:var(--bd2);position:relative;transition:all .15s}
+.tog .box::after{content:'';position:absolute;top:2px;left:2px;width:13px;height:13px;border-radius:50%;background:#fff;transition:all .15s}
+.tog.on .box{background:var(--ac)}
+.tog.on .box::after{left:15px}
+input[type=range]{width:100%;accent-color:var(--ac)}
+.addrow{display:flex;gap:6px;margin-top:7px}
+.flowitem{display:flex;align-items:center;gap:7px;font-size:11px;background:var(--s2);border:1px solid var(--bd);border-radius:6px;padding:5px 8px;margin-bottom:4px}
+.flowitem .fd{width:10px;height:10px;border-radius:3px;flex-shrink:0}
+.flowitem .fn{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.flowitem .fx{cursor:pointer;color:var(--t3)}
+.flowitem .fx:hover{color:var(--ac)}
+.topbar{position:absolute;top:0;left:0;right:0;height:52px;background:rgba(255,255,255,.85);backdrop-filter:blur(8px);border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:8px;padding:0 16px;z-index:50}
+.ttl{font-family:'Inter',sans-serif;font-weight:700;font-size:14px;flex:1}
+.vt{padding:7px 12px;font-family:'Space Mono',monospace;font-size:9px;background:var(--s2);border:1px solid var(--bd);border-radius:6px;color:var(--t2);cursor:pointer}
+.vt:hover{background:var(--s3)}
+.vt.solid{background:var(--tx);color:#fff;border-color:var(--tx)}
+.vt.acc{background:var(--ac);color:#fff;border-color:var(--ac)}
+.canv-wrap{position:relative;height:100vh;overflow:hidden;background:var(--bg)}
+svg.canvas{width:100%;height:100%;display:block;cursor:crosshair}
+.hint{font-size:10px;color:var(--t2);line-height:1.55;background:var(--s2);border:1px solid var(--bd);border-radius:8px;padding:9px}
+.toast{position:fixed;bottom:40px;left:50%;transform:translateX(-50%) translateY(10px);background:var(--tx);color:var(--sf);padding:12px 24px;border-radius:8px;font-size:13px;font-weight:500;opacity:0;transition:all .3s;z-index:9999;pointer-events:none;box-shadow:0 4px 12px rgba(0,0,0,0.15)}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+.empty{position:absolute;inset:52px 0 0 0;display:flex;align-items:center;justify-content:center;pointer-events:none}
+.empty div{text-align:center;color:var(--t3);font-family:'Space Mono',monospace;font-size:12px;line-height:1.9}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sb">
+    <div class="sb-top">
+      <div class="sb-mark">SA</div>
+      <div style="flex:1"><div class="sb-name">Sh<span>Arch</span></div><div class="sb-sub" data-fl-i18n="sb_sub">Circulation · 流线分析</div></div>
+    </div>
+    <div class="sb-body">
+      <div class="grp">
+        <div class="lbl" data-fl-i18n="sec_baseplan">底图 Base plan</div>
+        <div style="display:flex;gap:6px"><button class="btn ghost" id="upBtn" style="flex:1" data-fl-i18n="btn_upload">上传总平/平面图 ↑</button><button class="btn ghost" id="upClr" data-fl-i18n="btn_clear_img">清</button></div>
+        <input type="file" id="upFile" accept="image/*" style="display:none">
+        <div class="row" style="margin-top:9px"><span data-fl-i18n="lbl_opacity">透明度</span><input type="range" id="bgOp" min="10" max="100" value="55" style="width:130px"></div>
+        <div class="row"><span data-fl-i18n="lbl_size">大小 Size</span><input type="range" id="bgSize" min="20" max="300" value="100" style="width:130px"></div>
+        <div class="tog" id="bgBw" style="margin-top:4px"><span data-fl-i18n="tog_bw">黑白模式 B&amp;W</span><span class="box"></span></div>
+        <div class="hint" style="margin-top:4px" data-fl-i18n="hint_baseplan">上传你的场地图当参照(可拖动、拖角缩放)。流线是矢量生成的,可单独导出。</div>
+      </div>
+      <div class="grp">
+        <div class="lbl" data-fl-i18n="sec_flowtype">流线类型 Flow type</div>
+        <div id="typeList"></div>
+        <div class="addrow"><input class="in" id="ctName" placeholder="自定义类型名" data-fl-i18n-ph="ph_type_name" style="font-size:11px;padding:6px 8px"><input type="color" id="ctCol" value="#C0392B" style="width:34px;height:34px;border:1px solid var(--bd);border-radius:7px;background:none;cursor:pointer;padding:0"><button class="btn ghost" id="ctAdd">+</button></div>
+      </div>
+      <div class="grp">
+        <div class="lbl" data-fl-i18n="sec_entrance">入口标记 Entrance</div>
+        <div class="ent">
+          <div class="eb" data-mk="ped" data-fl-i18n="ent_ped">人行入口</div>
+          <div class="eb" data-mk="veh" data-fl-i18n="ent_veh">车行入口</div>
+          <div class="eb" data-mk="bld" data-fl-i18n="ent_bld">建筑入口</div>
+        </div>
+      </div>
+      <div class="grp">
+        <div class="lbl" data-fl-i18n="sec_annotate">标注 Annotate</div>
+        <div style="display:flex;gap:6px">
+          <button class="btn ghost" id="textBtn" style="flex:1" data-fl-i18n="btn_text">＋ 文字</button>
+          <button class="btn ghost" id="nodeBtn" style="flex:1" data-fl-i18n="btn_node">＋ 圆圈节点</button>
+        </div>
+        <div class="tog" id="tSpread" style="margin-top:8px"><span data-fl-i18n="tog_spread">多线自动错开 Spread</span><span class="box"></span></div>
+        <div class="tog" id="tNum"><span data-fl-i18n="tog_number">流线编号 Number</span><span class="box"></span></div>
+        <div class="tog" id="tConflict"><span data-fl-i18n="tog_conflict">冲突点 Conflict dots</span><span class="box"></span></div>
+        <div class="hint" style="margin-top:4px" data-fl-i18n="hint_annotate">画线时第一个点靠近已有流线会自动吸附,可从主干拉出分枝。文字/圆圈可拖动,Delete 删除。</div>
+      </div>
+      <div class="grp">
+        <div class="lbl" data-fl-i18n="sec_templates">模板骨架 Templates</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+          <button class="btn ghost tpl" data-tpl="home" data-fl-i18n="tpl_home">住宅</button>
+          <button class="btn ghost tpl" data-tpl="school" data-fl-i18n="tpl_school">学校</button>
+          <button class="btn ghost tpl" data-tpl="hospital" data-fl-i18n="tpl_hospital">医院</button>
+          <button class="btn ghost tpl" data-tpl="office" data-fl-i18n="tpl_office">办公</button>
+          <button class="btn ghost tpl" data-tpl="landscape" data-fl-i18n="tpl_landscape">景观</button>
+          <button class="btn ghost tpl" data-tpl="parking" data-fl-i18n="tpl_parking">停车</button>
+        </div>
+        <div class="hint" style="margin-top:6px" data-fl-i18n="hint_templates">一键铺典型流线骨架,再拖节点贴合你上传的总平面。可叠加多个模板。</div>
+      </div>
+      <div class="grp">
+        <div class="lbl" id="styLbl" data-fl-i18n="lbl_style_default">样式 Style · 默认</div>
+        <div class="row"><span data-fl-i18n="lbl_width">粗细 Width</span><input type="range" id="sW" min="1" max="14" step="0.5" value="4" style="width:120px"></div>
+        <div class="row"><span data-fl-i18n="lbl_arrow">箭头 Arrow</span><select id="sArr"><option value="end" data-fl-i18n="opt_arr_end">单头</option><option value="both" data-fl-i18n="opt_arr_both">双头</option><option value="along" data-fl-i18n="opt_arr_along">沿线连续</option><option value="none" data-fl-i18n="opt_arr_none">无</option></select></div>
+        <div class="row"><span data-fl-i18n="lbl_line">样式 Line</span><select id="sStyle"><option value="solid" data-fl-i18n="opt_sty_solid">实线</option><option value="dashed" data-fl-i18n="opt_sty_dashed">虚线</option><option value="dotted" data-fl-i18n="opt_sty_dotted">点线</option><option value="double" data-fl-i18n="opt_sty_double">双线</option><option value="taper" data-fl-i18n="opt_sty_taper">锥形渐变</option><option value="glow" data-fl-i18n="opt_sty_glow">发光</option><option value="sketch" data-fl-i18n="opt_sty_sketch">手绘</option><option value="ribbon" data-fl-i18n="opt_sty_ribbon">色带</option></select></div>
+        <div class="tog on" id="sGrad"><span data-fl-i18n="tog_grad">渐变 Gradient</span><span class="box"></span></div>
+        <div class="tog on" id="sSmooth"><span data-fl-i18n="tog_smooth">平滑曲线 Smooth</span><span class="box"></span></div>
+        <div class="row" style="margin-top:9px"><span data-fl-i18n="lbl_theme">出图风格 Theme</span><select id="palSel"><option value="default" data-fl-i18n="opt_pal_default">默认配色</option><option value="classic" data-fl-i18n="opt_pal_classic">经典</option><option value="morandi" data-fl-i18n="opt_pal_morandi">莫兰迪</option><option value="nordic" data-fl-i18n="opt_pal_nordic">冷调</option><option value="warm" data-fl-i18n="opt_pal_warm">暖调</option><option value="bold" data-fl-i18n="opt_pal_bold">撞色</option><option value="ink" data-fl-i18n="opt_pal_ink">墨色</option></select></div>
+      </div>
+      <div class="grp">
+        <div class="lbl" data-fl-i18n="sec_flows">流线 Flows</div>
+        <div id="flowList"></div>
+      </div>
+      <div class="grp">
+        <div class="hint"><span data-fl-i18n="hint_steps_1">① 点流线类型 → 在图上依次点节点 → 双击/回车/点「完成」结束一条。</span><br><span data-fl-i18n="hint_steps_2">② 「选择」工具下可拖动节点微调、删除。</span></div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="canv-wrap" id="canvWrap">
+    <div class="topbar">
+      <div class="ttl" data-fl-i18n="ttl">流线分析 Circulation</div>
+      <button id="langBtn" style="border:1px solid var(--bd);background:var(--sf);border-radius:8px;padding:7px 10px;font:700 11px 'Space Mono',monospace;cursor:pointer;color:var(--t2)">EN</button>
+      <button class="vt acc" id="finBtn" data-fl-i18n="btn_finish">完成 ✓</button>
+      <button class="vt" id="selBtn" data-fl-i18n="btn_select">选择</button>
+      <button class="vt" id="undoBtn" data-fl-i18n="btn_undo">UNDO ↶</button>
+      <button class="vt" id="clrBtn" data-fl-i18n="btn_clear_all">CLEAR</button>
+      <button class="vt" id="pngBtn" data-fl-i18n="btn_png">PNG ↓</button>
+      <button class="vt solid" id="svgBtn" data-fl-i18n="btn_svg">SVG ↓</button>
+    </div>
+    <svg class="canvas" id="cv" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid meet"></svg>
+    <div class="empty" id="empty"><div data-fl-i18n="empty">选一个流线类型,在图上点节点连线</div></div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const cv=document.getElementById('cv'),VW=1200,VH=800;
+let types=[
+  {id:'ped',name:'人流',color:'#2E7A52'},
+  {id:'veh',name:'车流',color:'#34708E'},
+  {id:'fire',name:'消防',color:'#C0392B'},
+  {id:'log',name:'后勤',color:'#B0791E'},
+  {id:'tour',name:'游览',color:'#7A4F9E'}
+];
+const MK={ped:{name:'人行入口',g:'▷',c:'#2E7A52'},veh:{name:'车行入口',g:'▣',c:'#34708E'},bld:{name:'建筑入口',g:'⌂',c:'#1A1917'}};
+const TPL={
+ home:{name:'住宅 Residential',marks:[{kind:'ped',x:175,y:255,label:'人行入口'},{kind:'veh',x:175,y:610,label:'车行入口'},{kind:'bld',x:725,y:285,label:'单元入口'}],
+   flows:[{type:'ped',pts:[[175,255],[430,250],[725,285]]},{type:'veh',pts:[[175,610],[430,585],[680,560]],style:'taper'},{type:'tour',pts:[[725,285],[560,435],[360,475],[280,565]]}]},
+ school:{name:'学校 School',marks:[{kind:'ped',x:175,y:400,label:'校门'},{kind:'veh',x:175,y:625,label:'车行入口'}],
+   flows:[{type:'ped',pts:[[175,400],[450,360],[705,340]]},{type:'tour',pts:[[705,340],[860,465],[625,565],[420,545]]},{type:'log',pts:[[175,625],[450,600],[640,572]]}]},
+ hospital:{name:'医院 Hospital',marks:[{kind:'ped',x:175,y:300,label:'门诊'},{kind:'veh',x:175,y:565,label:'急诊'},{kind:'bld',x:705,y:325,label:'住院'}],
+   flows:[{type:'ped',pts:[[175,300],[450,300],[705,325]]},{type:'fire',pts:[[175,565],[460,540],[700,500]],style:'dashed'},{type:'log',pts:[[705,325],[860,425],[700,565]]}]},
+ office:{name:'办公 Office',marks:[{kind:'ped',x:175,y:400,label:'入口'},{kind:'veh',x:175,y:600,label:'车行入口'},{kind:'bld',x:830,y:355,label:'会议'}],
+   flows:[{type:'ped',pts:[[175,400],[430,400],[630,380],[830,355]]},{type:'log',pts:[[175,600],[460,545],[690,520]]}]},
+ landscape:{name:'景观 Landscape',marks:[{kind:'ped',x:150,y:415,label:'主入口'},{kind:'bld',x:850,y:390,label:'节点'}],
+   flows:[{type:'tour',pts:[[150,415],[280,320],[480,350],[640,455],[850,390]],style:'glow'},{type:'ped',pts:[[150,415],[350,520],[610,545],[850,390]],style:'dashed'}]},
+ parking:{name:'停车 Parking',marks:[{kind:'veh',x:170,y:610,label:'车入口'},{kind:'ped',x:840,y:300,label:'人入口'}],
+   flows:[{type:'veh',pts:[[170,610],[360,580],[545,605],[730,560]],style:'taper'},{type:'ped',pts:[[840,300],[700,380],[570,475],[430,510]],style:'sketch'},{type:'fire',pts:[[160,185],[420,190],[760,210],[920,320]],style:'dashed'}]}
+};
+function applyTemplate(k){const t=TPL[k];if(!t)return;pushUndo();
+  t.marks.forEach(m=>marks.push({id:uid++,kind:m.kind,x:m.x,y:m.y,label:m.label}));
+  t.flows.forEach(f=>flows.push({id:uid++,type:f.type,pts:f.pts.map(p=>({x:p[0],y:p[1]})),w:def.w,arr:def.arr,style:f.style||def.style,grad:def.grad,smooth:true}));
+  mode='select';curMark=null;draft=null;sel=null;syncMode();renderTypes();renderEnt();renderAll();toast(flT('toast_tpl_loaded').replace('{name}',flT('tpl_name_'+k)));
+}
+let flows=[],marks=[],bg=null,annos=[];
+let curType='ped',curMark=null,mode='draw',draft=null,sel=null,uid=1,hist=[],redoHist=[];
+let spreadOn=false,numberOn=false,conflictOn=false,palette='default';
+const PALETTES={
+  classic:['#C0392B','#2C6E8F','#4A7C59','#E0822D','#8A6FB0','#C9A227'],
+  morandi:['#B07C76','#7C90A0','#8B9D83','#C9A98C','#9888A0','#C2B280'],
+  nordic:['#4A6D8C','#5E8B7E','#7B9EA8','#A0B9C8','#6E7B91','#8FA9B8'],
+  warm:['#C0392B','#D9772E','#E0A93B','#B5562E','#A8554C','#C99A3F'],
+  bold:['#E63946','#1D3557','#2A9D8F','#F4A261','#7209B7','#E9C46A'],
+  ink:['#2B2B2B','#555555','#777777','#444444','#666666','#888888']
+};
+let def={w:4,arr:'end',style:'solid',grad:true,smooth:true};
+
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function dist(a,b){return Math.hypot(a.x-b.x,a.y-b.y);}
+function typeOf(id){return types.find(t=>t.id===id)||types[0];}
+function mix(a,b,t){const pa=hx(a),pb=hx(b);return '#'+[0,1,2].map(i=>Math.round(pa[i]+(pb[i]-pa[i])*t).toString(16).padStart(2,'0')).join('');}
+function hx(c){c=c.replace('#','');if(c.length===3)c=c[0]+c[0]+c[1]+c[1]+c[2]+c[2];return [parseInt(c.slice(0,2),16),parseInt(c.slice(2,4),16),parseInt(c.slice(4,6),16)];}
+function _snapFlow(){return JSON.stringify({flows,marks,bg,annos});}
+function _restoreFlow(s){flows=s.flows||[];marks=s.marks||[];bg=s.bg||null;annos=s.annos||[];sel=null;draft=null;renderAll();}
+function pushUndo(){const now=_snapFlow();if(hist[hist.length-1]!==now){hist.push(now);if(hist.length>50)hist.shift();}redoHist=[];}
+function undo(){if(!hist.length){toast(flT('toast_no_undo'));return;}redoHist.push(_snapFlow());_restoreFlow(JSON.parse(hist.pop()));}
+function redo(){if(!redoHist.length){toast(flT('toast_no_redo'));return;}hist.push(_snapFlow());_restoreFlow(JSON.parse(redoHist.pop()));}
+function toSvg(e){
+  const r=cv.getBoundingClientRect();
+  const sc=Math.min(r.width/VW,r.height/VH);
+  const ox=(r.width-VW*sc)/2,oy=(r.height-VH*sc)/2;
+  return {x:(e.clientX-r.left-ox)/sc,y:(e.clientY-r.top-oy)/sc};
+}
+function clampPt(p){p.x=Math.max(0,Math.min(VW,p.x));p.y=Math.max(0,Math.min(VH,p.y));return p;}
+function scaleFlowScene(cx,cy,k){
+  if(!isFinite(k)||Math.abs(k-1)<1e-6)return;
+  const sp=p=>{p.x=cx+(p.x-cx)*k;p.y=cy+(p.y-cy)*k;return p;};
+  flows.forEach(f=>{f.pts.forEach(sp);f.w=Math.max(1,Math.min(42,(f.w||def.w)*k));});
+  marks.forEach(sp);
+  annos.forEach(a=>{sp(a);if(a.kind==='circle')a.size=Math.max(8,Math.min(80,(a.size||16)*k));});
+  if(draft&&draft.pts)draft.pts.forEach(sp);
+}
+function setBgSizeFromCenter(w,h,scaleOverlay){
+  if(!bg)return;
+  const ow=bg.w,oh=bg.h,cx=bg.x+ow/2,cy=bg.y+oh/2;
+  const k=ow?Math.max(w/ow,h/oh):1;
+  bg.w=Math.max(60,w);bg.h=Math.max(40,h);bg.x=cx-bg.w/2;bg.y=cy-bg.h/2;
+  if(scaleOverlay)scaleFlowScene(cx,cy,k);
+}
+
+
+/* ---- geometry ---- */
+function sampleSmooth(pts,per){
+  if(pts.length<2)return pts.slice();
+  if(pts.length===2){const o=[];for(let i=0;i<=per;i++){const t=i/per;o.push({x:pts[0].x+(pts[1].x-pts[0].x)*t,y:pts[0].y+(pts[1].y-pts[0].y)*t});}return o;}
+  const o=[];
+  for(let i=0;i<pts.length-1;i++){const p0=pts[i-1]||pts[i],p1=pts[i],p2=pts[i+1],p3=pts[i+2]||p2;
+    for(let j=0;j<per;j++){const t=j/per,t2=t*t,t3=t2*t;
+      o.push({x:0.5*((2*p1.x)+(-p0.x+p2.x)*t+(2*p0.x-5*p1.x+4*p2.x-p3.x)*t2+(-p0.x+3*p1.x-3*p2.x+p3.x)*t3),
+              y:0.5*((2*p1.y)+(-p0.y+p2.y)*t+(2*p0.y-5*p1.y+4*p2.y-p3.y)*t2+(-p0.y+3*p1.y-3*p2.y+p3.y)*t3)});}}
+  o.push(pts[pts.length-1]);return o;
+}
+function samplesOf(f){return sampleSmooth(f.pts,f.smooth?22:1);}
+function typeColor(t){if(palette==='default')return t.color;const idx=types.findIndex(x=>x.id===t.id);const p=PALETTES[palette];return (p&&idx>=0&&idx<p.length)?p[idx]:t.color;}
+function spreadFlows(fl,SAMP){const ids=fl.map(f=>f.id),W={};fl.forEach(f=>W[f.id]=f.w);
+  for(let it=0;it<6;it++){const disp={};ids.forEach(id=>disp[id]=SAMP[id].map(()=>({x:0,y:0})));
+    for(let a=0;a<ids.length;a++)for(let b=a+1;b<ids.length;b++){const SA=SAMP[ids[a]],SB=SAMP[ids[b]],sep=(W[ids[a]]+W[ids[b]])/2+16;
+      for(let i=1;i<SA.length-1;i++){let best=1e9,bj=-1;for(let j=0;j<SB.length;j++){const d=Math.hypot(SA[i].x-SB[j].x,SA[i].y-SB[j].y);if(d<best){best=d;bj=j;}}
+        if(best<sep&&best>0.01){const ta=tangentAt(SA,i),tb=tangentAt(SB,bj);if(Math.abs(ta[0]*tb[0]+ta[1]*tb[1])>0.6){const push=(sep-best)*0.5,ux=(SA[i].x-SB[bj].x)/best,uy=(SA[i].y-SB[bj].y)/best;disp[ids[a]][i].x+=ux*push;disp[ids[a]][i].y+=uy*push;if(bj>0&&bj<SB.length-1){disp[ids[b]][bj].x-=ux*push;disp[ids[b]][bj].y-=uy*push;}}}}}
+    ids.forEach(id=>{const S=SAMP[id];for(let i=1;i<S.length-1;i++){S[i].x+=disp[id][i].x*0.5;S[i].y+=disp[id][i].y*0.5;}const c=S.map(p=>({x:p.x,y:p.y}));for(let i=1;i<S.length-1;i++){S[i].x=c[i].x*0.6+(c[i-1].x+c[i+1].x)*0.2;S[i].y=c[i].y*0.6+(c[i-1].y+c[i+1].y)*0.2;}});
+  }
+}
+function polyD(s){let d='M'+s[0].x.toFixed(1)+','+s[0].y.toFixed(1);for(let i=1;i<s.length;i++)d+=' L'+s[i].x.toFixed(1)+','+s[i].y.toFixed(1);return d;}
+function tangentAt(s,i){const a=s[Math.max(0,i-1)],b=s[Math.min(s.length-1,i+1)],dx=b.x-a.x,dy=b.y-a.y,L=Math.hypot(dx,dy)||1;return[dx/L,dy/L];}
+function arrowHead(p,t,sz,col){const nx=-t[1],ny=t[0],tip=[p.x+t[0]*sz*0.5,p.y+t[1]*sz*0.5],b1=[tip[0]-t[0]*sz+nx*sz*0.62,tip[1]-t[1]*sz+ny*sz*0.62],b2=[tip[0]-t[0]*sz-nx*sz*0.62,tip[1]-t[1]*sz-ny*sz*0.62];return'<path d="M'+tip[0].toFixed(1)+','+tip[1].toFixed(1)+' L'+b1[0].toFixed(1)+','+b1[1].toFixed(1)+' L'+b2[0].toFixed(1)+','+b2[1].toFixed(1)+'Z" fill="'+col+'"/>';}
+function ribbonPoly(s,w0,w1){const L=[],R=[];for(let i=0;i<s.length;i++){const t=i/(s.length-1),tg=tangentAt(s,i),nx=-tg[1],ny=tg[0],hw=(w0+(w1-w0)*t)/2;L.push([s[i].x+nx*hw,s[i].y+ny*hw]);R.push([s[i].x-nx*hw,s[i].y-ny*hw]);}let d='M'+L[0][0].toFixed(1)+','+L[0][1].toFixed(1);for(let i=1;i<L.length;i++)d+=' L'+L[i][0].toFixed(1)+','+L[i][1].toFixed(1);for(let i=R.length-1;i>=0;i--)d+=' L'+R[i][0].toFixed(1)+','+R[i][1].toFixed(1);return d+'Z';}
+
+function flowSVG(f,i,editing,s){
+  if(f.pts.length<2)return'';
+  const T=typeOf(f.type),col=typeColor(T),end=s[s.length-1],et=tangentAt(s,s.length-1);
+  let stroke=col,defs='';
+  if(f.grad){const a=s[0],b=end;defs='<linearGradient id="fg'+i+'" gradientUnits="userSpaceOnUse" x1="'+a.x.toFixed(1)+'" y1="'+a.y.toFixed(1)+'" x2="'+b.x.toFixed(1)+'" y2="'+b.y.toFixed(1)+'"><stop offset="0" stop-color="'+mix(col,'#ffffff',0.62)+'"/><stop offset="1" stop-color="'+col+'"/></linearGradient>';stroke='url(#fg'+i+')';}
+  let vis='';
+  if(f.style==='taper'){vis='<path d="'+ribbonPoly(s,Math.max(1,f.w*0.35),f.w*1.25)+'" fill="'+stroke+'" fill-opacity="0.92"/>';}
+  else if(f.style==='ribbon'){vis='<path d="'+ribbonPoly(s,f.w*0.85,f.w*0.85)+'" fill="'+stroke+'" fill-opacity="0.78"/>';}
+  else if(f.style==='glow'){vis='<path d="'+polyD(s)+'" fill="none" stroke="'+col+'" stroke-width="'+(f.w*4.2)+'" stroke-linecap="round" stroke-linejoin="round" opacity="0.14"/><path d="'+polyD(s)+'" fill="none" stroke="'+stroke+'" stroke-width="'+f.w+'" stroke-linecap="round" stroke-linejoin="round" opacity="0.96"/>';}
+  else{let dash='';if(f.style==='dashed')dash=' stroke-dasharray="'+(f.w*2.6).toFixed(1)+','+(f.w*2.1).toFixed(1)+'"';else if(f.style==='dotted')dash=' stroke-dasharray="0.1,'+(f.w*2).toFixed(1)+'"';else if(f.style==='sketch')dash=' stroke-dasharray="'+(f.w*3.2).toFixed(1)+','+(f.w*1.2).toFixed(1)+'"';
+    vis='<path d="'+polyD(s)+'" fill="none" stroke="'+stroke+'" stroke-width="'+f.w+'" stroke-linecap="round" stroke-linejoin="round"'+dash+' opacity="'+(f.style==='sketch'?'0.82':'0.95')+'"/>';
+    if(f.style==='sketch')vis+='<path d="'+polyD(s.map((p,j)=>({x:p.x+(j%2?1.5:-1.2),y:p.y+(j%3?-.9:1.1)})))+'" fill="none" stroke="'+col+'" stroke-width="'+Math.max(1,f.w*.38)+'" stroke-linecap="round" stroke-linejoin="round" opacity="0.36"/>';
+    if(f.style==='double')vis+='<path d="'+polyD(s)+'" fill="none" stroke="#F8F7F5" stroke-width="'+Math.max(0.8,f.w*0.34).toFixed(2)+'" stroke-linecap="round" stroke-linejoin="round"/>';}
+  if(f.arr==='end'||f.arr==='both')vis+=arrowHead(end,et,Math.max(9,f.w*2.4),col);
+  if(f.arr==='both'){const st=tangentAt(s,0);vis+=arrowHead(s[0],[-st[0],-st[1]],Math.max(9,f.w*2.4),col);}
+  else if(f.arr==='along'){const step=Math.max(34,f.w*9);let acc=step;for(let k=1;k<s.length;k++){acc+=dist(s[k-1],s[k]);if(acc>=step){acc=0;vis+=arrowHead(s[k],tangentAt(s,k),Math.max(7,f.w*1.7),col);}}vis+=arrowHead(end,et,Math.max(9,f.w*2.4),col);}
+  if(numberOn){const p=s[0];vis+='<circle cx="'+p.x.toFixed(1)+'" cy="'+p.y.toFixed(1)+'" r="9" fill="'+col+'"/><text x="'+p.x.toFixed(1)+'" y="'+(p.y+3.5).toFixed(1)+'" text-anchor="middle" font-family="Space Mono,monospace" font-size="11" font-weight="700" fill="#fff">'+(i+1)+'</text>';}
+  let nodes='';
+  if(editing){const selF=sel&&sel.kind==='flow'&&sel.id===f.id;if(selF)f.pts.forEach((p,j)=>{nodes+='<circle class="node" data-fi="'+i+'" data-pi="'+j+'" cx="'+p.x.toFixed(1)+'" cy="'+p.y.toFixed(1)+'" r="5.5" fill="#fff" stroke="'+col+'" stroke-width="2" style="cursor:move"/>';});
+    nodes+='<path class="hit" data-fi="'+i+'" d="'+polyD(s)+'" fill="none" stroke="#000" stroke-opacity="0" stroke-width="22" pointer-events="stroke" style="cursor:move"/>';
+    if(selF)vis='<path d="'+polyD(s)+'" fill="none" stroke="'+col+'" stroke-width="'+(f.w+8)+'" opacity="0.16" stroke-linecap="round"/>'+vis;}
+  return (defs?'<defs>'+defs+'</defs>':'')+vis+nodes;
+}
+function markSVG(m,i,editing){const k=MK[m.kind];let g='<g class="mk" data-mi="'+i+'"'+(editing?' style="cursor:move"':'')+'>';
+  g+='<circle cx="'+m.x.toFixed(1)+'" cy="'+m.y.toFixed(1)+'" r="13" fill="#fff" stroke="'+k.c+'" stroke-width="2"/>';
+  g+='<text x="'+m.x.toFixed(1)+'" y="'+(m.y+4.5).toFixed(1)+'" text-anchor="middle" font-size="13" font-weight="700" fill="'+k.c+'">'+k.g+'</text>';
+  g+='<text x="'+m.x.toFixed(1)+'" y="'+(m.y+27).toFixed(1)+'" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" font-weight="600" fill="#1A1917" paint-order="stroke" stroke="#fff" stroke-width="2.6">'+esc(m.label||k.name)+'</text>';
+  return g+'</g>';
+}
+function draftSVG(){if(!draft||!draft.pts.length)return'';const T=typeOf(curType),col=T.color;let g='';
+  if(draft.pts.length>=2){const s=sampleSmooth(draft.pts,def.smooth?22:1);g+='<path d="'+polyD(s)+'" fill="none" stroke="'+col+'" stroke-width="'+def.w+'" stroke-linecap="round" stroke-dasharray="2,6" opacity="0.7"/>';}
+  draft.pts.forEach(p=>{g+='<circle cx="'+p.x.toFixed(1)+'" cy="'+p.y.toFixed(1)+'" r="4.5" fill="'+col+'"/>';});
+  return g;
+}
+function computeSamples(){const SAMP={};flows.forEach(f=>{SAMP[f.id]=samplesOf(f);});if(spreadOn&&flows.length>1)spreadFlows(flows,SAMP);return SAMP;}
+function annoSVG(a,i,editing){const selA=editing&&sel&&sel.kind==='anno'&&sel.id===a.id;let g='<g class="anno" data-ai="'+i+'"'+(editing?' style="cursor:move"':'')+'>';
+  if(a.kind==='text'){if(selA)g+='<rect x="'+(a.x-4).toFixed(1)+'" y="'+(a.y-(a.size||16)-1).toFixed(1)+'" width="8" height="'+((a.size||16)+6)+'" fill="none"/>';g+='<text x="'+a.x.toFixed(1)+'" y="'+a.y.toFixed(1)+'" font-family="Inter,sans-serif" font-size="'+(a.size||16)+'" font-weight="600" fill="'+(a.color||'#1A1917')+'" paint-order="stroke" stroke="#fff" stroke-width="3.4" text-anchor="middle">'+esc(a.text||'文字')+'</text>';}
+  else if(a.kind==='circle'){g+='<circle cx="'+a.x.toFixed(1)+'" cy="'+a.y.toFixed(1)+'" r="'+(a.size||16)+'" fill="#fff" fill-opacity="0.82" stroke="'+(a.color||'#1A1917')+'" stroke-width="2.2"/>';if(a.text)g+='<text x="'+a.x.toFixed(1)+'" y="'+(a.y+(a.size||16)*0.34).toFixed(1)+'" text-anchor="middle" font-family="Space Mono,monospace" font-size="'+((a.size||16)*0.92).toFixed(0)+'" font-weight="700" fill="'+(a.color||'#1A1917')+'">'+esc(a.text)+'</text>';}
+  if(selA)g+='<circle cx="'+a.x.toFixed(1)+'" cy="'+a.y.toFixed(1)+'" r="'+((a.size||16)+5)+'" fill="none" stroke="#C0392B" stroke-width="1.3" stroke-dasharray="4,3"/>';
+  return g+'</g>';
+}
+function lineInter(a,b,c,d){const den=(a.x-b.x)*(c.y-d.y)-(a.y-b.y)*(c.x-d.x);if(Math.abs(den)<1e-6)return null;const px=((a.x*b.y-a.y*b.x)*(c.x-d.x)-(a.x-b.x)*(c.x*d.y-c.y*d.x))/den;const py=((a.x*b.y-a.y*b.x)*(c.y-d.y)-(a.y-b.y)*(c.x*d.y-c.y*d.x))/den;const within=(p,q,r)=>Math.min(p.x,q.x)-1<=r.x&&r.x<=Math.max(p.x,q.x)+1&&Math.min(p.y,q.y)-1<=r.y&&r.y<=Math.max(p.y,q.y)+1;const P={x:px,y:py};return within(a,b,P)&&within(c,d,P)?P:null;}
+function conflictSVG(SAMP){if(!conflictOn||flows.length<2)return'';let dots=[];for(let i=0;i<flows.length;i++)for(let j=i+1;j<flows.length;j++){const A=SAMP[flows[i].id]||samplesOf(flows[i]),B=SAMP[flows[j].id]||samplesOf(flows[j]);for(let a=1;a<A.length;a+=3)for(let b=1;b<B.length;b+=3){const p=lineInter(A[a-1],A[a],B[b-1],B[b]);if(p&&dots.every(d=>Math.hypot(d.x-p.x,d.y-p.y)>20))dots.push(p);}}
+  return dots.map((p,i)=>'<g><circle cx="'+p.x.toFixed(1)+'" cy="'+p.y.toFixed(1)+'" r="11" fill="#fff" stroke="#C0392B" stroke-width="2"/><text x="'+p.x.toFixed(1)+'" y="'+(p.y+4).toFixed(1)+'" text-anchor="middle" font-family="Space Mono,monospace" font-size="12" font-weight="700" fill="#C0392B">!</text></g>').join('');}
+function sceneSVG(editing){let s='';
+  if(bg){const flt=bg.bw?' filter="url(#bwf)"':'';s+='<defs><filter id="bwf"><feColorMatrix type="saturate" values="0"/><feComponentTransfer><feFuncR type="linear" slope="1.35" intercept="-0.16"/><feFuncG type="linear" slope="1.35" intercept="-0.16"/><feFuncB type="linear" slope="1.35" intercept="-0.16"/></feComponentTransfer></filter></defs>';
+    s+='<image href="'+bg.href+'" xlink:href="'+bg.href+'" x="'+bg.x.toFixed(1)+'" y="'+bg.y.toFixed(1)+'" width="'+bg.w.toFixed(1)+'" height="'+bg.h.toFixed(1)+'" preserveAspectRatio="xMidYMid meet" opacity="'+(bg.op/100)+'"'+flt+'/>';}
+  const SAMP=computeSamples();
+  flows.forEach((f,i)=>{s+=flowSVG(f,i,editing,SAMP[f.id]||samplesOf(f));});
+  s+=conflictSVG(SAMP);
+  marks.forEach((m,i)=>{s+=markSVG(m,i,editing);});
+  annos.forEach((a,i)=>{s+=annoSVG(a,i,editing);});
+  if(editing){s+=draftSVG();
+    if(bg&&sel&&sel.kind==='bg'){s+='<rect x="'+bg.x.toFixed(1)+'" y="'+bg.y.toFixed(1)+'" width="'+bg.w.toFixed(1)+'" height="'+bg.h.toFixed(1)+'" fill="none" stroke="#C0392B" stroke-width="1.5" stroke-dasharray="5,4"/><circle class="bgh" cx="'+(bg.x+bg.w).toFixed(1)+'" cy="'+(bg.y+bg.h).toFixed(1)+'" r="7" fill="#fff" stroke="#C0392B" stroke-width="2" style="cursor:nwse-resize"/>';}}
+  return s;
+}
+function renderAll(){
+  document.getElementById('empty').style.display=(flows.length||marks.length||draft)?'none':'flex';
+  cv.innerHTML=sceneSVG(true);
+  renderFlowList();bindCanvas();
+}
+
+/* ---- legend + export (auto-fit frame) ---- */
+let EXF={X:0,Y:0,W:1200,H:800};
+function exportFrame(){let x0=Infinity,y0=Infinity,x1=-Infinity,y1=-Infinity;
+  flows.forEach(f=>f.pts.forEach(p=>{const m=f.w+12;x0=Math.min(x0,p.x-m);y0=Math.min(y0,p.y-m);x1=Math.max(x1,p.x+m);y1=Math.max(y1,p.y+m);}));
+  marks.forEach(m=>{x0=Math.min(x0,m.x-30);x1=Math.max(x1,m.x+30);y0=Math.min(y0,m.y-18);y1=Math.max(y1,m.y+34);});
+  if(bg){x0=Math.min(x0,bg.x);y0=Math.min(y0,bg.y);x1=Math.max(x1,bg.x+bg.w);y1=Math.max(y1,bg.y+bg.h);}annos.forEach(a=>{const r=(a.size||16)+(a.kind==='text'?60:8);x0=Math.min(x0,a.x-r);y0=Math.min(y0,a.y-r);x1=Math.max(x1,a.x+r);y1=Math.max(y1,a.y+r);});
+  if(!isFinite(x0)){x0=0;y0=0;x1=1200;y1=800;}
+  const pX=60,pT=110,pB=78;return{X:x0-pX,Y:y0-pT,W:(x1-x0)+2*pX,H:(y1-y0)+pT+pB};
+}
+function usedTypes(){const ids=[...new Set(flows.map(f=>f.type))];return ids.map(typeOf);}
+function buildSVG(){const sc=sceneSVG(false),F=exportFrame();EXF=F;const X=F.X,Y=F.Y,W=F.W,H=F.H;
+  const title='CIRCULATION DIAGRAM';let leg='';usedTypes().forEach((t,i)=>{const tc=typeColor(t);leg+='<g transform="translate('+(X+40+i*120).toFixed(1)+','+(Y+H-30).toFixed(1)+')"><line x1="0" y1="-4" x2="20" y2="-4" stroke="'+tc+'" stroke-width="3.5" stroke-linecap="round"/><path d="M20,-4 L13,-7.5 L13,-0.5Z" fill="'+tc+'"/><text x="27" font-family="Inter,sans-serif" font-size="11" fill="#3A352F">'+esc(t.name)+'</text></g>';});
+  return '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="'+X.toFixed(1)+' '+Y.toFixed(1)+' '+W.toFixed(1)+' '+H.toFixed(1)+'" width="'+W.toFixed(0)+'" height="'+H.toFixed(0)+'"><rect x="'+X.toFixed(1)+'" y="'+Y.toFixed(1)+'" width="'+W.toFixed(1)+'" height="'+H.toFixed(1)+'" fill="#F8F7F5"/><text x="'+(X+40).toFixed(1)+'" y="'+(Y+52).toFixed(1)+'" font-family="Space Mono,monospace" font-size="22" font-weight="700" fill="#1A1917">'+title+'</text><text x="'+(X+40).toFixed(1)+'" y="'+(Y+72).toFixed(1)+'" font-family="Space Mono,monospace" font-size="10" fill="#A8A69F" letter-spacing="2">EASYMAP · 流线分析</text><line x1="'+(X+30).toFixed(1)+'" y1="'+(Y+88).toFixed(1)+'" x2="'+(X+W-30).toFixed(1)+'" y2="'+(Y+88).toFixed(1)+'" stroke="#1A1917" stroke-width="1.2"/>'+sc+leg+'<text x="'+(X+W-40).toFixed(1)+'" y="'+(Y+H-14).toFixed(1)+'" text-anchor="end" font-family="Space Mono,monospace" font-size="9" fill="#C8C6C0">EasyMap · easymap.uk</text></svg>';
+}
+function dl(b,n){const u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=n;document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(()=>URL.revokeObjectURL(u),4000);}
+function dlSVG(){if(!flows.length&&!marks.length){toast(flT('toast_draw_first'));return;}dl(new Blob(['<?xml version="1.0"?>\n'+buildSVG()],{type:'image/svg+xml'}),'easymap_circulation.svg');toast(flT('toast_svg_saved'));}
+function dlPNG(){if(!flows.length&&!marks.length){toast(flT('toast_draw_first'));return;}
+  const svg=buildSVG(),img=new Image(),u=URL.createObjectURL(new Blob([svg],{type:'image/svg+xml'}));
+  img.onload=()=>{const k=2,cw=Math.round(EXF.W*k),ch=Math.round(EXF.H*k),c=document.createElement('canvas');c.width=cw;c.height=ch;const x=c.getContext('2d');x.fillStyle='#F8F7F5';x.fillRect(0,0,cw,ch);x.drawImage(img,0,0,cw,ch);URL.revokeObjectURL(u);c.toBlob(b=>{dl(b,'easymap_circulation.png');toast(flT('toast_png_saved'));});};
+  img.onerror=()=>toast(flT('toast_png_failed'));img.src=u;
+}
+
+/* ---- UI ---- */
+function renderTypes(){const box=document.getElementById('typeList');box.innerHTML=types.map(t=>'<div class="tchip'+(t.id===curType&&mode==='draw'?' on':'')+'" data-t="'+t.id+'"><span class="dot" style="background:'+t.color+'"></span><span class="nm">'+esc(t.name)+'</span>'+(t.id.startsWith('c')?'<span class="del" data-del="'+t.id+'">×</span>':'')+'</div>').join('');
+  box.querySelectorAll('.tchip').forEach(el=>el.onclick=e=>{if(e.target.dataset.del){types=types.filter(t=>t.id!==e.target.dataset.del);if(curType===e.target.dataset.del)curType=types[0].id;renderTypes();return;}curType=el.dataset.t;mode='draw';curMark=null;draft=null;sel=null;syncMode();renderTypes();renderEnt();renderAll();});}
+function renderEnt(){document.querySelectorAll('.eb').forEach(b=>b.classList.toggle('on',mode==='mark'&&curMark===b.dataset.mk));}
+function renderFlowList(){const box=document.getElementById('flowList');if(!flows.length){box.innerHTML='<div style="font-size:10px;color:var(--t3)">'+flT('flows_none')+'</div>';return;}
+  box.innerHTML=flows.map((f,i)=>{const t=typeOf(f.type);return '<div class="flowitem"><span class="fd" style="background:'+t.color+'"></span><span class="fn">'+esc(t.name)+' · '+f.pts.length+flT('flows_pts')+'</span><span class="fx" data-del="'+f.id+'">×</span></div>';}).join('');
+  box.querySelectorAll('.fx').forEach(x=>x.onclick=()=>{pushUndo();flows=flows.filter(f=>f.id!=x.dataset.del);sel=null;renderAll();});}
+function syncMode(){document.getElementById('styLbl').textContent=(sel&&sel.kind==='flow')?flT('lbl_style_selected'):flT('lbl_style_default');
+  document.getElementById('selBtn').classList.toggle('solid',mode==='select');}
+function curStyleObj(){return (sel&&sel.kind==='flow')?flows.find(f=>f.id===sel.id):def;}
+function syncStyleInputs(){const o=curStyleObj();document.getElementById('sW').value=o.w;document.getElementById('sArr').value=o.arr;document.getElementById('sStyle').value=o.style;document.getElementById('sGrad').classList.toggle('on',o.grad);document.getElementById('sSmooth').classList.toggle('on',o.smooth);}
+function applyStyle(k,v){const o=curStyleObj();o[k]=v;if(o!==def&&sel&&sel.kind==='flow'){pushUndo&&0;}renderAll();}
+
+/* ---- pointer ---- */
+function finishDraft(){if(draft&&draft.pts.length>=2){const L=draft.pts.length-1,sn=snapToFlow(draft.pts[L]);if(sn)draft.pts[L]=sn;pushUndo();flows.push({id:uid++,type:draft.type,pts:draft.pts,w:def.w,arr:def.arr,style:def.style,grad:def.grad,smooth:def.smooth});}draft=null;renderAll();}
+function bindCanvas(){
+  cv.querySelectorAll('.node').forEach(n=>n.addEventListener('pointerdown',e=>{e.stopPropagation();if(mode!=='select')return;const fi=+n.dataset.fi,pi=+n.dataset.pi,f=flows[fi];pushUndo();n.setPointerCapture(e.pointerId);
+    function mv(ev){const q=clampPt(toSvg(ev));f.pts[pi]={x:q.x,y:q.y};renderAll();}function up(){cv.removeEventListener('pointermove',mv);cv.removeEventListener('pointerup',up);}cv.addEventListener('pointermove',mv);cv.addEventListener('pointerup',up);}));
+  cv.querySelectorAll('.hit').forEach(h=>h.addEventListener('pointerdown',e=>{if(mode!=='select')return;e.stopPropagation();const f=flows[+h.dataset.fi];sel={kind:'flow',id:f.id};syncMode();syncStyleInputs();
+    const q=toSvg(e);let bi=0,bd=1e9;f.pts.forEach((p,j)=>{const d=Math.hypot(p.x-q.x,p.y-q.y);if(d<bd){bd=d;bi=j;}});
+    pushUndo();h.setPointerCapture(e.pointerId);
+    function mv(ev){const w=clampPt(toSvg(ev));f.pts[bi]={x:w.x,y:w.y};renderAll();}
+    function up(){cv.removeEventListener('pointermove',mv);cv.removeEventListener('pointerup',up);}
+    cv.addEventListener('pointermove',mv);cv.addEventListener('pointerup',up);renderAll();}));
+  cv.querySelectorAll('.mk').forEach(g=>g.addEventListener('pointerdown',e=>{if(mode!=='select')return;e.stopPropagation();const mi=+g.dataset.mi,m=marks[mi];pushUndo();sel={kind:'mark',id:m.id};g.setPointerCapture(e.pointerId);
+    function mv(ev){const q=clampPt(toSvg(ev));m.x=q.x;m.y=q.y;renderAll();}function up(){cv.removeEventListener('pointermove',mv);cv.removeEventListener('pointerup',up);}cv.addEventListener('pointermove',mv);cv.addEventListener('pointerup',up);}));
+  const bgh=cv.querySelector('.bgh');if(bgh)bgh.addEventListener('pointerdown',e=>{e.stopPropagation();pushUndo();const ar=bg.w/bg.h;bgh.setPointerCapture(e.pointerId);function mv(ev){const q=toSvg(ev);const nw=Math.max(60,q.x-bg.x),nh=nw/ar;setBgSizeFromCenter(nw,nh,true);renderAll();}function up(){cv.removeEventListener('pointermove',mv);cv.removeEventListener('pointerup',up);}cv.addEventListener('pointermove',mv);cv.addEventListener('pointerup',up);});
+  cv.querySelectorAll('.anno').forEach(g=>g.addEventListener('pointerdown',e=>{if(mode!=='select')return;e.stopPropagation();const a=annos[+g.dataset.ai];pushUndo();sel={kind:'anno',id:a.id};const ox=toSvg(e).x-a.x,oy=toSvg(e).y-a.y;g.setPointerCapture(e.pointerId);
+    function mv(ev){const q=clampPt(toSvg(ev));a.x=q.x-ox;a.y=q.y-oy;renderAll();}function up(){cv.removeEventListener('pointermove',mv);cv.removeEventListener('pointerup',up);}cv.addEventListener('pointermove',mv);cv.addEventListener('pointerup',up);renderAll();}));
+}
+cv.addEventListener('pointerdown',e=>{
+  if(e.target!==cv&&e.target.tagName!=='image'&&!e.target.classList.contains('canvas'))return;
+  const p=clampPt(toSvg(e));
+  if(mode==='draw'){if(!draft){draft={type:curType,pts:[]};const sn=snapToFlow(p);draft.pts.push(sn||{x:p.x,y:p.y});}else draft.pts.push({x:p.x,y:p.y});renderAll();}
+  else if(mode==='text'){const t=prompt(flT('prompt_text'),'');if(t){pushUndo();annos.push({id:uid++,kind:'text',x:p.x,y:p.y,text:t,size:16,color:'#1A1917'});}renderAll();}
+  else if(mode==='node'){const t=prompt(flT('prompt_node'),'');pushUndo();annos.push({id:uid++,kind:'circle',x:p.x,y:p.y,text:t||'',size:16,color:'#1A1917'});renderAll();}
+  else if(mode==='mark'&&curMark){pushUndo();marks.push({id:uid++,kind:curMark,x:p.x,y:p.y,label:MK[curMark].name});renderAll();}
+  else if(mode==='select'){
+    if(bg&&!sel&&p.x>=bg.x&&p.x<=bg.x+bg.w&&p.y>=bg.y&&p.y<=bg.y+bg.h){sel={kind:'bg'};const ox=p.x-bg.x,oy=p.y-bg.y;cv.setPointerCapture(e.pointerId);function mv(ev){const q=toSvg(ev);bg.x=q.x-ox;bg.y=q.y-oy;renderAll();}function up(){cv.removeEventListener('pointermove',mv);cv.removeEventListener('pointerup',up);}cv.addEventListener('pointermove',mv);cv.addEventListener('pointerup',up);pushUndo();}
+    else{sel=null;syncMode();renderAll();}
+  }
+});
+function snapToFlow(p){let best=null,bd=22;flows.forEach(f=>{const s=samplesOf(f);for(let i=0;i<s.length;i++){const d=Math.hypot(s[i].x-p.x,s[i].y-p.y);if(d<bd){bd=d;best={x:s[i].x,y:s[i].y};}}});return best;}
+cv.addEventListener('dblclick',e=>{if(mode==='draw')finishDraft();});
+window.addEventListener('keydown',e=>{if(e.target.tagName==='INPUT')return;if(e.key==='Enter'&&mode==='draw')finishDraft();else if(e.key==='Escape'){draft=null;sel=null;renderAll();}else if((e.key==='Delete'||e.key==='Backspace')&&sel){pushUndo();if(sel.kind==='flow')flows=flows.filter(f=>f.id!==sel.id);else if(sel.kind==='mark')marks=marks.filter(m=>m.id!==sel.id);else if(sel.kind==='anno')annos=annos.filter(a=>a.id!==sel.id);sel=null;renderAll();}});
+
+/* wheel: scale bg or whole? scale bg if hovering it */
+cv.addEventListener('wheel',e=>{if(!bg)return;const p=toSvg(e);if(p.x>=bg.x&&p.x<=bg.x+bg.w&&p.y>=bg.y&&p.y<=bg.y+bg.h){e.preventDefault();const ar=bg.w/bg.h,f=e.deltaY>0?0.94:1.06;pushUndo();setBgSizeFromCenter(bg.w*f,bg.w*f/ar,true);const pct=Math.round((bg.w/(bg.baseW||bg.w))*100);document.getElementById('bgSize').value=Math.max(20,Math.min(260,pct));renderAll();}},{passive:false});
+
+/* ---- bindings ---- */
+document.querySelectorAll('.eb').forEach(b=>b.onclick=()=>{mode='mark';curMark=b.dataset.mk;draft=null;sel=null;syncMode();renderTypes();renderEnt();});
+document.querySelectorAll('.tpl').forEach(b=>b.onclick=()=>applyTemplate(b.dataset.tpl));
+document.getElementById('selBtn').onclick=()=>{mode='select';curMark=null;draft=null;syncMode();renderTypes();renderEnt();renderAll();};
+document.getElementById('textBtn').onclick=()=>{mode='text';curMark=null;draft=null;sel=null;syncMode();renderTypes();renderEnt();};
+document.getElementById('nodeBtn').onclick=()=>{mode='node';curMark=null;draft=null;sel=null;syncMode();renderTypes();renderEnt();};
+document.getElementById('tSpread').onclick=function(){spreadOn=!spreadOn;this.classList.toggle('on',spreadOn);renderAll();};
+document.getElementById('tNum').onclick=function(){numberOn=!numberOn;this.classList.toggle('on',numberOn);renderAll();};
+document.getElementById('tConflict').onclick=function(){conflictOn=!conflictOn;this.classList.toggle('on',conflictOn);renderAll();};
+document.getElementById('palSel').onchange=e=>{palette=e.target.value;renderAll();};
+document.getElementById('bgBw').onclick=function(){if(bg){bg.bw=!bg.bw;this.classList.toggle('on',bg.bw);renderAll();}};
+document.getElementById('finBtn').onclick=()=>{if(mode==='draw')finishDraft();};
+document.getElementById('undoBtn').onclick=undo;
+document.getElementById('clrBtn').onclick=()=>{if(confirm(flT('toast_clear_confirm'))){pushUndo();flows=[];marks=[];annos=[];draft=null;sel=null;renderAll();}};
+document.getElementById('pngBtn').onclick=dlPNG;document.getElementById('svgBtn').onclick=dlSVG;
+document.getElementById('ctAdd').onclick=()=>{const n=document.getElementById('ctName').value.trim();if(!n)return;const id='c'+Date.now();types.push({id,name:n,color:document.getElementById('ctCol').value});document.getElementById('ctName').value='';curType=id;mode='draw';renderTypes();};
+document.getElementById('sW').oninput=e=>applyStyle('w',+e.target.value);
+document.getElementById('sArr').onchange=e=>applyStyle('arr',e.target.value);
+document.getElementById('sStyle').onchange=e=>applyStyle('style',e.target.value);
+document.getElementById('sGrad').onclick=function(){const o=curStyleObj();o.grad=!o.grad;this.classList.toggle('on',o.grad);renderAll();};
+document.getElementById('sSmooth').onclick=function(){const o=curStyleObj();o.smooth=!o.smooth;this.classList.toggle('on',o.smooth);renderAll();};
+document.getElementById('upBtn').onclick=()=>{const f=document.getElementById('upFile');f.value='';f.click();};
+document.getElementById('upClr').onclick=()=>{bg=null;renderAll();};
+document.getElementById('upFile').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{const im=new Image();im.onload=()=>{pushUndo();const sc=Math.min(900/im.width,620/im.height),w=im.width*sc,h=im.height*sc;bg={href:ev.target.result,x:(VW-w)/2,y:(VH-h)/2,w,h,baseW:w,baseH:h,scale:1,op:+document.getElementById('bgOp').value};document.getElementById('bgSize').value=100;renderAll();};im.src=ev.target.result;};r.readAsDataURL(f);};
+document.getElementById('bgOp').oninput=e=>{if(bg){bg.op=+e.target.value;renderAll();}};
+document.getElementById('bgSize').oninput=e=>{if(bg){const bw=bg.baseW||bg.w,bh=bg.baseH||bg.h,s=(+e.target.value)/100;setBgSizeFromCenter(bw*s,bh*s,true);renderAll();}};
+
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('on');setTimeout(()=>t.classList.remove('on'),1700);}
+
+// ── i18n ──
+let FL_LANG='zh';try{FL_LANG=localStorage.getItem('em_lang')||'zh'}catch(e){}
+const FL_I18N={
+  // brand + title
+  sb_sub:{zh:'流线分析',en:'Circulation'},
+  ttl:{zh:'流线分析',en:'Circulation'},
+  // base plan group
+  sec_baseplan:{zh:'底图',en:'Base plan'},
+  btn_upload:{zh:'上传总平/平面图 ↑',en:'Upload plan ↑'},
+  btn_clear_img:{zh:'清',en:'Clear'},
+  lbl_opacity:{zh:'透明度',en:'Opacity'},
+  lbl_size:{zh:'大小',en:'Size'},
+  tog_bw:{zh:'黑白模式',en:'B&W'},
+  hint_baseplan:{zh:'上传你的场地图当参照(可拖动、拖角缩放)。流线是矢量生成的,可单独导出。',en:'Upload your site plan as reference (draggable, drag corner to scale). Flows are vector-generated and can be exported separately.'},
+  // flow type group
+  sec_flowtype:{zh:'流线类型',en:'Flow type'},
+  ph_type_name:{zh:'自定义类型名',en:'Custom type name'},
+  // entrance group
+  sec_entrance:{zh:'入口标记',en:'Entrance'},
+  ent_ped:{zh:'人行入口',en:'Pedestrian entry'},
+  ent_veh:{zh:'车行入口',en:'Vehicle entry'},
+  ent_bld:{zh:'建筑入口',en:'Building entry'},
+  // annotate group
+  sec_annotate:{zh:'标注',en:'Annotate'},
+  btn_text:{zh:'＋ 文字',en:'＋ Text'},
+  btn_node:{zh:'＋ 圆圈节点',en:'＋ Circle node'},
+  tog_spread:{zh:'多线自动错开',en:'Auto-spread'},
+  tog_number:{zh:'流线编号',en:'Flow numbers'},
+  tog_conflict:{zh:'冲突点',en:'Conflict dots'},
+  hint_annotate:{zh:'画线时第一个点靠近已有流线会自动吸附,可从主干拉出分枝。文字/圆圈可拖动,Delete 删除。',en:'First point near an existing flow snaps automatically; branches can be pulled from a main line. Text/circles draggable, Delete to remove.'},
+  // templates group
+  sec_templates:{zh:'模板骨架',en:'Templates'},
+  tpl_home:{zh:'住宅',en:'Residential'},
+  tpl_school:{zh:'学校',en:'School'},
+  tpl_hospital:{zh:'医院',en:'Hospital'},
+  tpl_office:{zh:'办公',en:'Office'},
+  tpl_landscape:{zh:'景观',en:'Landscape'},
+  tpl_parking:{zh:'停车',en:'Parking'},
+  hint_templates:{zh:'一键铺典型流线骨架,再拖节点贴合你上传的总平面。可叠加多个模板。',en:'One-click typical flow skeleton, then drag nodes to fit your plan. Templates can be stacked.'},
+  // style group
+  lbl_style_default:{zh:'样式 · 默认',en:'Style · Default'},
+  lbl_style_selected:{zh:'样式 · 选中流线',en:'Style · Selected'},
+  lbl_width:{zh:'粗细',en:'Width'},
+  lbl_arrow:{zh:'箭头',en:'Arrow'},
+  lbl_line:{zh:'样式',en:'Line'},
+  opt_arr_end:{zh:'单头',en:'Single'},
+  opt_arr_both:{zh:'双头',en:'Both'},
+  opt_arr_along:{zh:'沿线连续',en:'Along line'},
+  opt_arr_none:{zh:'无',en:'None'},
+  opt_sty_solid:{zh:'实线',en:'Solid'},
+  opt_sty_dashed:{zh:'虚线',en:'Dashed'},
+  opt_sty_dotted:{zh:'点线',en:'Dotted'},
+  opt_sty_double:{zh:'双线',en:'Double'},
+  opt_sty_taper:{zh:'锥形渐变',en:'Tapered'},
+  opt_sty_glow:{zh:'发光',en:'Glow'},
+  opt_sty_sketch:{zh:'手绘',en:'Sketch'},
+  opt_sty_ribbon:{zh:'色带',en:'Ribbon'},
+  tog_grad:{zh:'渐变',en:'Gradient'},
+  tog_smooth:{zh:'平滑曲线',en:'Smooth'},
+  lbl_theme:{zh:'出图风格',en:'Theme'},
+  opt_pal_default:{zh:'默认配色',en:'Default'},
+  opt_pal_classic:{zh:'经典',en:'Classic'},
+  opt_pal_morandi:{zh:'莫兰迪',en:'Morandi'},
+  opt_pal_nordic:{zh:'冷调',en:'Nordic'},
+  opt_pal_warm:{zh:'暖调',en:'Warm'},
+  opt_pal_bold:{zh:'撞色',en:'Bold'},
+  opt_pal_ink:{zh:'墨色',en:'Ink'},
+  // flows group
+  sec_flows:{zh:'流线',en:'Flows'},
+  flows_none:{zh:'暂无',en:'None'},
+  flows_pts:{zh:'点',en:'pts'},
+  // steps hint (split across two spans)
+  hint_steps_1:{zh:'① 点流线类型 → 在图上依次点节点 → 双击/回车/点「完成」结束一条。',en:'① Pick a flow type → click nodes on the map → double-click / Enter / click "Finish" to end one.'},
+  hint_steps_2:{zh:'② 「选择」工具下可拖动节点微调、删除。',en:'② In "Select" mode, drag nodes to fine-tune or delete.'},
+  // topbar buttons
+  btn_finish:{zh:'完成 ✓',en:'Finish ✓'},
+  btn_select:{zh:'选择',en:'Select'},
+  btn_undo:{zh:'UNDO ↶',en:'UNDO ↶'},
+  btn_clear_all:{zh:'CLEAR',en:'CLEAR'},
+  btn_png:{zh:'PNG ↓',en:'PNG ↓'},
+  btn_svg:{zh:'SVG ↓',en:'SVG ↓'},
+  // empty state
+  empty:{zh:'选一个流线类型,在图上点节点连线',en:'SELECT A FLOW TYPE · CLICK TO PLACE NODES'},
+  // toast messages
+  toast_tpl_loaded:{zh:'已载入「{name}」· 拖动节点贴合你的图',en:'Loaded "{name}" · drag nodes to fit'},
+  toast_no_undo:{zh:'没有可撤销的步骤',en:'Nothing to undo'},
+  toast_no_redo:{zh:'没有可重做的步骤',en:'Nothing to redo'},
+  toast_draw_first:{zh:'先画流线',en:'Draw a flow first'},
+  toast_svg_saved:{zh:'SVG 已保存',en:'SVG SAVED'},
+  toast_png_saved:{zh:'PNG 已保存',en:'PNG SAVED'},
+  toast_png_failed:{zh:'PNG 导出失败',en:'PNG failed'},
+  toast_clear_confirm:{zh:'清空全部?',en:'Clear all?'},
+  // prompts
+  prompt_text:{zh:'输入文字 Text:',en:'Enter text:'},
+  prompt_node:{zh:'节点编号/文字(可留空):',en:'Node label (optional):'},
+  // template names (used in toast)
+  tpl_name_home:{zh:'住宅',en:'Residential'},
+  tpl_name_school:{zh:'学校',en:'School'},
+  tpl_name_hospital:{zh:'医院',en:'Hospital'},
+  tpl_name_office:{zh:'办公',en:'Office'},
+  tpl_name_landscape:{zh:'景观',en:'Landscape'},
+  tpl_name_parking:{zh:'停车',en:'Parking'}
+};
+function flT(k){const e=FL_I18N[k];return e?(e[FL_LANG]||e.en):k;}
+function flApplyLang(){
+  document.querySelectorAll('[data-fl-i18n]').forEach(el=>{const k=el.getAttribute('data-fl-i18n');if(FL_I18N[k])el.textContent=flT(k);});
+  document.querySelectorAll('[data-fl-i18n-ph]').forEach(el=>{const k=el.getAttribute('data-fl-i18n-ph');if(FL_I18N[k])el.placeholder=flT(k);});
+  const lb=document.getElementById('langBtn');if(lb)lb.textContent=FL_LANG==='zh'?'EN':'中';
+  if(typeof syncMode==='function')syncMode();
+  if(typeof renderFlowList==='function')renderFlowList();
+}
+function flToggleLang(){FL_LANG=FL_LANG==='zh'?'en':'zh';try{localStorage.setItem('em_lang',FL_LANG)}catch(e){}flApplyLang();}
+document.getElementById('langBtn').onclick=flToggleLang;
+document.addEventListener('DOMContentLoaded',flApplyLang);
+
+renderTypes();renderEnt();renderFlowList();syncMode();syncStyleInputs();renderAll();
+</script>
+<a href="../../index.html" style="position:fixed;left:18px;bottom:18px;z-index:9999;padding:9px 14px;border:1px solid #E5E7EB;border-radius:999px;background:rgba(255,255,255,.92);color:#111827;font:600 11px 'Inter',sans-serif;text-decoration:none;box-shadow:0 8px 24px rgba(0,0,0,.08);backdrop-filter:blur(10px)">← <span>ShArch</span></a>
+</body>
+</html>

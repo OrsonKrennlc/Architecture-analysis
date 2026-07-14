@@ -21,6 +21,16 @@
   - 单张卡片导出：**1080P 高清 PNG (New)**、矢量编辑 SVG（支持 AI 导入二次修改）、PDF。
   - 组合图册导出：**A4 报告 PDF**、**A3 作品集排版图纸**，以及 **3D 爆炸叠合图 (Layered Axonometric PDF)**。
 - **🫧 泡泡图场地分析 (Bubble Analysis) (New)**：内置完全独立的泡泡图互动生成引擎，支持物理力导向布局、关系线绘制、多种气泡样式及配色自定义，支持导出高分辨率无水印 PNG，帮助设计师快速梳理建筑功能关系。
+- **🏗️ 七大建筑工作室工具 (Studio Tools) (New)**：在 `studio/` 目录下集成从概念到图板的全流程建筑制图子工具，全部纯前端运行、无水印、与主项目配色统一互联：
+  - **Site Strategy 场地策略**：在真实底图上绘制竞赛级出入口、视线视锥、分区与流线策略图。
+  - **Floorplan / AXO 平面绘制**：绘制墙、房间、家具、多楼层并导出轴测视图。
+  - **Flow Analysis 流线分析**：人流、车流、后勤、消防与景观游线表达。
+  - **Parti Studio 概念演变**：BIG/OMA 风格的等轴测体块生成序列图，链式操作或一键预设。
+  - **Plan Render 总平上色**：将底图快速转换为高级总平色彩研究。
+  - **Elevation / Section 立面与剖面渲染**：材质填充、地面、天空氛围与配景表达。
+  - **Portfolio Layout 作品集排版**：A1/A2/A3 图板、策略模板与打印就绪导出。
+- **🌐 全站中英双语切换 (New)**：主项目与全部 7 个 Studio 工具均已接入统一的 `em_lang` 语言偏好系统，顶栏一键切换中/EN，所有界面文本、按钮、提示、Toast 消息与动态生成的图例标签均实时双语响应，偏好持久化于 `localStorage`，跨页面保持一致。
+- **🎨 Studio UI 统一设计语言 (New)**：7 个 Studio 工具的 UI 外观（侧栏、按钮、Toast、字体、品牌标识）全部对齐主项目 `styles.css` 的冷灰 + 深蓝（`#2563EB`）配色系统，品牌统一为 ShArch / SA 标识，同时**完整保留各工具内部的功能绘图配色盘**（THEMES / SCHEMES / PALETTES）不受影响。
 
 ---
 
@@ -60,7 +70,35 @@
 
 ## 📈 历代版本更新内容 (Changelog)
 
-### v1.2.2 (当前版本)
+### v1.3.1 (当前版本)
+- **🌐 全站中英双语 i18n 系统**：为全部 7 个 Studio 工具新增独立的中英双语切换控件与翻译字典（`FL_I18N` / `ST_I18N` / `LY_I18N` / `FP_I18N` / `PS_I18N`），加上原有的 `EM_ZH`（立面）与 `T`（Parti）共 7 套子系统，统一共享 `localStorage` 键 `em_lang`，跨页面保持语言偏好一致。所有界面文本、按钮、提示框、Toast 消息与动态生成的图例标签均已双语化。
+- **🎨 Studio UI 统一设计语言**：将 7 个 Studio 工具的 UI 外观（`:root` CSS 变量、侧栏、按钮、Toast、字体、品牌标识）全部对齐主项目 `styles.css` 的冷灰 + 深蓝（`#2563EB`）配色系统：
+  - 统一品牌标识为 "ShArch" + 32×32 蓝底白字 "SA" 方块
+  - 统一字体为 Inter（主体）/ Space Mono（数字与代码）
+  - 统一 Toast 样式为 `padding:12px 24px; border-radius:8px; font:500 13px Inter`
+  - 统一左下角 "← ShArch" 返回链接为冷灰边框 + Inter 字体
+  - **完整保留各工具内部的功能绘图配色盘**（THEMES / SCHEMES / PALETTES / matInfo）不受影响
+- **🔧 OSM API 兼容性修复**：
+  - 修正 `strategy.html` 中 Nominatim 与 Overpass API 的请求头，移除导致 406 报错的 `Accept: application/json` 头，仅保留 `Accept-Language`（与主项目 `app.js` 及参考站点一致）
+  - 改进 `testNet()` 网络检测函数，遍历尝试所有 Overpass 端点而非仅测首个，任一可用即显示"OSM 连接正常"
+  - 所有 OSM API 调用对齐主项目 `app.js` 的格式（GET + `Accept-Language`），添加超时控制与细化的错误提示（403/429/504 分别给出对应建议）
+- **🗺️ 底图统一为 OSM 公共 API**：`strategy.html` 底图瓦片源从 CARTO 切换为 OSM 官方标准瓦片 (`{s}.tile.openstreetmap.org`)，Overpass 端点列表更新为 OSM 官方节点。
+
+### v1.3
+- **🏗️ 新增七大 Studio 工作室工具**：在 `studio/` 目录下集成从场地策略到作品集排版的完整建筑制图工作流，与主项目左侧工具栏无缝互联：
+  - `studio/strategy/strategy.html` 场地策略图（基于 Leaflet 真实底图绘制出入口、视线、分区与流线）
+  - `studio/floorplan/floorplan.html` 平面绘制与轴测导出（基于 Three.js 的多楼层墙体、家具与 AXO 视图）
+  - `studio/flow/flow.html` 流线分析（人流、车流、后勤、消防、景观多类型流线表达）
+  - `studio/parti/parti.html` Parti 概念演变（等轴测体块生成序列与链式操作历史）
+  - `studio/planstudio/planstudio.html` 总平上色（底图快速上色为高级总平色彩研究）
+  - `studio/elevation/elevation.html` 立面与剖面渲染（材质填充、地面、天空氛围与配景）
+  - `studio/layout/layout.html` 作品集排版（A1/A2/A3 图板、策略模板与打印就绪导出）
+- **🔗 工具栏入口扩展**：将原“Diagram Tools”区块升级为“Studio Tools”，统一收纳泡泡图与七大新工具的快捷入口，全部支持中英双语切换。
+- **🌐 路径与依赖本地化**：所有 Studio 工具的第三方依赖（Leaflet、Three.js）已统一替换为与主项目一致的 CDN 引用；每个工具左下角新增悬浮“← ShArch”返回入口，与主项目形成闭环导航。
+- **♻️ 重合功能保留原实现**：主项目原有的 2D/3D 分析、A3 作品集导出 (`exportPortfolio`)、轴测叠加图等保留不变，新 `studio/layout/layout.html` 作为独立的高级排版工具并存，互不影响。
+- **📁 工具独立目录**：每个 Studio 工具均独立存放在 `studio/<tool-name>/` 子文件夹中，便于后续扩展各工具的独立资源（配景素材、字体、JSON 预设等），目录结构清晰、互不干扰。
+
+### v1.2.2
 - **🫧 新增泡泡图场地分析子项目**：在 `bubble-analysis/` 目录下完整复刻了高阶泡泡图 (Bubble Diagram) 生成引擎，支持物理引擎排斥与连线、多种泡泡样式与高阶属性编辑，所有高级功能完全免费解锁且无水印。
 - **🎨 配色与 UI 系统融入**：将泡泡图的左侧工具栏、控制面板与主项目配色系统（冷灰色调及深蓝色主色）进行统一设计，保持一致的视觉体验。
 - **🔗 工具栏无缝互联**：在主项目的左侧工具栏顶部新增了“Bubble Analysis”快捷跳转入口，支持中英双语国际化切换。

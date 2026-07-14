@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>ShArch · Parti Studio</title>
+<style>
+:root{--ink:#111827;--muted:#6B7280;--line:#E5E7EB;--paper:#FAFAFA;--sheet:#FFFFFF;--accent:#2563EB;--soft:#F3F4F6;--shadow:rgba(0,0,0,0.08)}
+*{box-sizing:border-box;margin:0;padding:0}html,body{width:100%;height:100%;overflow:hidden}body{font-family:Inter,"PingFang SC","Microsoft YaHei",system-ui,sans-serif;background:var(--paper);color:var(--ink)}
+button,input,select,textarea{font:inherit;color:inherit}.mono{font-family:"Space Mono",ui-monospace,SFMono-Regular,Consolas,monospace}
+.topbar{height:58px;background:var(--sheet);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:9px;padding:0 14px;position:relative;z-index:20}.brandMark{width:34px;height:34px;border:none;border-radius:8px;background:var(--accent);color:#fff;display:grid;place-items:center;font:700 14px 'Inter',sans-serif}.brand{font-size:16px;font-weight:700;line-height:1;font-family:'Inter',sans-serif}.brand small{display:block;margin-top:2px;font:600 11px 'Inter',sans-serif;letter-spacing:.05em;color:var(--accent)}
+.projectTitle{width:190px;border:1px solid var(--line);background:#fff;border-radius:9px;padding:8px 10px;font-weight:700;outline:none}.tabs{display:flex;border:1px solid var(--line);border-radius:9px;overflow:hidden;background:#fff}.tab{border:0;background:transparent;padding:8px 13px;font:800 9px "Space Mono",monospace;letter-spacing:.05em;cursor:pointer}.tab.on{background:var(--ink);color:#fff}.spacer{flex:1}.topbtn,.primary,.ghostBtn{border:1px solid var(--line);background:#fff;border-radius:9px;padding:8px 11px;font:800 9px "Space Mono",monospace;cursor:pointer;letter-spacing:.04em}.topbtn:hover,.ghostBtn:hover{border-color:var(--ink)}.topbtn:disabled{opacity:.35;cursor:default}.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+.app{height:calc(100% - 58px);display:grid;grid-template-rows:minmax(0,1fr) 132px}.main{min-height:0;display:grid;grid-template-columns:224px minmax(0,1fr) 282px}.left,.right{background:var(--sheet);overflow:auto;padding:12px}.left{border-right:1px solid var(--line)}.right{border-left:1px solid var(--line)}
+.sectionTitle{font:800 9px "Space Mono",monospace;letter-spacing:.16em;color:var(--muted);text-transform:uppercase;margin:13px 2px 8px}.sectionTitle:first-child{margin-top:1px}.toolGrid{display:grid;grid-template-columns:1fr 1fr;gap:7px}.tool,.mass{min-height:58px;border:1px solid var(--line);background:#fff;border-radius:10px;padding:8px;text-align:left;cursor:pointer}.tool:hover,.mass:hover{border-color:var(--ink)}.tool.on{background:var(--ink);color:#fff;border-color:var(--ink)}.tool:disabled{opacity:.42;cursor:default}.tool b,.mass b{font-size:11px;display:block}.tool span,.mass span{display:block;color:var(--muted);font-size:9px;margin-top:3px}.tool.on span{color:#cfd1d5}.full{grid-column:1/-1}.hintBox{border:1px dashed var(--line);border-radius:10px;padding:10px;color:var(--muted);font-size:10px;line-height:1.55;background:#fff}
+.canvasArea{position:relative;overflow:hidden;background:radial-gradient(circle at 52% 44%,#fff 0,#F3F4F6 76%)}#mainSvg{width:100%;height:100%;display:block;touch-action:none}.canvasPill{position:absolute;top:12px;left:50%;transform:translateX(-50%);background:rgba(255,255,255,.94);border:1px solid var(--line);border-radius:999px;padding:7px 12px;font:700 9px "Space Mono",monospace;color:var(--muted);pointer-events:none}.zoomBox{position:absolute;right:14px;bottom:14px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:5px;display:flex;gap:4px}.zoomBox button{width:31px;height:28px;border:0;background:transparent;font-weight:800;cursor:pointer;border-radius:7px}.zoomBox button:hover{background:var(--soft)}
+.card{border:1px solid var(--line);background:#fff;border-radius:12px;padding:11px;margin-bottom:10px}.cardTitle{font-weight:800;font-size:15px}.cardMeta{font:700 9px "Space Mono",monospace;color:var(--muted);line-height:1.5;margin-top:3px}.field{margin-top:10px}.field label{display:flex;align-items:center;justify-content:space-between;font:800 9px "Space Mono",monospace;color:var(--muted);letter-spacing:.08em;margin-bottom:6px}.field input[type=text],.field input[type=number],.field select,.field textarea{width:100%;border:1px solid var(--line);background:#fff;border-radius:8px;padding:8px;outline:none}.field textarea{resize:vertical;min-height:58px}.field input[type=range]{width:100%;height:4px;appearance:none;background:var(--line);border-radius:5px}.field input[type=range]::-webkit-slider-thumb{appearance:none;width:17px;height:17px;border-radius:50%;background:var(--accent);border:2px solid #fff;box-shadow:0 1px 4px var(--shadow);cursor:pointer}.row2{display:grid;grid-template-columns:1fr 1fr;gap:7px}.smallbtn{border:1px solid var(--line);background:#fff;border-radius:8px;padding:8px;font:800 9px "Space Mono",monospace;cursor:pointer}.smallbtn.on{background:var(--ink);color:#fff;border-color:var(--ink)}.apply{width:100%;margin-top:11px;border:0;background:var(--accent);color:#fff;border-radius:9px;padding:10px;font:800 10px "Space Mono",monospace;cursor:pointer}.delete{width:100%;margin-top:8px;border:1px solid rgba(37,99,235,0.3);background:rgba(37,99,235,0.05);color:var(--accent);border-radius:9px;padding:9px;font:800 9px "Space Mono",monospace;cursor:pointer}.palette{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}.sw{height:25px;border:1px solid var(--line);border-radius:7px;cursor:pointer}.sw.on{outline:2px solid var(--ink);outline-offset:1px}.toggleRow{display:flex;align-items:center;justify-content:space-between;margin-top:9px;font:700 10px "Space Mono",monospace;color:var(--muted)}.toggleRow input{accent-color:var(--ink)}
+.timeline{border-top:1px solid var(--line);background:var(--sheet);padding:10px 13px;display:grid;grid-template-columns:145px minmax(0,1fr);gap:10px;overflow:hidden}.timelineIntro{display:flex;flex-direction:column;justify-content:center}.timelineIntro b{font-size:13px}.timelineIntro span{font:700 9px "Space Mono",monospace;color:var(--muted);margin-top:4px;line-height:1.45}.stepStrip{display:flex;gap:8px;overflow-x:auto;padding-bottom:3px}.stepCard{width:150px;flex:0 0 auto;border:1px solid var(--line);background:#fff;border-radius:10px;cursor:pointer;overflow:hidden;position:relative}.stepDelete{position:absolute;right:6px;top:6px;width:27px;height:27px;border:1px solid var(--line);border-radius:8px;background:rgba(255,255,255,.96);color:var(--accent);font-weight:900;cursor:pointer;opacity:1;transition:.15s;z-index:3}.stepDelete:hover{background:rgba(37,99,235,0.08);border-color:var(--accent);transform:scale(1.04)}.canvasArea.boardScroll{overflow:auto}.canvasArea.boardScroll #mainSvg{max-width:none;max-height:none}.stepCard.on{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}.stepThumb{height:73px;background:var(--soft);border-bottom:1px solid var(--line)}.stepThumb svg{width:100%;height:100%;display:block}.stepText{padding:7px 8px;display:grid;grid-template-columns:27px 1fr;gap:5px}.stepNum{font:800 9px "Space Mono",monospace;color:var(--muted)}.stepName{font-size:10px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.emptyTimeline{min-width:300px;border:1px dashed var(--line);border-radius:10px;display:grid;place-items:center;color:var(--muted);font-size:11px}
+.piece{cursor:pointer}.piece.selected .selectRing{display:block}.selectRing{display:none}.ghostShape{fill:none;stroke-dasharray:7 5;vector-effect:non-scaling-stroke}.opArrow{fill:none;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke}.cutGuide{stroke-dasharray:5 4;vector-effect:non-scaling-stroke}.boardTitle{font-weight:800}.boardNote{font:700 8px "Space Mono",monospace;letter-spacing:.05em}.stepLabel{font:800 9px "Space Mono",monospace;letter-spacing:.08em}.toast{position:fixed;left:50%;bottom:148px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:12px 24px;border-radius:8px;font:500 13px 'Inter',sans-serif;letter-spacing:0;opacity:0;pointer-events:none;transition:.3s;z-index:9999;white-space:nowrap;box-shadow:0 4px 12px rgba(0,0,0,0.15)}.toast.show{opacity:1}
+@media(max-width:1000px){.main{grid-template-columns:200px minmax(0,1fr) 250px}.projectTitle{width:145px}.topbar{padding:0 8px}.topbtn{padding:8px}.timeline{grid-template-columns:115px 1fr}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="brandMark">SA</div><div class="brand">ShArch<small>Parti · Concept Evolution</small></div>
+  <input id="projectTitle" class="projectTitle" value="Concept Evolution">
+  <div class="tabs"><button class="tab on" data-view="work">WORK</button><button class="tab" data-view="board">BOARD</button></div>
+  <div class="spacer"></div>
+  <button id="undoBtn" class="topbtn">撤回</button><button id="redoBtn" class="topbtn">重做</button>
+  <button id="saveBtn" class="topbtn">保存</button><button id="loadBtn" class="topbtn">读取</button>
+  <button id="langBtn" class="topbtn">EN</button><button id="exportBtn" class="primary">导出 PNG</button>
+</div>
+<div class="app">
+ <div class="main">
+  <aside class="left" id="leftPanel"></aside>
+  <main class="canvasArea">
+   <div class="canvasPill" id="canvasHint">选择基础体块开始 · 所有步骤保持同一轴测视角</div>
+   <svg id="mainSvg" viewBox="0 0 1180 650" aria-label="Parti canvas"></svg>
+   <div class="zoomBox"><button id="zoomOut">−</button><button id="zoomFit">1:1</button><button id="zoomIn">＋</button></div>
+  </main>
+  <aside class="right" id="rightPanel"></aside>
+ </div>
+ <footer class="timeline"><div class="timelineIntro"><b id="timelineTitle">演变步骤</b><span id="timelineHelp">每次操作自动记录。点击旧步骤只预览，不破坏当前模型。</span></div><div id="stepStrip" class="stepStrip"></div></footer>
+</div>
+<div id="toast" class="toast"></div>
+<script>
+(()=>{
+const W=1180,H=650;
+const COLORS=['#ffffff','#f2eee5','#c9c4b8','#7f97be','#aebed8','#e4b4ad','#ef9777','#d98172','#c6cfad','#8ea38a','#6f8f72','#d5bd8d','#c18f56','#6f7886','#30343a'];
+const PROGRAMS={neutral:'#ffffff',public:'#ef9777',private:'#7f97be',service:'#d5bd8d',circulation:'#e4b4ad',landscape:'#8ea38a',void:'#f2eee5'};
+const STYLES={
+ white:{name:'White Axon',bg:'#fcfbf7',ink:'#17191d',line:'#b9b5ac',accent:'#c8462b',mass:'#ffffff',shadow:'#d8d4cb'},
+ ink:{name:'Ink',bg:'#fcfbf7',ink:'#16181c',line:'#c8c3b9',accent:'#c8462b',mass:'#f5f3ee',shadow:'#c7c2b8'},
+ big:{name:'BIG Warm',bg:'#fff7ec',ink:'#111111',line:'#ddcbb8',accent:'#ff4a2b',mass:'#f2e0c8',shadow:'#c69961'},
+ rhino:{name:'Rhino White',bg:'#f6f6f3',ink:'#111111',line:'#c9c9c3',accent:'#111111',mass:'#ffffff',shadow:'#b8b4aa'},
+ slate:{name:'Slate',bg:'#11151b',ink:'#eaf0f5',line:'#52606d',accent:'#5cc8d8',mass:'#2e3742',shadow:'#1a2027'},
+ sage:{name:'Sage',bg:'#eef0e9',ink:'#1f2a22',line:'#aeb9a8',accent:'#3e8a52',mass:'#e4e7dc',shadow:'#b2bca2'},
+ pastel:{name:'Soft Pastel',bg:'#fbfbfa',ink:'#22252a',line:'#c5c6c8',accent:'#8195bc',mass:'#dce5f0',shadow:'#b9c7d8'},
+ orange:{name:'Orange Mass',bg:'#f3ece2',ink:'#161616',line:'#c8b6a5',accent:'#d4511c',mass:'#f18f69',shadow:'#b84d22'},
+ diagram:{name:'Diagram Line',bg:'#f4f0e8',ink:'#181a1d',line:'#9a9b96',accent:'#b94d3c',mass:'#ffffff',shadow:'#cbc6bb'},
+ dustblue:{name:'Dust Blue',bg:'#f4f7fa',ink:'#263342',line:'#aebdca',accent:'#477aa7',mass:'#dbe7ef',shadow:'#9eb3c3'},
+ redwhite:{name:'Red / White',bg:'#fff9f7',ink:'#562f2b',line:'#d7b7b1',accent:'#a94237',mass:'#ffffff',shadow:'#d8a097'},
+ forest:{name:'Forest Wash',bg:'#f2f5ef',ink:'#243126',line:'#aab7a5',accent:'#537657',mass:'#dfe7da',shadow:'#9cac94'},
+ clay:{name:'Clay Portfolio',bg:'#fbf3ee',ink:'#422e29',line:'#d8bcb1',accent:'#b65f49',mass:'#e7b3a2',shadow:'#b97863'}
+};
+const T={zh:{start:'基础体块',ops:'体块操作',project:'项目',box:'方盒',cylinder:'圆柱',polygon:'多边形',l:'L 形',u:'U 形',courtyard:'围合体块',cut:'分割',move:'移动',lift:'抬升',rotate:'旋转',scale:'缩放',duplicate:'复制',extrude:'拉伸高度',stretch:'非等比缩放',terrace:'退台',courtyardOp:'挖中庭',bridge:'连桥',mirror:'镜像',subtract:'减去',program:'功能着色',new:'新建',selectHint:'先选择一个体块',noMass:'还没有体块',noMassHelp:'从左侧选择基础体块。第一步会自动创建。',selected:'已选体块',steps:'演变步骤',stepHelp:'概念操作确认后才生成步骤；直接拖动只调整当前步骤。',latest:'返回最新步骤',apply:'应用并记录',delete:'删除 / 减去体块',board:'图板设置',layout:'排版',style:'图面风格',ghost:'显示前一步虚影',arrows:'显示操作箭头',ortho:'正交移动',emptySteps:'选择基础体块后开始记录步骤。',viewing:'正在预览旧步骤',viewOnly:'旧步骤为只读，返回最新步骤后继续编辑。'},en:{start:'START MASS',ops:'OPERATIONS',project:'PROJECT',box:'BOX',cylinder:'CYLINDER',polygon:'POLYGON',l:'L SHAPE',u:'U SHAPE',courtyard:'COURTYARD',cut:'CUT',move:'MOVE',lift:'LIFT',rotate:'ROTATE',scale:'SCALE',duplicate:'DUPLICATE',extrude:'EXTRUDE',stretch:'STRETCH',terrace:'TERRACE',courtyardOp:'COURTYARD VOID',bridge:'BRIDGE',mirror:'MIRROR',subtract:'SUBTRACT',program:'PROGRAM',new:'NEW STUDY',selectHint:'SELECT A MASS FIRST',noMass:'NO MASS YET',noMassHelp:'Choose a base mass on the left. Step 01 is created automatically.',selected:'SELECTED MASS',steps:'GENERATION STEPS',stepHelp:'Confirmed concept operations create steps. Direct dragging only adjusts the current step.',latest:'RETURN TO LATEST',apply:'APPLY + RECORD',delete:'DELETE / SUBTRACT MASS',board:'BOARD SETTINGS',layout:'LAYOUT',style:'GRAPHIC STYLE',ghost:'SHOW PREVIOUS GHOST',arrows:'SHOW OPERATION ARROWS',ortho:'ORTHOGONAL MOVE',emptySteps:'Choose a base mass to begin the sequence.',viewing:'VIEWING OLD STEP',viewOnly:'Older steps are read-only. Return to latest to continue editing.'}};
+let state={lang:'zh',view:'work',style:'white',boardLayout:'2x3',zoom:1,showGhost:true,showArrows:true,ortho:true,pieces:[],steps:[],redo:[],selectedId:null,stepFocus:-1,tool:'select',drag:null,id:1,op:{cut:{style:'half',axis:'x',ratio:.5,gap:.18,irregular:.35},move:{x:1,y:0,z:0},lift:{z:1},rotate:{deg:15},scale:{factor:1.2},duplicate:{count:1,axis:'x',spacing:.8},extrude:{height:1},stretch:{x:1.25,y:1,h:1},terrace:{levels:3,axis:'x',rise:.45},courtyardOp:{wall:.22},bridge:{axis:'x',length:2.5,width:1,height:.45,elevation:.65},mirror:{axis:'x',gap:.5},program:{key:'public'}},title:'Concept Evolution'};
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const clone=o=>JSON.parse(JSON.stringify(o)); const uid=()=>`p${state.id++}`; const L=k=>T[state.lang][k]||k;
+function toast(msg){const e=$('#toast');e.textContent=msg;e.classList.add('show');clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('show'),1500)}
+function style(){return STYLES[state.style]||STYLES.white}
+function pieceBaseColor(p){return p&&p.program&&p.program!=='neutral'?(PROGRAMS[p.program]||p.color||style().mass):style().mass}
+function makeBox(o={}){return Object.assign({id:uid(),type:'box',name:'Mass',x:0,y:0,z:0,w:4,d:3,h:2.4,rot:0,color:style().mass,program:'neutral'},o)}
+function makeCylinder(o={}){return Object.assign({id:uid(),type:'cylinder',name:'Cylinder',x:0,y:0,z:0,w:3.2,d:3.2,h:2.5,rot:0,color:style().mass,program:'neutral'},o)}
+function makePolygon(o={}){return Object.assign({id:uid(),type:'polygon',name:'Polygon',x:0,y:0,z:0,w:3.5,d:3.5,h:2.5,rot:0,sides:6,color:style().mass,program:'neutral'},o)}
+function selected(){const p=state.pieces.find(p=>p.id===state.selectedId)||null;return normalizeCourtyard(p)}
+function isLatest(){return state.stepFocus===state.steps.length-1||state.steps.length===0}
+function displayStep(){return state.steps[state.stepFocus]||null}
+function displayPieces(){const s=displayStep();return state.view==='board'?state.pieces:(s?clone(s.pieces):state.pieces)}
+function commit(title,operation,before){const st={id:uid(),title,note:operation.note||'',pieces:clone(state.pieces),operation:clone(operation),beforePieces:clone(before)};state.steps.push(st);state.redo=[];state.stepFocus=state.steps.length-1;saveSilent();renderAll()}
+function updateCurrentStep(adjustedId=null){const st=state.steps.at(-1);if(!st)return;st.pieces=clone(state.pieces);if(adjustedId&&st.operation&&st.operation.targetId===adjustedId&&st.operation.after){const p=state.pieces.find(x=>x.id===adjustedId);if(p){st.operation.after=clone(p);if(st.operation.before)st.operation.vector={x:p.x-st.operation.before.x,y:p.y-st.operation.before.y,z:p.z-st.operation.before.z}}}state.stepFocus=state.steps.length-1;saveSilent();renderAll()}
+function deleteStep(i){
+  if(i<0||i>=state.steps.length)return;
+  state.steps.splice(i,1);
+  state.redo=[];
+  if(!state.steps.length){
+    state.pieces=[];state.stepFocus=-1;
+  }else{
+    state.pieces=clone(state.steps.at(-1).pieces);
+    state.stepFocus=state.steps.length-1;
+  }
+  state.selectedId=null;state.tool='select';saveSilent();renderAll();
+  toast(state.lang==='zh'?'步骤已删除':'STEP DELETED');
+}
+function moveStep(i,dir){const j=i+dir;if(i<0||j<0||i>=state.steps.length||j>=state.steps.length)return;const [st]=state.steps.splice(i,1);state.steps.splice(j,0,st);state.stepFocus=j;saveSilent();renderAll()}
+
+function restoreLast(){if(state.steps.length){state.pieces=clone(state.steps.at(-1).pieces).map(normalizeCourtyard);state.stepFocus=state.steps.length-1}else{state.pieces=[];state.stepFocus=-1}state.selectedId=null;state.tool='select'}
+function undo(){if(!state.steps.length){toast('没有可撤回的步骤');return}state.redo.push(state.steps.pop());restoreLast();renderAll()}
+function redo(){if(!state.redo.length){toast('没有可重做的步骤');return}const s=state.redo.pop();state.steps.push(s);state.pieces=clone(s.pieces).map(normalizeCourtyard);state.stepFocus=state.steps.length-1;renderAll()}
+function returnLatest(){restoreLast();renderAll()}
+function addBase(type){if(!isLatest())return;const before=clone(state.pieces),c=style().mass;let a=[];
+ if(type==='box')a=[makeBox({name:'Base Mass',color:c})];
+ if(type==='cylinder')a=[makeCylinder({name:'Base Cylinder',color:c})];
+ if(type==='polygon')a=[makePolygon({name:'Base Polygon',color:c})];
+ if(type==='l')a=[makeBox({name:'L Wing A',x:-1.2,y:.5,w:1.6,d:3.7,color:c}),makeBox({name:'L Wing B',x:.8,y:-1.05,w:5.6,d:1.5,color:c})];
+ if(type==='u')a=[makeBox({name:'U Left',x:-1.8,y:0,w:1.2,d:4,color:c}),makeBox({name:'U Right',x:1.8,y:0,w:1.2,d:4,color:c}),makeBox({name:'U Back',x:0,y:1.4,w:2.4,d:1.2,color:c})];
+ if(type==='courtyard')a=[makeBox({name:'North',x:0,y:1.65,w:5,d:1.1,color:c}),makeBox({name:'South',x:0,y:-1.65,w:5,d:1.1,color:c}),makeBox({name:'West',x:-1.95,y:0,w:1.1,d:2.2,color:c}),makeBox({name:'East',x:1.95,y:0,w:1.1,d:2.2,color:c})];
+ state.pieces.push(...a);state.selectedId=a[0]?.id||null;commit(state.steps.length?'Add Mass':'Start Mass',{type:'start',afterIds:a.map(x=>x.id),note:type.toUpperCase()},before)}
+function setTool(t){if(!isLatest()){toast(L('viewOnly'));return}if(t!=='select'&&!selected()){toast(L('selectHint'));return}state.tool=t;renderAll()}
+function beforeOp(){return clone(state.pieces)}
+function applyMove(){const p=selected();if(!p)return;const b=beforeOp(),old=clone(p);p.x+=+state.op.move.x;p.y+=+state.op.move.y;p.z+=+state.op.move.z;state.tool='select';commit(`Move ${p.name}`,{type:'move',targetId:p.id,before:old,after:clone(p),vector:{x:p.x-old.x,y:p.y-old.y,z:p.z-old.z}},b)}
+function applyLift(){const p=selected();if(!p)return;const b=beforeOp(),old=clone(p);p.z+=+state.op.lift.z;state.tool='select';commit(`Lift ${p.name}`,{type:'lift',targetId:p.id,before:old,after:clone(p),vector:{x:0,y:0,z:p.z-old.z}},b)}
+function applyRotate(){const p=selected();if(!p)return;const b=beforeOp(),old=clone(p);p.rot=(p.rot||0)+(+state.op.rotate.deg);state.tool='select';commit(`Rotate ${p.name}`,{type:'rotate',targetId:p.id,before:old,after:clone(p),deg:+state.op.rotate.deg},b)}
+function applyScale(){const p=selected();if(!p)return;const b=beforeOp(),old=clone(p),f=+state.op.scale.factor;p.w*=f;p.d*=f;p.h*=f;state.tool='select';commit(`Scale ${p.name}`,{type:'scale',targetId:p.id,before:old,after:clone(p),factor:f},b)}
+function applyExtrude(){const p=selected();if(!p)return;const b=beforeOp(),old=clone(p),dh=+state.op.extrude.height;p.h=Math.max(.2,p.h+dh);state.tool='select';commit(`Extrude ${p.name}`,{type:'extrude',targetId:p.id,before:old,after:clone(p),vector:{x:0,y:0,z:dh}},b)}
+function applyStretch(){const p=selected();if(!p)return;const b=beforeOp(),old=clone(p),fx=+state.op.stretch.x,fy=+state.op.stretch.y,fh=+state.op.stretch.h;p.w=Math.max(.2,p.w*fx);p.d=Math.max(.2,p.d*fy);p.h=Math.max(.2,p.h*fh);state.tool='select';commit(`Stretch ${p.name}`,{type:'stretch',targetId:p.id,before:old,after:clone(p),factor:{x:fx,y:fy,z:fh}},b)}
+function localShift(p,lx,ly){const r=rotxy(lx,ly,p.rot||0);return{x:p.x+r[0],y:p.y+r[1]}}
+function simulateTerrace(p,preview=false){const n=Math.max(2,Math.min(6,Math.round(+state.op.terrace.levels))),axis=state.op.terrace.axis,rise=+state.op.terrace.rise,out=[];for(let i=0;i<n;i++){const q=clone(p);q.id=preview?`terracePreview${i}`:uid();q.name=`${p.name} Terrace ${i+1}`;if(axis==='x'){q.w=p.w/n;const sh=localShift(p,-p.w/2+q.w*(i+.5),0);q.x=sh.x;q.y=sh.y}else{q.d=p.d/n;const sh=localShift(p,0,-p.d/2+q.d*(i+.5));q.x=sh.x;q.y=sh.y}q.z=p.z+i*rise;q.h=Math.max(.28,p.h-i*rise*.5);out.push(q)}return out}
+function applyTerrace(){const p=selected();if(!p)return;const b=beforeOp(),old=clone(p),parts=simulateTerrace(p,false);state.pieces=state.pieces.filter(x=>x.id!==p.id).concat(parts);state.selectedId=parts.at(-1)?.id||null;state.tool='select';commit(`Terrace ${p.name}`,{type:'terrace',targetId:p.id,before:old,created:clone(parts),note:`${parts.length} LEVELS`},b)}
+function courtyardRatio(p){
+  const minSide=Math.max(.2,Math.min(p.w||1,p.d||1));
+  const saved=Number.isFinite(+p.courtyardRatio)?+p.courtyardRatio:(Number.isFinite(+p.wall)?(+p.wall/minSide):.22);
+  return Math.max(.08,Math.min(.44,saved));
+}
+function normalizeCourtyard(p){
+  if(!p||p.type!=='courtyard')return p;
+  p.courtyardRatio=courtyardRatio(p);
+  delete p.wall;delete p.innerW;delete p.innerD;
+  return p;
+}
+function simulateCourtyard(p,preview=false){
+  const q=clone(p);
+  q.id=preview?'courtyardPreview':uid();
+  q.type='courtyard';
+  q.name=`${p.name} Courtyard`;
+  q.courtyardRatio=Math.max(.08,Math.min(.44,+state.op.courtyardOp.wall||.22));
+  delete q.wall;delete q.innerW;delete q.innerD;
+  return [q];
+}
+function applyCourtyardOp(){
+  const p=selected();if(!p)return;
+  const b=beforeOp(),old=clone(p),parts=simulateCourtyard(p,false);
+  state.pieces=state.pieces.filter(x=>x.id!==p.id).concat(parts);
+  state.selectedId=parts[0]?.id||null;state.tool='select';
+  commit(`Courtyard ${p.name}`,{type:'courtyardOp',targetId:p.id,before:old,created:clone(parts),note:'VOID CARVED'},b);
+}
+function simulateBridge(p,preview=false){const q=makeBox();q.id=preview?'bridgePreview':uid();q.name=`${p.name} Bridge`;q.rot=p.rot||0;q.h=+state.op.bridge.height;q.z=p.z+p.h*(+state.op.bridge.elevation);if(state.op.bridge.axis==='x'){q.w=+state.op.bridge.length;q.d=+state.op.bridge.width;const sh=localShift(p,p.w/2+q.w/2,0);q.x=sh.x;q.y=sh.y}else{q.d=+state.op.bridge.length;q.w=+state.op.bridge.width;const sh=localShift(p,0,p.d/2+q.d/2);q.x=sh.x;q.y=sh.y}q.program=p.program;q.color=p.color;return q}
+function applyBridge(){const p=selected();if(!p)return;const b=beforeOp(),old=clone(p),q=simulateBridge(p,false);state.pieces.push(q);state.selectedId=q.id;state.tool='select';commit(`Bridge ${p.name}`,{type:'bridge',targetId:p.id,before:old,created:[clone(q)],vector:{x:q.x-p.x,y:q.y-p.y,z:q.z-p.z}},b)}
+function applyMirror(){const p=selected();if(!p)return;const b=beforeOp(),q=clone(p);q.id=uid();q.name=`${p.name} Mirror`;const gap=+state.op.mirror.gap;if(state.op.mirror.axis==='x'){q.x=Math.abs(p.x)<.01?p.x+p.w+gap:-p.x;q.rot=-(p.rot||0)}else{q.y=Math.abs(p.y)<.01?p.y+p.d+gap:-p.y;q.rot=180-(p.rot||0)}state.pieces.push(q);state.selectedId=q.id;state.tool='select';commit(`Mirror ${p.name}`,{type:'mirror',targetId:p.id,before:clone(p),created:[clone(q)],vector:{x:q.x-p.x,y:q.y-p.y,z:0}},b)}
+
+function applyDuplicate(){const p=selected();if(!p)return;const b=beforeOp(),created=[];for(let i=1;i<=+state.op.duplicate.count;i++){const q=clone(p);q.id=uid();q.name=`${p.name} Copy ${i}`;const sp=+state.op.duplicate.spacing;if(state.op.duplicate.axis==='x')q.x+=i*(p.w+sp);if(state.op.duplicate.axis==='y')q.y+=i*(p.d+sp);if(state.op.duplicate.axis==='z')q.z+=i*(p.h+sp*.35);state.pieces.push(q);created.push(q)}state.selectedId=created.at(-1)?.id||p.id;state.tool='select';commit(`Duplicate ${p.name}`,{type:'duplicate',targetId:p.id,before:clone(p),created:clone(created),vector:created.length?{x:created[0].x-p.x,y:created[0].y-p.y,z:created[0].z-p.z}:null},b)}
+function applySubtract(){const p=selected();if(!p)return;const b=beforeOp(),old=clone(p);state.pieces=state.pieces.filter(x=>x.id!==p.id);state.selectedId=state.pieces[0]?.id||null;state.tool='select';commit(`Subtract ${p.name}`,{type:'subtract',targetId:p.id,before:old,note:'Removed volume'},b)}
+function applyProgram(key){const p=selected();if(!p)return;const b=beforeOp(),old=clone(p);p.program=key;p.color=PROGRAMS[key]||p.color;state.tool='select';commit(`Program · ${key}`,{type:'program',targetId:p.id,before:old,after:clone(p),note:key.toUpperCase()},b)}
+function courtyardLocalRects(p){
+  normalizeCourtyard(p);
+  const ratio=courtyardRatio(p),minSide=Math.max(.2,Math.min(p.w,p.d));
+  const wall=Math.max(.12,Math.min(minSide*.44,minSide*ratio));
+  const iw=Math.max(.18,p.w-wall*2),id=Math.max(.18,p.d-wall*2);
+  return[
+    {cx:0,cy:(p.d-wall)/2,w:p.w,d:wall},
+    {cx:0,cy:-(p.d-wall)/2,w:p.w,d:wall},
+    {cx:-(p.w-wall)/2,cy:0,w:wall,d:id},
+    {cx:(p.w-wall)/2,cy:0,w:wall,d:id}
+  ];
+}
+function assemblyLocalRects(p){
+  if(p.type==='courtyard')return courtyardLocalRects(p);
+  if(p.type==='assembly'&&Array.isArray(p.segments))return p.segments.map(s=>({cx:(s.cx||0)*p.w,cy:(s.cy||0)*p.d,w:Math.max(.02,(s.w||0)*p.w),d:Math.max(.02,(s.d||0)*p.d)}));
+  return[{cx:0,cy:0,w:p.w,d:p.d}];
+}
+function intersectRectRange(rect,axis,min,max){
+  const rmin=axis==='x'?rect.cx-rect.w/2:rect.cy-rect.d/2;
+  const rmax=axis==='x'?rect.cx+rect.w/2:rect.cy+rect.d/2;
+  const lo=Math.max(rmin,min),hi=Math.min(rmax,max);
+  if(hi-lo<.04)return null;
+  const q=Object.assign({},rect);
+  if(axis==='x'){q.cx=(lo+hi)/2;q.w=hi-lo}else{q.cy=(lo+hi)/2;q.d=hi-lo}
+  return q;
+}
+function makeAssemblyFromRects(source,rects,name){
+  if(!rects.length)return null;
+  const minX=Math.min(...rects.map(r=>r.cx-r.w/2)),maxX=Math.max(...rects.map(r=>r.cx+r.w/2));
+  const minY=Math.min(...rects.map(r=>r.cy-r.d/2)),maxY=Math.max(...rects.map(r=>r.cy+r.d/2));
+  const w=Math.max(.04,maxX-minX),d=Math.max(.04,maxY-minY),lcx=(minX+maxX)/2,lcy=(minY+maxY)/2;
+  const sh=localShift(source,lcx,lcy);
+  return{id:uid(),type:'assembly',name,x:sh.x,y:sh.y,z:source.z,w,d,h:source.h,rot:source.rot||0,color:source.color,program:source.program,segments:rects.map(r=>({cx:(r.cx-lcx)/w,cy:(r.cy-lcy)/d,w:r.w/w,d:r.d/d}))};
+}
+function simulateCut(p){
+  let r=state.op.cut.style==='half'?.5:state.op.cut.style==='third'?.333:state.op.cut.style==='quarter'?.25:+state.op.cut.ratio;
+  r=Math.max(.12,Math.min(.88,r));const gap=Math.max(0,+state.op.cut.gap),axis=state.op.cut.axis;
+  if(p.type==='courtyard'||p.type==='assembly'){
+    const rects=assemblyLocalRects(p),half=axis==='x'?p.w:p.d,min=-half/2,max=half/2,cut=min+half*r;
+    const leftRects=rects.map(q=>intersectRectRange(q,axis,min,cut-gap/2)).filter(Boolean);
+    const rightRects=rects.map(q=>intersectRectRange(q,axis,cut+gap/2,max)).filter(Boolean);
+    let a=makeAssemblyFromRects(p,leftRects,p.name+' A'),b=makeAssemblyFromRects(p,rightRects,p.name+' B');
+    if(!a||!b)return [];
+    if(state.op.cut.style==='diagonal'){a.rot-=7;b.rot+=7}
+    if(state.op.cut.style==='irregular'){const q=+state.op.cut.irregular;if(axis==='x'){a.y-=q;b.y+=q;b.h*=.9}else{a.x-=q;b.x+=q;b.h*=.9}b.z+=q*.2}
+    return[a,b];
+  }
+  let a=clone(p),b=clone(p);a.id=uid();b.id=uid();a.type=b.type='box';a.name=p.name+' A';b.name=p.name+' B';
+  if(axis==='x'){a.w=Math.max(.2,p.w*r-gap/2);b.w=Math.max(.2,p.w*(1-r)-gap/2);const sa=localShift(p,-p.w/2+a.w/2,0),sb=localShift(p,p.w/2-b.w/2,0);a.x=sa.x;a.y=sa.y;b.x=sb.x;b.y=sb.y}else{a.d=Math.max(.2,p.d*r-gap/2);b.d=Math.max(.2,p.d*(1-r)-gap/2);const sa=localShift(p,0,-p.d/2+a.d/2),sb=localShift(p,0,p.d/2-b.d/2);a.x=sa.x;a.y=sa.y;b.x=sb.x;b.y=sb.y}
+  if(state.op.cut.style==='diagonal'){a.rot-=7;b.rot+=7}
+  if(state.op.cut.style==='irregular'){const q=+state.op.cut.irregular;if(axis==='x'){a.y-=q;b.y+=q;b.h*=.9}else{a.x-=q;b.x+=q;b.h*=.9}b.z+=q*.2}
+  return[a,b];
+}
+function applyCut(){const p=selected();if(!p)return;const before=beforeOp(),old=clone(p),parts=simulateCut(p);if(parts.length<2){toast(state.lang==='zh'?'当前切割无法生成有效体块':'CUT COULD NOT CREATE VALID MASSES');return}state.pieces=state.pieces.filter(x=>x.id!==p.id).concat(parts);state.selectedId=parts[1].id;state.tool='select';commit(`Cut ${p.name}`,{type:'cut',targetId:p.id,before:old,created:clone(parts),axis:state.op.cut.axis,ratio:+state.op.cut.ratio,style:state.op.cut.style},before)}
+function updatePiece(key,val,record=false){const p=selected();if(!p)return;const before=beforeOp(),old=clone(p);if(key==='name')p.name=val;else p[key]=typeof val==='number'?val:+val;renderCanvas();if(record)commit(`Adjust ${p.name}`,{type:'adjust',targetId:p.id,before:old,after:clone(p)},before)}
+function setOp(group,key,val){state.op[group][key]=isNaN(+val)?val:+val;renderCanvas()}
+function iso(x,y,z,u=49,ox=590,oy=405){return[(x-y)*u+ox,(x+y)*u*.5-z*u+oy]}
+function rotxy(x,y,d){const r=d*Math.PI/180,c=Math.cos(r),s=Math.sin(r);return[x*c-y*s,x*s+y*c]}
+function boxCorners(p){const a=[[-p.w/2,-p.d/2],[p.w/2,-p.d/2],[p.w/2,p.d/2],[-p.w/2,p.d/2]];return a.map(v=>{const r=rotxy(v[0],v[1],p.rot||0);return[p.x+r[0],p.y+r[1]]})}
+function shade(hex,n){hex=hex.replace('#','');if(hex.length===3)hex=hex.split('').map(x=>x+x).join('');let v=parseInt(hex,16),r=(v>>16)+n,g=((v>>8)&255)+n,b=(v&255)+n;return'#'+[r,g,b].map(x=>Math.max(0,Math.min(255,x)).toString(16).padStart(2,'0')).join('')}
+function path(pts){return'M'+pts.map(p=>p.map(v=>v.toFixed(1)).join(' ')).join(' L')+' Z'}
+function drawBox(p,ctx={},ghost=false){const u=ctx.u||49,ox=ctx.ox||590,oy=ctx.oy||405,corners=boxCorners(p),top=corners.map(q=>iso(q[0],q[1],p.z+p.h,u,ox,oy)),bot=corners.map(q=>iso(q[0],q[1],p.z,u,ox,oy));const ed=[0,1,2,3].map(i=>{const j=(i+1)%4;return{i,j,y:(top[i][1]+top[j][1])/2,x:(top[i][0]+top[j][0])/2}}).sort((a,b)=>b.y-a.y).slice(0,2).sort((a,b)=>a.x-b.x);const base=pieceBaseColor(p),sel=p.id===state.selectedId&&isLatest()&&state.view==='work';if(ghost){return `<g class="ghostShape" stroke="${style().accent}" opacity=".7"><path d="${path(top)}"/><path d="${path([top[ed[0].i],top[ed[0].j],bot[ed[0].j],bot[ed[0].i]])}"/><path d="${path([top[ed[1].i],top[ed[1].j],bot[ed[1].j],bot[ed[1].i]])}"/></g>`}
+ return `<g class="piece ${sel?'selected':''}" data-id="${p.id}"><path d="${path([top[ed[0].i],top[ed[0].j],bot[ed[0].j],bot[ed[0].i]])}" fill="${shade(base,-19)}"/><path d="${path([top[ed[1].i],top[ed[1].j],bot[ed[1].j],bot[ed[1].i]])}" fill="${shade(base,-30)}"/><path d="${path(top)}" fill="${shade(base,-4)}"/><path class="selectRing" d="${path(top)}" fill="none" stroke="${style().ink}" stroke-width="2" vector-effect="non-scaling-stroke"/></g>`}
+
+function drawCylinder(p,ctx={},ghost=false){const u=ctx.u||49,ox=ctx.ox||590,oy=ctx.oy||405,t=iso(p.x,p.y,p.z+p.h,u,ox,oy),b=iso(p.x,p.y,p.z,u,ox,oy),rx=p.w*u*.46,ry=p.d*u*.23,base=pieceBaseColor(p);if(ghost)return `<g fill="none" stroke="${style().accent}" stroke-dasharray="7 5" opacity=".7"><ellipse cx="${t[0]}" cy="${t[1]}" rx="${rx}" ry="${ry}"/><path d="M${t[0]-rx} ${t[1]}V${b[1]}M${t[0]+rx} ${t[1]}V${b[1]}"/></g>`;return `<g class="piece" data-id="${p.id}"><path d="M${t[0]-rx} ${t[1]}V${b[1]}A${rx} ${ry} 0 0 0 ${t[0]+rx} ${b[1]}V${t[1]}" fill="${shade(base,-24)}"/><ellipse cx="${t[0]}" cy="${t[1]}" rx="${rx}" ry="${ry}" fill="${shade(base,-4)}"/></g>`}
+function drawPolygon(p,ctx={},ghost=false){const n=p.sides||6,pts=[];for(let i=0;i<n;i++){const a=Math.PI*2*i/n+Math.PI/6,rr=rotxy(Math.cos(a)*p.w/2,Math.sin(a)*p.d/2,p.rot||0);pts.push([p.x+rr[0],p.y+rr[1]])}const u=ctx.u||49,ox=ctx.ox||590,oy=ctx.oy||405,top=pts.map(q=>iso(q[0],q[1],p.z+p.h,u,ox,oy)),bot=pts.map(q=>iso(q[0],q[1],p.z,u,ox,oy)),base=pieceBaseColor(p);if(ghost)return `<path d="${path(top)}" fill="none" stroke="${style().accent}" stroke-dasharray="7 5" opacity=".7"/>`;let h='';const edges=[...Array(n)].map((_,i)=>({i,j:(i+1)%n,y:(top[i][1]+top[(i+1)%n][1])/2})).sort((a,b)=>b.y-a.y).slice(0,3);edges.forEach((e,k)=>h+=`<path d="${path([top[e.i],top[e.j],bot[e.j],bot[e.i]])}" fill="${shade(base,-18-k*6)}"/>`);return `<g class="piece" data-id="${p.id}">${h}<path d="${path(top)}" fill="${shade(base,-4)}"/></g>`}
+function courtyardBars(p){
+  normalizeCourtyard(p);
+  const ratio=courtyardRatio(p),minSide=Math.max(.2,Math.min(p.w,p.d));
+  const wall=Math.max(.12,Math.min(minSide*.44,minSide*ratio));
+  const innerW=Math.max(.18,p.w-wall*2),innerD=Math.max(.18,p.d-wall*2);
+  const make=(name,lx,ly,w,d)=>{const sh=localShift(p,lx,ly);return{id:`${p.id}_${name}`,type:'box',name,x:sh.x,y:sh.y,z:p.z,w,d,h:p.h,rot:p.rot||0,color:p.color,program:p.program}};
+  return[
+    make('north',0,(p.d-wall)/2,p.w,wall),
+    make('south',0,-(p.d-wall)/2,p.w,wall),
+    make('west',-(p.w-wall)/2,0,wall,innerD),
+    make('east',(p.w-wall)/2,0,wall,innerD)
+  ];
+}
+function courtyardBoxFaces(bar,ctx={}){
+  const u=ctx.u||49,ox=ctx.ox||590,oy=ctx.oy||405,corners=boxCorners(bar);
+  const top=corners.map(q=>({world:[q[0],q[1],bar.z+bar.h],screen:iso(q[0],q[1],bar.z+bar.h,u,ox,oy)}));
+  const bot=corners.map(q=>({world:[q[0],q[1],bar.z],screen:iso(q[0],q[1],bar.z,u,ox,oy)}));
+  const faces=[{kind:'top',points:top.map(q=>q.screen),depth:top.reduce((s,q)=>s+q.world[0]+q.world[1]+q.world[2],0)/4,normal:[0,0,1]}];
+  const normals=[[0,-1],[1,0],[0,1],[-1,0]];
+  for(let i=0;i<4;i++){
+    const j=(i+1)%4,n=rotxy(normals[i][0],normals[i][1],bar.rot||0);
+    if(n[0]+n[1]<=.0001)continue;
+    const verts=[top[i],top[j],bot[j],bot[i]];
+    faces.push({kind:'side',points:verts.map(q=>q.screen),depth:verts.reduce((s,q)=>s+q.world[0]+q.world[1]+q.world[2],0)/4,normal:[n[0],n[1],0]});
+  }
+  return faces;
+}
+function drawCourtyard(p,ctx={},ghost=false){
+  normalizeCourtyard(p);
+  const ratio=courtyardRatio(p),minSide=Math.max(.2,Math.min(p.w,p.d));
+  const wall=Math.max(.12,Math.min(minSide*.44,minSide*ratio));
+  const iw=Math.max(.18,p.w-wall*2),id=Math.max(.18,p.d-wall*2);
+  const u=ctx.u||49,ox=ctx.ox||590,oy=ctx.oy||405;
+  const world=(x,y,z)=>{const r=rotxy(x,y,p.rot||0);return [p.x+r[0],p.y+r[1],z]};
+  const scr=q=>iso(q[0],q[1],q[2],u,ox,oy);
+  const outerLocal=[[-p.w/2,-p.d/2],[p.w/2,-p.d/2],[p.w/2,p.d/2],[-p.w/2,p.d/2]];
+  const innerLocal=[[-iw/2,-id/2],[iw/2,-id/2],[iw/2,id/2],[-iw/2,id/2]];
+  const outerTopW=outerLocal.map(q=>world(q[0],q[1],p.z+p.h));
+  const outerBotW=outerLocal.map(q=>world(q[0],q[1],p.z));
+  const innerTopW=innerLocal.map(q=>world(q[0],q[1],p.z+p.h));
+  const innerBotW=innerLocal.map(q=>world(q[0],q[1],p.z));
+  const outerTop=outerTopW.map(scr),outerBot=outerBotW.map(scr),innerTop=innerTopW.map(scr),innerBot=innerBotW.map(scr);
+  const ring=`M${outerTop.map(v=>v.join(' ')).join(' L')} Z M${[...innerTop].reverse().map(v=>v.join(' ')).join(' L')} Z`;
+  const innerLoop=`M${innerTop.map(v=>v.join(' ')).join(' L')} Z`;
+  if(ghost){
+    return `<g class="ghostShape" fill="none" stroke="${style().accent}" stroke-dasharray="7 5" opacity=".72"><path d="${ring}" fill-rule="evenodd"/><path d="${innerLoop}"/></g>`;
+  }
+  const sel=p.id===state.selectedId&&isLatest()&&state.view==='work',base=pieceBaseColor(p);
+  const outerEdges=[0,1,2,3].map(i=>{const j=(i+1)%4;return{i,j,y:(outerTop[i][1]+outerTop[j][1])/2,x:(outerTop[i][0]+outerTop[j][0])/2}}).sort((a,b)=>b.y-a.y).slice(0,2).sort((a,b)=>a.x-b.x);
+  const innerEdges=[0,1,2,3].map(i=>{const j=(i+1)%4;return{i,j,y:(innerTop[i][1]+innerTop[j][1])/2,x:(innerTop[i][0]+innerTop[j][0])/2}}).sort((a,b)=>a.y-b.y).slice(0,2).sort((a,b)=>a.x-b.x);
+  let h=`<g class="piece ${sel?'selected':''}" data-id="${p.id}">`;
+  innerEdges.forEach((e,k)=>{
+    h+=`<path d="${path([innerTop[e.i],innerTop[e.j],innerBot[e.j],innerBot[e.i]])}" fill="${shade(base,k? -24:-14)}"/>`;
+  });
+  outerEdges.forEach((e,k)=>{
+    h+=`<path d="${path([outerTop[e.i],outerTop[e.j],outerBot[e.j],outerBot[e.i]])}" fill="${shade(base,k? -30:-19)}"/>`;
+  });
+  h+=`<path d="${ring}" fill="${shade(base,-4)}" fill-rule="evenodd"/>`;
+  h+=`<path d="${innerLoop}" fill="none" stroke="${style().line}" stroke-width="1.2" opacity=".65" vector-effect="non-scaling-stroke"/>`;
+  if(sel)h+=`<path class="selectRing" d="${ring}" fill="none" fill-rule="evenodd" stroke="${style().ink}" stroke-width="2" vector-effect="non-scaling-stroke"/>`;
+  h+='</g>';return h;
+}
+function assemblyBoxes(p){return (p.segments||[]).map((s,i)=>{const sh=localShift(p,(s.cx||0)*p.w,(s.cy||0)*p.d);return{id:`${p.id}_seg${i}`,type:'box',name:p.name,x:sh.x,y:sh.y,z:p.z,w:Math.max(.03,(s.w||0)*p.w),d:Math.max(.03,(s.d||0)*p.d),h:p.h,rot:p.rot||0,color:p.color,program:p.program}})}
+function assemblyBoundaryLoops(p){
+  const rects=assemblyLocalRects(p);
+  const clean=v=>Math.round(v*1000000)/1000000;
+  const uniq=a=>[...new Set(a.map(clean))].sort((x,y)=>x-y);
+  const xs=uniq(rects.flatMap(r=>[r.cx-r.w/2,r.cx+r.w/2]));
+  const ys=uniq(rects.flatMap(r=>[r.cy-r.d/2,r.cy+r.d/2]));
+  const nx=Math.max(0,xs.length-1),ny=Math.max(0,ys.length-1);
+  const inside=Array.from({length:nx},()=>Array(ny).fill(false));
+  for(let i=0;i<nx;i++)for(let j=0;j<ny;j++){
+    const cx=(xs[i]+xs[i+1])/2,cy=(ys[j]+ys[j+1])/2;
+    inside[i][j]=rects.some(r=>cx>r.cx-r.w/2-1e-7&&cx<r.cx+r.w/2+1e-7&&cy>r.cy-r.d/2-1e-7&&cy<r.cy+r.d/2+1e-7);
+  }
+  const edges=[];
+  const add=(a,b)=>edges.push({a:[clean(a[0]),clean(a[1])],b:[clean(b[0]),clean(b[1])]});
+  for(let i=0;i<nx;i++)for(let j=0;j<ny;j++)if(inside[i][j]){
+    const x0=xs[i],x1=xs[i+1],y0=ys[j],y1=ys[j+1];
+    if(j===0||!inside[i][j-1])add([x0,y0],[x1,y0]);
+    if(i===nx-1||!inside[i+1][j])add([x1,y0],[x1,y1]);
+    if(j===ny-1||!inside[i][j+1])add([x1,y1],[x0,y1]);
+    if(i===0||!inside[i-1][j])add([x0,y1],[x0,y0]);
+  }
+  const key=p=>p[0].toFixed(6)+','+p[1].toFixed(6),byStart=new Map();
+  edges.forEach((e,i)=>{const k=key(e.a);if(!byStart.has(k))byStart.set(k,[]);byStart.get(k).push(i)});
+  const used=new Set(),loops=[];
+  for(let seed=0;seed<edges.length;seed++){
+    if(used.has(seed))continue;
+    const loop=[],first=edges[seed];let idx=seed,current=first.a,guard=0;
+    while(idx!=null&&!used.has(idx)&&guard++<edges.length+8){
+      const e=edges[idx];used.add(idx);if(!loop.length)loop.push(e.a);loop.push(e.b);current=e.b;
+      if(key(current)===key(first.a))break;
+      const cand=(byStart.get(key(current))||[]).find(n=>!used.has(n));idx=cand==null?null:cand;
+    }
+    if(loop.length>3){
+      if(key(loop[0])===key(loop[loop.length-1]))loop.pop();
+      let pts=loop.slice(),changed=true;
+      while(changed&&pts.length>3){changed=false;for(let i=0;i<pts.length;i++){
+        const a=pts[(i-1+pts.length)%pts.length],b=pts[i],c=pts[(i+1)%pts.length];
+        if(Math.abs((b[0]-a[0])*(c[1]-b[1])-(b[1]-a[1])*(c[0]-b[0]))<1e-7){pts.splice(i,1);changed=true;break}
+      }}
+      loops.push(pts);
+    }
+  }
+  return loops;
+}
+function drawAssembly(p,ctx={},ghost=false){
+  const loops=assemblyBoundaryLoops(p),u=ctx.u||49,ox=ctx.ox||590,oy=ctx.oy||405;
+  const world=(q,z)=>{const r=rotxy(q[0],q[1],p.rot||0);return [p.x+r[0],p.y+r[1],z]};
+  const screen=(q,z)=>{const w=world(q,z);return iso(w[0],w[1],w[2],u,ox,oy)};
+  const topLoops=loops.map(loop=>loop.map(q=>screen(q,p.z+p.h)));
+  const topPath=topLoops.map(loop=>'M'+loop.map(v=>v.map(n=>n.toFixed(1)).join(' ')).join(' L')+' Z').join(' ');
+  if(ghost){
+    let sides='';loops.forEach(loop=>loop.forEach((a,i)=>{const b=loop[(i+1)%loop.length],dx=b[0]-a[0],dy=b[1]-a[1],len=Math.hypot(dx,dy)||1,n=rotxy(dy/len,-dx/len,p.rot||0);if(n[0]+n[1]>.0001){const at=screen(a,p.z+p.h),bt=screen(b,p.z+p.h),bb=screen(b,p.z),ab=screen(a,p.z);sides+=`<path d="${path([at,bt,bb,ab])}"/>`}}));
+    return `<g class="ghostShape assemblyGhost" fill="none" stroke="${style().accent}" stroke-dasharray="7 5" opacity=".72"><path d="${topPath}" fill-rule="evenodd"/>${sides}</g>`;
+  }
+  const base=pieceBaseColor(p),sel=p.id===state.selectedId&&isLatest()&&state.view==='work',faces=[];
+  loops.forEach(loop=>loop.forEach((a,i)=>{const b=loop[(i+1)%loop.length],dx=b[0]-a[0],dy=b[1]-a[1],len=Math.hypot(dx,dy)||1,n=rotxy(dy/len,-dx/len,p.rot||0);if(n[0]+n[1]>.0001){const aw=world(a,p.z+p.h),bw=world(b,p.z+p.h),at=iso(aw[0],aw[1],aw[2],u,ox,oy),bt=iso(bw[0],bw[1],bw[2],u,ox,oy),bb=screen(b,p.z),ab=screen(a,p.z);faces.push({pts:[at,bt,bb,ab],depth:(aw[0]+aw[1]+bw[0]+bw[1])/2,shade:n[0]>n[1]?-19:-30})}}));
+  faces.sort((a,b)=>a.depth-b.depth);
+  let h=`<g class="piece ${sel?'selected':''}" data-id="${p.id}">`;
+  faces.forEach(f=>h+=`<path d="${path(f.pts)}" fill="${shade(base,f.shade)}"/>`);
+  h+=`<path class="assemblyTop" d="${topPath}" fill="${shade(base,-4)}" fill-rule="evenodd"/>`;
+  if(sel)h+=`<path class="selectRing" d="${topPath}" fill="none" fill-rule="evenodd" stroke="${style().ink}" stroke-width="2" vector-effect="non-scaling-stroke"/>`;
+  h+='</g>';return h;
+}
+function drawPiece(p,ctx,ghost=false){if(p.type==='courtyard')return drawCourtyard(p,ctx,ghost);if(p.type==='assembly')return drawAssembly(p,ctx,ghost);if(p.type==='cylinder')return drawCylinder(p,ctx,ghost);if(p.type==='polygon')return drawPolygon(p,ctx,ghost);return drawBox(p,ctx,ghost)}
+function drawGround(ctx={}){const u=ctx.u||49,ox=ctx.ox||590,oy=ctx.oy||405,a=iso(-5,-4,0,u,ox,oy),b=iso(5,-4,0,u,ox,oy),c=iso(5,4,0,u,ox,oy),d=iso(-5,4,0,u,ox,oy);return `<path d="${path([a,b,c,d])}" fill="none" stroke="${style().line}" stroke-dasharray="7 5"/><path d="M${a[0]} ${a[1]}L${d[0]} ${d[1]}L${c[0]} ${c[1]}" fill="none" stroke="${style().line}" opacity=".45"/>`}
+function arrow(from,to,ctx={}){const a=iso(from.x,from.y,from.z,ctx.u||49,ctx.ox||590,ctx.oy||405),b=iso(to.x,to.y,to.z,ctx.u||49,ctx.ox||590,ctx.oy||405),ang=Math.atan2(b[1]-a[1],b[0]-a[0]),s=10,p1=[b[0]-Math.cos(ang-.55)*s,b[1]-Math.sin(ang-.55)*s],p2=[b[0]-Math.cos(ang+.55)*s,b[1]-Math.sin(ang+.55)*s];return `<g stroke="${style().accent}" stroke-width="2" class="opArrow"><path d="M${a[0]} ${a[1]}L${b[0]} ${b[1]}"/><path d="M${p1[0]} ${p1[1]}L${b[0]} ${b[1]}L${p2[0]} ${p2[1]}"/></g>`}
+function annotation(op,ctx={}){if(!op)return'';let h='';if(state.showGhost&&op.before)h+=drawPiece(op.before,ctx,true);if(state.showArrows&&op.before&&op.after){const a={x:op.before.x,y:op.before.y,z:op.before.z+op.before.h*.55},b={x:op.after.x,y:op.after.y,z:op.after.z+op.after.h*.55};if(op.type==='move'||op.type==='lift')h+=arrow(a,b,ctx)}if(state.showArrows&&op.type==='duplicate'&&op.before&&op.created?.[0])h+=arrow({x:op.before.x,y:op.before.y,z:op.before.z+op.before.h*.55},{x:op.created[0].x,y:op.created[0].y,z:op.created[0].z+op.created[0].h*.55},ctx);if(op.type==='cut'&&op.before){const p=op.before,c=iso(p.x,p.y,p.z+p.h+.02,ctx.u||49,ctx.ox||590,ctx.oy||405);h+=`<path class="cutGuide" d="M${c[0]-42} ${c[1]-10}L${c[0]+42} ${c[1]+10}" stroke="${style().accent}" stroke-width="2"/>`}if(op.type==='subtract'&&op.before)h+=drawPiece(Object.assign({},op.before,{color:'#d96b5a'}),ctx,true);return h}
+function scene(pieces,op,ctx={}){let h=drawGround(ctx);pieces.slice().sort((a,b)=>(a.x+a.y+a.z)-(b.x+b.y+b.z)).forEach(p=>h+=drawPiece(p,ctx,false));h+=annotation(op,ctx);return h}
+function projectedPiecePoints(p){const pts=[];if(!p)return pts;if(p.type==='cylinder'){for(let i=0;i<20;i++){const a=Math.PI*2*i/20,x=p.x+Math.cos(a)*p.w/2,y=p.y+Math.sin(a)*p.d/2;pts.push(iso(x,y,p.z,1,0,0),iso(x,y,p.z+p.h,1,0,0))}}else if(p.type==='polygon'){const n=p.sides||6;for(let i=0;i<n;i++){const a=Math.PI*2*i/n+Math.PI/6,r=rotxy(Math.cos(a)*p.w/2,Math.sin(a)*p.d/2,p.rot||0),x=p.x+r[0],y=p.y+r[1];pts.push(iso(x,y,p.z,1,0,0),iso(x,y,p.z+p.h,1,0,0))}}else{boxCorners(p).forEach(q=>{pts.push(iso(q[0],q[1],p.z,1,0,0),iso(q[0],q[1],p.z+p.h,1,0,0))})}return pts}
+function sceneProjectedBounds(steps){const pts=[];[[-5,-4],[5,-4],[5,4],[-5,4]].forEach(q=>pts.push(iso(q[0],q[1],0,1,0,0)));(steps||[]).forEach(st=>{(st.pieces||[]).forEach(p=>pts.push(...projectedPiecePoints(p)));const op=st.operation||{};if(op.before)pts.push(...projectedPiecePoints(op.before));(op.created||[]).forEach(p=>pts.push(...projectedPiecePoints(p)));if(op.after)pts.push(...projectedPiecePoints(op.after))});if(!pts.length)return{minX:-9,maxX:9,minY:-2,maxY:7};return{minX:Math.min(...pts.map(p=>p[0])),maxX:Math.max(...pts.map(p=>p[0])),minY:Math.min(...pts.map(p=>p[1])),maxY:Math.max(...pts.map(p=>p[1]))}}
+function fitSceneContext(bounds,x,y,w,h,top=34,pad=18){const bw=Math.max(.1,bounds.maxX-bounds.minX),bh=Math.max(.1,bounds.maxY-bounds.minY),uw=Math.max(20,w-pad*2),uh=Math.max(20,h-top-pad),u=Math.min(uw/bw,uh/bh),cx=(bounds.minX+bounds.maxX)/2,cy=(bounds.minY+bounds.maxY)/2;return{u,ox:x+w/2-cx*u,oy:y+top+(h-top)/2-cy*u}}
+function boardMetrics(){const n=Math.max(1,state.steps.length);let cols=2;if(state.boardLayout==='3x3')cols=3;else if(state.boardLayout==='column')cols=1;else if(state.boardLayout==='row')cols=n;const margin=45,gap=20,header=70,cw=state.boardLayout==='row'?360:(cols===1?Math.max(760,W-margin*2):(W-margin*2-gap*(cols-1))/cols),ch=255,rows=Math.max(1,Math.ceil(n/cols)),w=state.boardLayout==='row'?margin*2+cols*cw+(cols-1)*gap:W,h=header+margin+rows*ch+(rows-1)*gap;return{n,cols,rows,margin,gap,header,cw,ch,w,h}}
+
+function previewPieces(){if(!selected()||!isLatest())return state.pieces;const base=clone(state.pieces),p=base.find(x=>x.id===state.selectedId);if(!p)return state.pieces;if(state.tool==='cut')return state.pieces.filter(x=>x.id!==state.selectedId).concat(simulateCutPreview(selected()));if(state.tool==='move'){p.x+=+state.op.move.x;p.y+=+state.op.move.y;p.z+=+state.op.move.z;return base}if(state.tool==='lift'){p.z+=+state.op.lift.z;return base}if(state.tool==='rotate'){p.rot+=+state.op.rotate.deg;return base}if(state.tool==='scale'){const f=+state.op.scale.factor;p.w*=f;p.d*=f;p.h*=f;return base}if(state.tool==='extrude'){p.h=Math.max(.2,p.h+(+state.op.extrude.height));return base}if(state.tool==='stretch'){p.w*=+state.op.stretch.x;p.d*=+state.op.stretch.y;p.h*=+state.op.stretch.h;return base}if(state.tool==='terrace')return state.pieces.filter(x=>x.id!==state.selectedId).concat(simulateTerrace(selected(),true));if(state.tool==='courtyardOp')return state.pieces.filter(x=>x.id!==state.selectedId).concat(simulateCourtyard(selected(),true));if(state.tool==='bridge')return state.pieces.concat(simulateBridge(selected(),true));if(state.tool==='mirror'){const q=clone(selected()),gap=+state.op.mirror.gap;q.id='mirrorPreview';if(state.op.mirror.axis==='x'){q.x=Math.abs(q.x)<.01?q.x+q.w+gap:-q.x;q.rot=-(q.rot||0)}else{q.y=Math.abs(q.y)<.01?q.y+q.d+gap:-q.y;q.rot=180-(q.rot||0)}return state.pieces.concat(q)}return state.pieces}
+function simulateCutPreview(p){const saved=state.id,parts=simulateCut(clone(p));state.id=saved;parts.forEach((x,i)=>x.id=`preview${i}`);return parts}
+function renderCanvas(){const svg=$('#mainSvg'),s=style(),area=svg.parentElement;svg.style.background=s.bg;if(state.view==='board'){const m=boardMetrics();area.classList.add('boardScroll');svg.setAttribute('viewBox',`0 0 ${m.w} ${m.h}`);if(state.boardLayout==='row'){svg.style.width=m.w+'px';svg.style.height=m.h+'px'}else{const dw=Math.max(320,area.clientWidth||W);svg.style.width='100%';svg.style.height=Math.round(m.h*dw/m.w)+'px'}svg.innerHTML=renderBoard(m);return}area.classList.remove('boardScroll');svg.setAttribute('viewBox',`0 0 ${W} ${H}`);svg.style.width='100%';svg.style.height='100%';const st=displayStep(),pieces=isLatest()?previewPieces():clone(st?.pieces||[]),op=isLatest()?(state.steps.at(-1)?.operation||null):(st?.operation||null);let h=`<rect width="${W}" height="${H}" fill="${s.bg}"/>`;if(!pieces.length)h+=`<g text-anchor="middle"><text x="590" y="298" font-size="28" font-weight="800" fill="${s.ink}">${state.lang==='zh'?'选择一个基础体块':'CHOOSE A START MASS'}</text><text x="590" y="330" font-size="12" fill="${s.line}">${state.lang==='zh'?'从基础体块开始，确认概念操作后生成步骤':'Start with a mass. Confirm concept operations to create steps.'}</text></g>`;else h+=`<g transform="translate(0 0) scale(${state.zoom}) translate(${(1-state.zoom)*590/state.zoom} ${(1-state.zoom)*350/state.zoom})">${scene(pieces,op)}</g>`;if(!isLatest())h+=`<g><rect x="18" y="18" width="220" height="49" rx="11" fill="#fff" stroke="${s.line}"/><text x="32" y="38" font-size="10" font-weight="800" fill="${s.accent}">${L('viewing')}</text><text x="32" y="55" font-size="9" fill="${s.ink}">${st?.title||''}</text></g>`;svg.innerHTML=h;bindPieces()}
+function renderBoard(m=boardMetrics()){const s=style(),bounds=sceneProjectedBounds(state.steps);let h=`<rect width="${m.w}" height="${m.h}" fill="${s.bg}"/><text x="${m.margin}" y="38" font-size="25" class="boardTitle" fill="${s.ink}">${esc(state.title)}</text><text x="${m.w-m.margin}" y="38" text-anchor="end" font-size="9" class="boardNote" fill="${s.line}">SHARCH · PARTI STUDIO</text>`;state.steps.forEach((st,i)=>{const col=i%m.cols,row=Math.floor(i/m.cols),x=m.margin+col*(m.cw+m.gap),y=m.header+row*(m.ch+m.gap),ctx=fitSceneContext(bounds,x,y,m.cw,m.ch,38,18);h+=`<g><defs><clipPath id="stepClip${i}"><rect x="${x+1}" y="${y+1}" width="${m.cw-2}" height="${m.ch-2}" rx="8"/></clipPath></defs><rect x="${x}" y="${y}" width="${m.cw}" height="${m.ch}" rx="9" fill="#fff" stroke="${s.line}"/><g clip-path="url(#stepClip${i})">${scene(st.pieces,st.operation,ctx)}</g><rect x="${x+8}" y="${y+7}" width="${Math.min(230,m.cw-16)}" height="24" rx="6" fill="${s.bg}" opacity=".94"/><text x="${x+14}" y="${y+22}" class="stepLabel" fill="${s.accent}">${String(i+1).padStart(2,'0')}</text><text x="${x+42}" y="${y+22}" font-size="11" font-weight="800" fill="${s.ink}">${esc(st.title)}</text></g>`});return h}
+function esc(v){return String(v||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function bindPieces(){$$('#mainSvg .piece').forEach(g=>{g.addEventListener('pointerdown',startDrag);g.addEventListener('click',e=>{e.stopPropagation();if(!isLatest())return;state.selectedId=g.dataset.id;state.tool='select';renderAll()})});$('#mainSvg').onclick=e=>{if(e.target===$('#mainSvg')&&isLatest()){state.selectedId=null;state.tool='select';renderAll()}}}
+function startDrag(e){if(state.view!=='work'||!isLatest())return;const id=e.currentTarget.dataset.id,p=state.pieces.find(x=>x.id===id);if(!p)return;e.preventDefault();state.selectedId=id;state.drag={id,startX:e.clientX,startY:e.clientY,old:clone(p),before:beforeOp(),moved:false};e.currentTarget.setPointerCapture?.(e.pointerId)}
+window.addEventListener('pointermove',e=>{if(!state.drag)return;const p=state.pieces.find(x=>x.id===state.drag.id);if(!p)return;const dx=(e.clientX-state.drag.startX)/52,dy=(e.clientY-state.drag.startY)/52;let mx=(dx+dy)*.55,my=(dy-dx)*.55;if(state.ortho){if(Math.abs(mx)>Math.abs(my))my=0;else mx=0}p.x=state.drag.old.x+mx;p.y=state.drag.old.y+my;state.drag.moved=Math.hypot(mx,my)>.04;renderCanvas()});
+window.addEventListener('pointerup',()=>{if(!state.drag)return;const d=state.drag,p=state.pieces.find(x=>x.id===d.id);state.drag=null;if(d.moved&&p){state.tool='select';updateCurrentStep(p.id);toast(state.lang==='zh'?'位置已调整 · 未新增步骤':'POSITION ADJUSTED · NO NEW STEP')}else renderAll()});
+function renderLeft(){const has=!!selected()&&isLatest(),btn=(t,label,sub)=>`<button class="tool ${state.tool===t?'on':''}" data-tool="${t}" ${has?'':'disabled'}><b>${label}</b><span>${sub}</span></button>`;$('#leftPanel').innerHTML=`<div class="sectionTitle">${L('start')}</div><div class="toolGrid"><button class="mass" data-mass="box"><b>${L('box')}</b><span>basic volume</span></button><button class="mass" data-mass="cylinder"><b>${L('cylinder')}</b><span>round volume</span></button><button class="mass" data-mass="polygon"><b>${L('polygon')}</b><span>6-sided prism</span></button><button class="mass" data-mass="l"><b>${L('l')}</b><span>two bars</span></button><button class="mass" data-mass="u"><b>${L('u')}</b><span>three bars</span></button><button class="mass" data-mass="courtyard"><b>${L('courtyard')}</b><span>four bars</span></button></div><div class="sectionTitle">${L('ops')}</div><div class="toolGrid">${btn('cut',L('cut'),'ratio / diagonal')}${btn('move',L('move'),'concept arrow')}${btn('lift',L('lift'),'vertical offset')}${btn('rotate',L('rotate'),'angle')}${btn('scale',L('scale'),'uniform')}${btn('stretch',L('stretch'),'width / depth')}${btn('extrude',L('extrude'),'height only')}${btn('duplicate',L('duplicate'),'linear array')}${btn('terrace',L('terrace'),'stepped mass')}${btn('courtyardOp',L('courtyardOp'),'carve center')}${btn('bridge',L('bridge'),'link volume')}${btn('mirror',L('mirror'),'copy across axis')}${btn('program',L('program'),'function color')}${btn('subtract',L('subtract'),'remove volume')}</div><div class="sectionTitle">${L('project')}</div><button id="newBtn" class="tool full"><b>${L('new')}</b><span>clear current sequence</span></button><div class="toggleRow"><span>${L('ortho')}</span><input id="orthoCheck" type="checkbox" ${state.ortho?'checked':''}></div>`;$$('[data-mass]').forEach(b=>b.onclick=()=>addBase(b.dataset.mass));$$('[data-tool]').forEach(b=>b.onclick=()=>{if(b.dataset.tool==='subtract')applySubtract();else setTool(b.dataset.tool)});$('#newBtn').onclick=newProject;$('#orthoCheck').onchange=e=>state.ortho=e.target.checked}
+function slider(group,key,label,min,max,step,val,suffix=''){return `<div class="field"><label>${label}<b>${Number(val).toFixed(step>=1?0:2)}${suffix}</b></label><input type="range" min="${min}" max="${max}" step="${step}" value="${val}" data-op="${group}.${key}"></div>`}
+function renderRight(){const box=$('#rightPanel');if(state.view==='board'){box.innerHTML=`<div class="card"><div class="cardTitle">${L('board')}</div><div class="field"><label>${L('layout')}</label><select id="layoutSelect"><option value="2x2">2 × N</option><option value="2x3">2 × N Wide</option><option value="3x3">3 × N</option><option value="column">Single Column</option><option value="row">Horizontal Row</option></select></div><div class="field"><label>${L('style')}</label><select id="styleSelect">${Object.entries(STYLES).map(([k,v])=>`<option value="${k}">${v.name}</option>`).join('')}</select></div><div class="toggleRow"><span>${L('ghost')}</span><input id="ghostCheck" type="checkbox" ${state.showGhost?'checked':''}></div><div class="toggleRow"><span>${L('arrows')}</span><input id="arrowCheck" type="checkbox" ${state.showArrows?'checked':''}></div></div><div class="card"><div class="cardMeta">${state.lang==='zh'?'全部步骤都会显示。画板采用全局自适应视野，保持统一角度、比例和基线，不再裁切体块。':'All steps are shown. The board uses one shared fitted camera, preserving angle, scale, and baseline without cropping masses.'}</div></div>`;$('#layoutSelect').value=state.boardLayout;$('#styleSelect').value=state.style;$('#layoutSelect').onchange=e=>{state.boardLayout=e.target.value;renderCanvas()};$('#styleSelect').onchange=e=>{state.style=e.target.value;renderAll()};$('#ghostCheck').onchange=e=>{state.showGhost=e.target.checked;renderCanvas()};$('#arrowCheck').onchange=e=>{state.showArrows=e.target.checked;renderCanvas()};return}
+ if(!isLatest()){const st=displayStep(),i=state.stepFocus;box.innerHTML=`<div class="card"><div class="cardTitle">${L('viewing')}</div><div class="cardMeta">${state.lang==='zh'?'步骤内容为快照；标题、说明、排序和删除可以直接管理。':'Step geometry is a snapshot. Metadata, order, and deletion can be managed here.'}</div><div class="field"><label>STEP TITLE</label><input id="stepTitleEdit" type="text" value="${esc(st?.title)}"></div><div class="field"><label>NOTE</label><textarea id="stepNoteEdit">${esc(st?.note)}</textarea></div><div class="row2"><button id="stepLeft" class="smallbtn">← ${state.lang==='zh'?'前移':'LEFT'}</button><button id="stepRight" class="smallbtn">${state.lang==='zh'?'后移':'RIGHT'} →</button></div><button id="deleteStepBtn" class="delete">${state.lang==='zh'?'直接删除步骤':'DELETE STEP'}</button><button id="latestBtn" class="apply">${L('latest')}</button></div>`;$('#latestBtn').onclick=returnLatest;$('#stepTitleEdit').oninput=e=>{st.title=e.target.value;saveSilent();renderTimeline();renderCanvas()};$('#stepNoteEdit').oninput=e=>{st.note=e.target.value;saveSilent()};$('#stepLeft').onclick=()=>moveStep(i,-1);$('#stepRight').onclick=()=>moveStep(i,1);$('#deleteStepBtn').onclick=()=>deleteStep(i);return}
+ const p=selected();if(!p){box.innerHTML=`<div class="card"><div class="cardTitle">${L('noMass')}</div><div class="cardMeta">${L('noMassHelp')}</div></div><div class="card"><div class="cardTitle">${L('style')}</div><div class="field"><select id="styleSelect">${Object.entries(STYLES).map(([k,v])=>`<option value="${k}">${v.name}</option>`).join('')}</select></div></div>`;$('#styleSelect').value=state.style;$('#styleSelect').onchange=e=>{state.style=e.target.value;renderAll()};return}
+ let h=`<div class="card"><div class="cardTitle">${L('selected')}</div><div class="cardMeta">${p.type.toUpperCase()} · ${p.id}</div><div class="field"><label>NAME</label><input id="pieceName" type="text" value="${esc(p.name)}"></div>${slider('piece','w','WIDTH',.3,10,.1,p.w)}${slider('piece','d','DEPTH',.3,10,.1,p.d)}${slider('piece','h','HEIGHT',.2,7,.1,p.h)}${slider('piece','z','ELEVATION',-1,6,.1,p.z)}<button id="recordAdjust" class="smallbtn" style="width:100%;margin-top:9px">${state.lang==='zh'?'更新当前步骤（不新增）':'UPDATE CURRENT STEP · NO NEW STEP'}</button></div>`;
+ if(state.tool==='cut')h+=`<div class="card"><div class="cardTitle">CUT</div><div class="field"><label>TYPE</label><select id="cutStyle"><option value="half">1 / 2</option><option value="third">1 / 3</option><option value="quarter">1 / 4</option><option value="custom">CUSTOM</option><option value="diagonal">DIAGONAL</option><option value="irregular">IRREGULAR</option></select></div><div class="row2"><button class="smallbtn ${state.op.cut.axis==='x'?'on':''}" data-axis="x">X AXIS</button><button class="smallbtn ${state.op.cut.axis==='y'?'on':''}" data-axis="y">Y AXIS</button></div>${slider('cut','ratio','RATIO',.15,.85,.01,state.op.cut.ratio)}${slider('cut','gap','CUT GAP',0,.8,.02,state.op.cut.gap)}${slider('cut','irregular','IRREGULAR',0,1,.05,state.op.cut.irregular)}<button id="applyOp" class="apply">${L('apply')}</button></div>`;
+ if(state.tool==='move')h+=`<div class="card"><div class="cardTitle">MOVE</div><div class="cardMeta">${state.lang==='zh'?'直接拖动只调整当前步骤；这里的数值移动才会作为概念演变步骤记录。':'Direct dragging only adjusts the current step. Numeric Move records a concept-evolution step.'}</div>${slider('move','x','MOVE X',-6,6,.1,state.op.move.x)}${slider('move','y','MOVE Y',-6,6,.1,state.op.move.y)}${slider('move','z','MOVE Z',-3,6,.1,state.op.move.z)}<button id="applyOp" class="apply">${L('apply')}</button></div>`;
+ if(state.tool==='lift')h+=`<div class="card"><div class="cardTitle">LIFT</div>${slider('lift','z','HEIGHT',0,7,.1,state.op.lift.z)}<button id="applyOp" class="apply">${L('apply')}</button></div>`;
+ if(state.tool==='rotate')h+=`<div class="card"><div class="cardTitle">ROTATE</div>${slider('rotate','deg','ANGLE',-180,180,1,state.op.rotate.deg,'°')}<button id="applyOp" class="apply">${L('apply')}</button></div>`;
+ if(state.tool==='scale')h+=`<div class="card"><div class="cardTitle">SCALE</div>${slider('scale','factor','FACTOR',.25,2.5,.05,state.op.scale.factor,'×')}<button id="applyOp" class="apply">${L('apply')}</button></div>`;
+ if(state.tool==='stretch')h+=`<div class="card"><div class="cardTitle">STRETCH</div>${slider('stretch','x','WIDTH FACTOR',.25,2.5,.05,state.op.stretch.x,'×')}${slider('stretch','y','DEPTH FACTOR',.25,2.5,.05,state.op.stretch.y,'×')}${slider('stretch','h','HEIGHT FACTOR',.25,2.5,.05,state.op.stretch.h,'×')}<button id="applyOp" class="apply">${L('apply')}</button></div>`;
+ if(state.tool==='extrude')h+=`<div class="card"><div class="cardTitle">EXTRUDE</div>${slider('extrude','height','HEIGHT CHANGE',-2,6,.1,state.op.extrude.height)}<button id="applyOp" class="apply">${L('apply')}</button></div>`;
+ if(state.tool==='duplicate')h+=`<div class="card"><div class="cardTitle">DUPLICATE</div><div class="field"><label>DIRECTION</label><select id="dupAxis"><option value="x">X</option><option value="y">Y</option><option value="z">Z</option></select></div>${slider('duplicate','count','COUNT',1,8,1,state.op.duplicate.count)}${slider('duplicate','spacing','SPACING',0,4,.1,state.op.duplicate.spacing)}<button id="applyOp" class="apply">${L('apply')}</button></div>`;
+ if(state.tool==='terrace')h+=`<div class="card"><div class="cardTitle">TERRACE</div><div class="row2"><button class="smallbtn ${state.op.terrace.axis==='x'?'on':''}" data-terrace-axis="x">X AXIS</button><button class="smallbtn ${state.op.terrace.axis==='y'?'on':''}" data-terrace-axis="y">Y AXIS</button></div>${slider('terrace','levels','LEVELS',2,6,1,state.op.terrace.levels)}${slider('terrace','rise','RISE',.15,1.5,.05,state.op.terrace.rise)}<button id="applyOp" class="apply">${L('apply')}</button></div>`;
+ if(state.tool==='courtyardOp')h+=`<div class="card"><div class="cardTitle">COURTYARD VOID</div>${slider('courtyardOp','wall','WALL RATIO',.1,.4,.01,state.op.courtyardOp.wall)}<button id="applyOp" class="apply">${L('apply')}</button></div>`;
+ if(state.tool==='bridge')h+=`<div class="card"><div class="cardTitle">BRIDGE</div><div class="row2"><button class="smallbtn ${state.op.bridge.axis==='x'?'on':''}" data-bridge-axis="x">X AXIS</button><button class="smallbtn ${state.op.bridge.axis==='y'?'on':''}" data-bridge-axis="y">Y AXIS</button></div>${slider('bridge','length','LENGTH',.5,6,.1,state.op.bridge.length)}${slider('bridge','width','WIDTH',.3,3,.1,state.op.bridge.width)}${slider('bridge','height','THICKNESS',.2,2,.05,state.op.bridge.height)}${slider('bridge','elevation','ELEVATION RATIO',0,1.4,.05,state.op.bridge.elevation)}<button id="applyOp" class="apply">${L('apply')}</button></div>`;
+ if(state.tool==='mirror')h+=`<div class="card"><div class="cardTitle">MIRROR</div><div class="row2"><button class="smallbtn ${state.op.mirror.axis==='x'?'on':''}" data-mirror-axis="x">X AXIS</button><button class="smallbtn ${state.op.mirror.axis==='y'?'on':''}" data-mirror-axis="y">Y AXIS</button></div>${slider('mirror','gap','CENTER GAP',0,4,.1,state.op.mirror.gap)}<button id="applyOp" class="apply">${L('apply')}</button></div>`;
+ if(state.tool==='program')h+=`<div class="card"><div class="cardTitle">PROGRAM</div><div class="palette">${Object.entries(PROGRAMS).map(([k,c])=>`<button class="sw ${p.program===k?'on':''}" data-program="${k}" title="${k}" style="background:${c}"></button>`).join('')}</div><div class="cardMeta" style="margin-top:9px">PUBLIC · PRIVATE · SERVICE · CIRCULATION · LANDSCAPE · VOID</div></div>`;
+ h+=`<button id="subtractBtn" class="delete">${L('delete')}</button>`;box.innerHTML=h;$('#pieceName').onchange=e=>{updatePiece('name',e.target.value,false);updateCurrentStep(p.id)};$('#recordAdjust').onclick=()=>updateCurrentStep(p.id);$$('[data-op]').forEach(inp=>{inp.oninput=e=>{const [g,k]=e.target.dataset.op.split('.');if(g==='piece')updatePiece(k,+e.target.value,false);else setOp(g,k,e.target.value);const b=e.target.previousElementSibling?.querySelector('b');if(b)b.textContent=Number(e.target.value).toFixed(+e.target.step>=1?0:2)+(b.textContent.includes('°')?'°':b.textContent.includes('×')?'×':'')};if(inp.dataset.op.startsWith('piece.'))inp.onchange=()=>updateCurrentStep(p.id)});
+ if($('#cutStyle')){$('#cutStyle').value=state.op.cut.style;$('#cutStyle').onchange=e=>setOp('cut','style',e.target.value);$$('[data-axis]').forEach(b=>b.onclick=()=>setOp('cut','axis',b.dataset.axis))}if($('#dupAxis')){$('#dupAxis').value=state.op.duplicate.axis;$('#dupAxis').onchange=e=>setOp('duplicate','axis',e.target.value)}$$('[data-terrace-axis]').forEach(b=>b.onclick=()=>setOp('terrace','axis',b.dataset.terraceAxis));$$('[data-bridge-axis]').forEach(b=>b.onclick=()=>setOp('bridge','axis',b.dataset.bridgeAxis));$$('[data-mirror-axis]').forEach(b=>b.onclick=()=>setOp('mirror','axis',b.dataset.mirrorAxis));if($('#applyOp'))$('#applyOp').onclick=({cut:applyCut,move:applyMove,lift:applyLift,rotate:applyRotate,scale:applyScale,stretch:applyStretch,extrude:applyExtrude,duplicate:applyDuplicate,terrace:applyTerrace,courtyardOp:applyCourtyardOp,bridge:applyBridge,mirror:applyMirror}[state.tool]);$$('[data-program]').forEach(b=>b.onclick=()=>applyProgram(b.dataset.program));$('#subtractBtn').onclick=applySubtract}
+function renderTimeline(){const strip=$('#stepStrip');if(!state.steps.length){strip.innerHTML=`<div class="emptyTimeline">${L('emptySteps')}</div>`;return}strip.innerHTML=state.steps.map((st,i)=>{const b=sceneProjectedBounds([st]),ctx=fitSceneContext(b,0,0,240,110,12,8);return `<div class="stepCard ${state.stepFocus===i?'on':''}" data-step="${i}"><button class="stepDelete" data-delete-step="${i}" title="${state.lang==='zh'?'删除步骤':'Delete step'}">×</button><div class="stepThumb"><svg viewBox="0 0 240 110">${scene(st.pieces,st.operation,ctx)}</svg></div><div class="stepText"><div class="stepNum">${String(i+1).padStart(2,'0')}</div><div class="stepName">${esc(st.title)}</div></div></div>`}).join('');$$('[data-step]').forEach(c=>c.onclick=e=>{if(e.target.closest('[data-delete-step]'))return;state.stepFocus=+c.dataset.step;state.selectedId=null;state.tool='select';renderAll()});$$('[data-delete-step]').forEach(b=>b.onclick=e=>{e.stopPropagation();deleteStep(+b.dataset.deleteStep)})}
+function renderAll(){state.title=$('#projectTitle').value||state.title;renderLeft();renderCanvas();renderRight();renderTimeline();$('#undoBtn').disabled=!state.steps.length;$('#redoBtn').disabled=!state.redo.length;$('#timelineTitle').textContent=L('steps');$('#timelineHelp').textContent=L('stepHelp');$('#canvasHint').textContent=state.view==='board'?(state.lang==='zh'?'图板模式 · 所有步骤统一视角与比例':'BOARD MODE · CONSISTENT CAMERA AND SCALE'):(isLatest()?(state.lang==='zh'?'直接拖动只调整当前步骤 · 左侧操作确认后才生成新步骤':'DIRECT DRAG ADJUSTS CURRENT STEP · CONFIRMED TOOLS CREATE NEW STEPS'):L('viewOnly'))}
+function newProject(){if(!confirm(state.lang==='zh'?'清空当前 Parti 项目？':'Clear this Parti project?'))return;state.pieces=[];state.steps=[];state.redo=[];state.selectedId=null;state.stepFocus=-1;state.tool='select';renderAll();saveSilent()}
+function saveSilent(){try{localStorage.setItem('em_parti_v4',JSON.stringify({...state,drag:null}))}catch(e){}}
+function saveProject(){saveSilent();toast(state.lang==='zh'?'已保存':'SAVED')}
+function loadProject(){try{const raw=localStorage.getItem('em_parti_v4');if(!raw){toast(state.lang==='zh'?'没有保存记录':'NO SAVE');return}const data=JSON.parse(raw),defaults=clone(state.op);state=Object.assign(state,data,{drag:null});state.pieces=(state.pieces||[]).map(normalizeCourtyard);state.steps=(state.steps||[]).map(st=>Object.assign(st,{pieces:(st.pieces||[]).map(normalizeCourtyard)}));state.op=Object.assign(defaults,data.op||{});Object.keys(defaults).forEach(k=>state.op[k]=Object.assign(defaults[k]||{},(data.op||{})[k]||{}));$('#projectTitle').value=state.title||'Concept Evolution';renderAll();toast(state.lang==='zh'?'已读取':'LOADED')}catch(e){toast('LOAD FAILED')}}
+function exportBoardSVG(){const s=style(),n=Math.max(1,state.steps.length);let cols=2;if(state.boardLayout==='3x3')cols=3;else if(state.boardLayout==='column')cols=1;else if(state.boardLayout==='row')cols=n;const rows=Math.max(1,Math.ceil(n/cols)),cellW=state.boardLayout==='row'?520:(cols===1?1120:690),cellH=390,gap=28,margin=72,header=120,ew=margin*2+cols*cellW+(cols-1)*gap,eh=header+margin+rows*cellH+(rows-1)*gap,bounds=sceneProjectedBounds(state.steps);let h=`<rect width="${ew}" height="${eh}" fill="${s.bg}"/><text x="${margin}" y="62" font-size="38" font-weight="800" fill="${s.ink}">${esc(state.title)}</text><text x="${ew-margin}" y="62" text-anchor="end" font-size="13" font-family="Space Mono,monospace" font-weight="700" fill="${s.line}">SHARCH · PARTI STUDIO</text>`;state.steps.forEach((st,i)=>{const col=i%cols,row=Math.floor(i/cols),x=margin+col*(cellW+gap),y=header+row*(cellH+gap),ctx=fitSceneContext(bounds,x,y,cellW,cellH,52,28);h+=`<g><defs><clipPath id="exportClip${i}"><rect x="${x+1}" y="${y+1}" width="${cellW-2}" height="${cellH-2}" rx="14"/></clipPath></defs><rect x="${x}" y="${y}" width="${cellW}" height="${cellH}" rx="14" fill="#fff" stroke="${s.line}" stroke-width="1.4"/><g clip-path="url(#exportClip${i})">${scene(st.pieces,st.operation,ctx)}</g><rect x="${x+14}" y="${y+12}" width="${Math.min(360,cellW-28)}" height="36" rx="8" fill="${s.bg}" opacity=".95"/><text x="${x+23}" y="${y+36}" font-size="13" font-family="Space Mono,monospace" font-weight="800" fill="${s.accent}">${String(i+1).padStart(2,'0')}</text><text x="${x+68}" y="${y+36}" font-size="17" font-weight="800" fill="${s.ink}">${esc(st.title)}</text></g>`});return{xml:`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${ew} ${eh}" width="${ew}" height="${eh}">${h}</svg>`,w:ew,h:eh}}
+
+function exportPNG(){
+ let xml,ew,eh;
+ if(state.view==='board'){const b=exportBoardSVG();xml=b.xml;ew=b.w;eh=b.h}else{const svg=$('#mainSvg');xml=new XMLSerializer().serializeToString(svg);ew=W;eh=H}
+ const url=URL.createObjectURL(new Blob([xml],{type:'image/svg+xml'})),img=new Image();
+ img.onload=()=>{const scale=2,c=document.createElement('canvas');c.width=Math.round(ew*scale);c.height=Math.round(eh*scale);const g=c.getContext('2d');g.fillStyle=style().bg;g.fillRect(0,0,c.width,c.height);g.drawImage(img,0,0,c.width,c.height);URL.revokeObjectURL(url);c.toBlob(b=>{const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=(state.title||'parti').replace(/[^\w-]+/g,'_')+'_parti_v4_9.png';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000)},'image/png')};img.onerror=()=>{URL.revokeObjectURL(url);toast(state.lang==='zh'?'导出失败':'EXPORT FAILED')};img.src=url
+}
+$$('.tab').forEach(b=>b.onclick=()=>{state.view=b.dataset.view;$$('.tab').forEach(x=>x.classList.toggle('on',x===b));state.selectedId=null;state.tool='select';state.stepFocus=state.steps.length-1;renderAll()});$('#undoBtn').onclick=undo;$('#redoBtn').onclick=redo;$('#saveBtn').onclick=saveProject;$('#loadBtn').onclick=loadProject;$('#exportBtn').onclick=exportPNG;$('#langBtn').onclick=()=>{state.lang=state.lang==='zh'?'en':'zh';$('#langBtn').textContent=state.lang==='zh'?'EN':'中';renderAll()};$('#projectTitle').oninput=()=>{state.title=$('#projectTitle').value;renderCanvas()};$('#zoomIn').onclick=()=>{state.zoom=Math.min(1.5,state.zoom+.1);renderCanvas()};$('#zoomOut').onclick=()=>{state.zoom=Math.max(.65,state.zoom-.1);renderCanvas()};$('#zoomFit').onclick=()=>{state.zoom=1;renderCanvas()};
+window.__PARTI_V4__={state,addBase,setTool,applyCut,applyMove,applyLift,applyRotate,applyScale,applyStretch,applyExtrude,applyDuplicate,applyTerrace,applyCourtyardOp,applyBridge,applyMirror,applySubtract,applyProgram,deleteStep,updateCurrentStep,undo,redo,renderAll,renderBoard,exportBoardSVG};
+if(new URLSearchParams(location.search).get('courtyardtest')==='1'){
+  state.pieces=[];state.steps=[];state.redo=[];state.selectedId=null;state.stepFocus=-1;state.tool='select';
+  addBase('box');state.tool='courtyardOp';state.op.courtyardOp.wall=.22;applyCourtyardOp();
+  state.tool='scale';state.op.scale.factor=1.45;applyScale();
+  state.tool='stretch';state.op.stretch.x=.72;state.op.stretch.y=1.35;state.op.stretch.h=.82;applyStretch();
+  state.tool='rotate';state.op.rotate.deg=25;applyRotate();
+  state.view='board';state.boardLayout='2x3';renderAll();document.body.dataset.courtyardtest='PASS';
+}
+
+if(new URLSearchParams(location.search).get('courtyardworktest')==='1'){
+  state.pieces=[];state.steps=[];state.redo=[];state.selectedId=null;state.stepFocus=-1;state.tool='select';
+  addBase('box');state.tool='courtyardOp';state.op.courtyardOp.wall=.22;applyCourtyardOp();
+  state.view='work';state.selectedId=state.pieces[0].id;renderAll();document.body.dataset.courtyardworktest='PASS';
+}
+
+if(new URLSearchParams(location.search).get('courtyardcuttest')==='1'){
+  state.pieces=[];state.steps=[];state.redo=[];state.selectedId=null;state.stepFocus=-1;state.tool='select';
+  addBase('box');state.tool='courtyardOp';state.op.courtyardOp.wall=.22;applyCourtyardOp();
+  state.tool='cut';state.op.cut.style='half';state.op.cut.axis='x';state.op.cut.gap=.18;applyCut();
+  state.view='work';renderAll();
+  document.body.dataset.courtyardcuttest=(state.pieces.length===2&&state.pieces.every(p=>p.type==='assembly')&&state.pieces.every(p=>p.segments?.length>=2))?'PASS':'FAIL';
+}
+
+if(new URLSearchParams(location.search).get('courtyardcutmovetest')==='1'){
+  state.pieces=[];state.steps=[];state.redo=[];state.selectedId=null;state.stepFocus=-1;
+  addBase('box');state.tool='courtyardOp';state.op.courtyardOp.wall=.22;applyCourtyardOp();
+  state.tool='cut';state.op.cut.style='half';state.op.cut.axis='x';state.op.cut.gap=.18;applyCut();
+  state.tool='move';state.op.move.x=1.2;state.op.move.y=.4;state.op.move.z=0;applyMove();
+  state.view='board';renderAll();
+  const html=document.getElementById('mainSvg').innerHTML;
+  document.body.dataset.courtyardcutmovetest=(state.pieces.some(p=>p.type==='assembly')&&html.includes('assemblyTop')&&!html.includes('assemblyChild'))?'PASS':'FAIL';
+}
+if(new URLSearchParams(location.search).get('selftest')==='1'){addBase('box');state.tool='cut';applyCut();state.selectedId=state.pieces[0].id;const beforeSteps=state.steps.length;state.pieces[0].x+=.35;updateCurrentStep(state.pieces[0].id);const noDragStep=state.steps.length===beforeSteps;state.tool='terrace';applyTerrace();const board=exportBoardSVG();document.body.dataset.selftest=(noDragStep&&state.steps.length===3&&board.xml.includes('Parti Studio'))?'PASS':'FAIL';}
+renderAll();
+})();
+</script>
+<a href="../../index.html" style="position:fixed;left:18px;bottom:18px;z-index:9999;padding:9px 14px;border:1px solid #E5E7EB;border-radius:999px;background:rgba(255,255,255,.92);color:#111827;font:600 11px 'Inter',sans-serif;text-decoration:none;box-shadow:0 8px 24px rgba(0,0,0,.08);backdrop-filter:blur(10px)">← <span>ShArch</span></a>
+</body>
+</html>
