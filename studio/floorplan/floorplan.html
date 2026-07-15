@@ -94,6 +94,7 @@ input[type=range]{width:100%;accent-color:var(--accent);margin:2px 0 9px}
 <div class="app">
   <div class="top">
     <div class="brand"><span class="dot"></span>ShArch <small>· Plan Draw 平面图</small></div>
+    <a href="../../index.html" data-fp-i18n="home_btn" class="tbtn solid" style="background:var(--accent);border-color:var(--accent);color:#fff;text-decoration:none;white-space:nowrap">← Home 主页</a>
     <button id="langBtn" style="font:700 10px 'Space Mono';border:1px solid var(--line);background:#fff;border-radius:7px;padding:7px 10px;cursor:pointer;color:var(--ink)">EN</button>
     <div class="spacer"></div>
     <button class="tbtn solid" id="autoBtn" data-fp-i18n="tb_auto">AUTO 自动排布</button>
@@ -2654,6 +2655,7 @@ function init(){buildTools();buildGrp();buildChips();buildFGrp();buildFChips();b
 let FP_LANG='zh';try{FP_LANG=localStorage.getItem('em_lang')||'zh'}catch(e){}
 const FP_I18N={
   // topbar buttons
+  home_btn:{zh:'← 主页',en:'← Home'},
   tb_auto:{zh:'AUTO 自动排布',en:'AUTO Layout'},
   tb_3d:{zh:'3D ⬚',en:'3D ⬚'},
   tb_axo:{zh:'AXO 轴测分析图',en:'AXO Analysis'},
@@ -2765,6 +2767,5 @@ init();
 document.getElementById('langBtn').onclick=fpToggleLang;
 fpApplyLang();
 </script>
-<a href="../../index.html" style="position:fixed;left:18px;bottom:18px;z-index:9999;padding:9px 14px;border:1px solid #E5E7EB;border-radius:999px;background:rgba(255,255,255,.92);color:#111827;font:600 11px 'Inter',sans-serif;text-decoration:none;box-shadow:0 8px 24px rgba(0,0,0,.08);backdrop-filter:blur(10px)">← <span>ShArch</span></a>
 </body>
 </html>

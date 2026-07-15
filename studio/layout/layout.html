@@ -157,6 +157,7 @@ html,body{height:100%;font-family:'Inter',system-ui,sans-serif;background:var(--
     <div class="sb-top">
       <div class="sb-mark">SA</div>
       <div style="flex:1"><div class="sb-name">Sh<span>Arch</span> Layout</div><div class="sb-sub" data-ly-i18n="appSub">Portfolio Board Generator</div></div>
+      <a href="../../index.html" data-ly-i18n="home_btn" style="padding:7px 12px;border:1px solid var(--ac);background:var(--ac);border-radius:8px;font:700 11px 'Space Mono',monospace;color:#fff;text-decoration:none;white-space:nowrap;box-shadow:0 4px 12px rgba(37,99,235,.25)">← Home 主页</a>
       <button id="langBtn" style="font:700 11px 'Space Mono',monospace;background:var(--s2);border:1px solid var(--bd);color:var(--t2);padding:3px 8px;border-radius:12px;cursor:pointer">EN</button>
     </div>
     <div class="sb-body">
@@ -803,6 +804,7 @@ document.querySelector('.stage').addEventListener('mousedown',e=>{if(e.target.cl
 // ── i18n ──
 let LY_LANG='zh';try{LY_LANG=localStorage.getItem('em_lang')||'zh'}catch(e){}
 const LY_I18N={
+  home_btn: {zh:'← 主页', en:'← Home'},
   appSub: {zh:'作品集排版生成器', en:'Portfolio Board Generator'},
   secSheet: {zh:'纸张', en:'Sheet'},
   secTheme: {zh:'主题', en:'Theme'},
@@ -848,6 +850,5 @@ initSizeOrient();initThemes();initFonts();initStarters();initPalette();loadStart
 document.getElementById('langBtn').onclick=lyToggleLang;
 document.addEventListener('DOMContentLoaded',lyApplyLang);
 </script>
-<a href="../../index.html" style="position:fixed;left:18px;bottom:18px;z-index:9999;padding:9px 14px;border:1px solid #E5E7EB;border-radius:999px;background:rgba(255,255,255,.92);color:#111827;font:600 11px 'Inter',sans-serif;text-decoration:none;box-shadow:0 8px 24px rgba(0,0,0,.08);backdrop-filter:blur(10px)">← <span>ShArch</span></a>
 </body>
 </html>

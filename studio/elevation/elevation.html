@@ -122,6 +122,7 @@ button,input,select{font-family:inherit}
 <div class="app">
 <header class="top">
 <div class="brand"><div class="mark">SA</div><div class="btitle">ShArch<small>Elevation / Section Render</small></div></div>
+<a href="../../index.html" data-em-original="← HOME" style="margin-left:6px;padding:7px 12px;border:1px solid var(--accent,#2563EB);background:var(--accent,#2563EB);border-radius:7px;color:#fff;font:700 10px 'Space Mono',monospace;text-decoration:none;white-space:nowrap;cursor:pointer;display:inline-flex;align-items:center">← HOME</a>
 <input aria-label="Project title" class="titleInput" id="projectTitle" value="Soft Elevation Study"/>
 <button class="topBtn" id="undoBtn">UNDO</button><button class="topBtn" id="redoBtn">REDO</button><button class="topBtn" id="clearRenderBtn">CLEAR</button>
 <button class="topBtn" id="copyBtn">COPY</button><button class="topBtn" id="pasteBtn">PASTE</button>
@@ -1639,6 +1640,7 @@ let lang=null;
 try{lang=localStorage.getItem('em_lang')}catch(e){}
 const EM_ZH={
 'UNDO':'撤回','REDO':'重做','CLEAR':'清空','COPY':'复制','PASTE':'粘贴','BEFORE':'原图','AFTER':'效果','SAVE':'保存','LOAD':'读取','BOARD':'图板',
+'← HOME':'← 主页',
 'Upload':'上传','UPLOAD DRAWING':'上传图纸','AUTO LINEWORK':'自动提取线稿','Tools':'工具','Fill':'填充','material areas':'材质区域','Edit':'编辑','select / move / opacity':'选择 / 移动 / 透明度','Ground':'地面','rect / polygon':'矩形 / 多边形','Line':'线条','draw sections':'绘制立面剖面线','Assets':'配景','tree / people / cloud':'树 / 人 / 云','Style':'风格','look / atmosphere':'图面 / 氛围','Sheet':'图纸','levels / scale / frame':'标高 / 比例 / 图框',
 'Ground Finish':'地面质感','CONCRETE WASH':'混凝土水洗','DARK POCHE':'深色剖切','SOIL LAYERS':'地层','MIST SECTION':'雾化剖面','SOLID':'纯色','Ground Type':'地面类型','Rectangle':'矩形','Polygon':'多边形','Concrete':'混凝土','platform':'平台','Soil':'土壤','section':'剖面','Grass':'草地','strip':'带状','Slope':'坡地','terrain':'地形','Terrace':'台地','steps':'台阶','Ground Material':'地面材质','CUSTOM':'自定义','UPLOAD GROUND TEXTURE':'上传地面贴图','Ground Settings':'地面设置','Thickness':'厚度','Steps':'台阶数','Slope':'坡度','FINISH POLYGON':'完成多边形',
 'Draw Line':'绘制线条','Outline':'轮廓线','Section Cut':'剖切线','ORTHOGONAL MODE':'正交模式','FINISH LINE':'完成线条','Sky / Atmosphere':'天空 / 氛围','Every preset controls color, linework, materials, ground and atmosphere together. Use Custom for manual editing.':'每个预设会同时控制配色、线稿、材质、地面和氛围。需要手动调整时选择自定义。','Sky Fill Area':'天空区域填充','SKY RECT':'天空矩形','SKY POLY':'天空多边形','Draw the selected sky effect only inside a rectangle or polygon.':'只在绘制的矩形或多边形区域内填充当前天空效果。','Sky Strength':'天空强度','Horizon Fade':'远景渐隐','Paper Grain':'纸张颗粒','BLANK':'留白','MIST':'雾化','HORIZON':'远景','WASH':'水洗','Style':'风格','Style Presets':'风格预设','NO STYLE':'无风格','BLACK / WHITE':'纯黑白','RED / WHITE':'红白','FOREST WASH':'森林水洗','SLATE SECTION':'蓝灰剖面','CLAY PORTFOLIO':'陶土作品集','REALISTIC ATMOSPHERE':'写实氛围','GRAY':'灰阶','REAL':'写实','COLLAGE':'拼贴','SOFT':'柔和',
@@ -1672,6 +1674,5 @@ window.addEventListener('DOMContentLoaded',()=>{initLang();const b=document.getE
 
 
 </script>
-<a href="../../index.html" style="position:fixed;left:18px;bottom:18px;z-index:9999;padding:9px 14px;border:1px solid #E5E7EB;border-radius:999px;background:rgba(255,255,255,.92);color:#111827;font:600 11px 'Inter',sans-serif;text-decoration:none;box-shadow:0 8px 24px rgba(0,0,0,.08);backdrop-filter:blur(10px)">← <span>ShArch</span></a>
 </body>
 </html>

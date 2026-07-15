@@ -1,334 +1,689 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1.0" />
-  <title>ShArch生成器</title>
+  <title>ShArch · Studio</title>
   <link rel="icon" type="image/png" href="favicon.png">
   <link rel="apple-touch-icon" href="favicon.png">
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <link href="https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet" />
   <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Noto+Sans+SC:wght@300;400;500;700&family=Noto+Sans:wght@300;400;500;700&family=Space+Mono:wght@400;700&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&family=Space+Mono:wght@400;700&display=swap"
     rel="stylesheet" />
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/suncalc@1.9.0/suncalc.min.js"></script>
-  <link rel="stylesheet" href="styles.css">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #FAFAFA;
+      --sf: #FFFFFF;
+      --s2: #F3F4F6;
+      --bd: rgba(0, 0, 0, 0.06);
+      --bd2: rgba(0, 0, 0, 0.12);
+      --tx: #111827;
+      --t2: #4B5563;
+      --t3: #9CA3AF;
+      --accent: #2563EB;
+      --accent-soft: rgba(37, 99, 235, 0.08);
+      /* critically damped spring — graceful, no overshoot */
+      --spring: cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', 'Noto Sans SC', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--tx);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      font-optical-sizing: auto;
+      overflow-x: hidden;
+    }
+
+    /* Ambient gradient mesh — depth without distraction */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      background:
+        radial-gradient(ellipse 80% 50% at 18% 0%, rgba(37, 99, 235, 0.07), transparent 60%),
+        radial-gradient(ellipse 60% 45% at 82% 8%, rgba(124, 170, 255, 0.06), transparent 60%),
+        radial-gradient(ellipse 70% 40% at 50% 100%, rgba(99, 102, 241, 0.04), transparent 60%),
+        linear-gradient(180deg, #FAFAFA 0%, #F2F3F6 100%);
+      pointer-events: none;
+    }
+
+    /* ─── Translucent top bar ─── */
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 32px;
+      background: rgba(255, 255, 255, 0.72);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      border-bottom: 1px solid var(--bd);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: var(--tx);
+    }
+
+    .brand-mark {
+      width: 32px; height: 32px;
+      border-radius: 8px;
+      background: var(--accent);
+      color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Space Mono', monospace;
+      font-weight: 700; font-size: 13px;
+      letter-spacing: -0.02em;
+      box-shadow: 0 2px 10px rgba(37, 99, 235, 0.28);
+    }
+
+    .brand-name {
+      font-size: 15px; font-weight: 600;
+      letter-spacing: -0.01em;
+      white-space: nowrap;
+    }
+    .brand-name span { color: var(--accent); }
+
+    .brand-sub {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      color: var(--t3);
+      letter-spacing: 0.08em;
+      margin-left: 4px;
+      padding-left: 10px;
+      border-left: 1px solid var(--bd2);
+    }
+
+    /* Language switch */
+    .lang-switch {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--t3);
+      cursor: pointer;
+      user-select: none;
+      background: rgba(0, 0, 0, 0.04);
+      padding: 3px 6px;
+      border-radius: 12px;
+      border: 1px solid var(--bd);
+      transition: background 0.2s var(--spring);
+    }
+    .lang-switch:hover { background: rgba(0, 0, 0, 0.07); }
+    .lang-switch span:not(.sep) {
+      padding: 2px 8px;
+      border-radius: 8px;
+      transition: all 0.2s var(--spring);
+    }
+    .lang-switch span.active {
+      background: var(--tx);
+      color: #fff;
+    }
+
+    /* ─── Hero ─── */
+    .hero {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 88px 32px 44px;
+      text-align: center;
+    }
+
+    .hero-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent);
+      background: var(--accent-soft);
+      padding: 6px 14px;
+      border-radius: 100px;
+      letter-spacing: 0.08em;
+      margin-bottom: 28px;
+    }
+    .hero-eyebrow::before {
+      content: '';
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+    }
+
+    .hero-title {
+      font-size: clamp(2.5rem, 6vw, 4.5rem);
+      font-weight: 700;
+      line-height: 1.05;
+      letter-spacing: -0.03em;
+      margin-bottom: 22px;
+      background: linear-gradient(180deg, var(--tx) 0%, #374151 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-subtitle {
+      font-size: clamp(1rem, 1.6vw, 1.2rem);
+      color: var(--t2);
+      line-height: 1.55;
+      max-width: 640px;
+      margin: 0 auto 18px;
+      font-weight: 400;
+    }
+
+    .hero-meta {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      color: var(--t3);
+      letter-spacing: 0.06em;
+      margin-top: 6px;
+    }
+
+    /* ─── Tools section ─── */
+    .tools-section {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 24px 32px 72px;
+    }
+
+    .section-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      margin-bottom: 28px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--bd);
+    }
+    .section-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--t2);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+    .section-count {
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      color: var(--t3);
+      letter-spacing: 0.04em;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 18px;
+    }
+
+    /* ─── Card (glass material) ─── */
+    .card {
+      position: relative;
+      display: block;
+      text-decoration: none;
+      color: inherit;
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(14px) saturate(160%);
+      -webkit-backdrop-filter: blur(14px) saturate(160%);
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      border-radius: 18px;
+      padding: 24px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 8px 24px rgba(0, 0, 0, 0.03);
+      transition:
+        transform 0.35s var(--spring),
+        box-shadow 0.35s var(--spring),
+        border-color 0.35s var(--spring);
+      overflow: hidden;
+      opacity: 0;
+      transform: translateY(14px);
+      animation: cardIn 0.6s var(--spring) forwards;
+    }
+
+    @keyframes cardIn {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06), 0 22px 52px rgba(0, 0, 0, 0.09);
+      border-color: rgba(37, 99, 235, 0.22);
+    }
+
+    /* instant feedback on press */
+    .card:active {
+      transform: scale(0.985) translateY(-2px);
+      transition: transform 0.1s ease-out;
+    }
+
+    .card:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 3px;
+    }
+
+    /* soft accent glow — materialize, don't just fade */
+    .card-glow {
+      position: absolute;
+      top: -50px; right: -50px;
+      width: 160px; height: 160px;
+      border-radius: 50%;
+      background: var(--card-accent, var(--accent));
+      filter: blur(56px);
+      opacity: 0.1;
+      transition: opacity 0.4s var(--spring);
+      pointer-events: none;
+    }
+    .card:hover .card-glow { opacity: 0.22; }
+
+    .card-head {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 16px;
+      position: relative;
+    }
+
+    .card-icon {
+      width: 44px; height: 44px;
+      border-radius: 11px;
+      background: var(--card-accent-soft, var(--accent-soft));
+      color: var(--card-accent, var(--accent));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+      transition: transform 0.4s var(--spring);
+      line-height: 1;
+    }
+    .card:hover .card-icon { transform: scale(1.08) rotate(-3deg); }
+
+    .card-tag {
+      margin-left: auto;
+      font-family: 'Space Mono', monospace;
+      font-size: 9px;
+      font-weight: 700;
+      color: var(--t3);
+      background: rgba(0, 0, 0, 0.04);
+      padding: 4px 9px;
+      border-radius: 6px;
+      letter-spacing: 0.08em;
+      white-space: nowrap;
+    }
+    .card-tag.featured {
+      color: var(--accent);
+      background: var(--accent-soft);
+    }
+
+    .card-title {
+      font-size: 17px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      margin-bottom: 6px;
+      line-height: 1.25;
+      position: relative;
+    }
+
+    .card-desc {
+      font-size: 13px;
+      color: var(--t2);
+      line-height: 1.55;
+      margin-bottom: 18px;
+      position: relative;
+    }
+
+    .card-foot {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--card-accent, var(--accent));
+      letter-spacing: 0.04em;
+      transition: gap 0.35s var(--spring);
+      position: relative;
+    }
+    .card:hover .card-foot { gap: 11px; }
+    .card-arrow {
+      display: inline-block;
+      transition: transform 0.35s var(--spring);
+    }
+    .card:hover .card-arrow { transform: translateX(3px); }
+
+    /* ─── Footer ─── */
+    .footer {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 28px 32px 36px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1px solid var(--bd);
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      color: var(--t3);
+      letter-spacing: 0.04em;
+    }
+    .footer-links { display: flex; gap: 18px; }
+    .footer a {
+      color: var(--t2);
+      text-decoration: none;
+      transition: color 0.2s var(--spring);
+    }
+    .footer a:hover { color: var(--accent); }
+
+    /* ─── Toast ─── */
+    .toast {
+      position: fixed;
+      bottom: 32px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: rgba(17, 24, 39, 0.92);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      color: #fff;
+      padding: 12px 22px;
+      border-radius: 100px;
+      font-size: 13px;
+      font-weight: 500;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.35s var(--spring);
+      z-index: 9999;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.22);
+    }
+    .toast.on { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* ─── Responsive ─── */
+    @media (max-width: 640px) {
+      .topbar { padding: 12px 18px; }
+      .brand-sub { display: none; }
+      .hero { padding: 52px 18px 30px; }
+      .tools-section { padding: 16px 18px 48px; }
+      .grid { grid-template-columns: 1fr; gap: 14px; }
+      .footer { padding: 22px 18px; flex-direction: column; gap: 12px; text-align: center; }
+    }
+
+    /* ─── Accessibility: reduced motion & transparency ─── */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+      .card { opacity: 1; transform: none; }
+    }
+
+    @media (prefers-reduced-transparency: reduce) {
+      .topbar { background: #fff; backdrop-filter: none; -webkit-backdrop-filter: none; }
+      .card { background: #fff; backdrop-filter: none; -webkit-backdrop-filter: none; }
+      .toast { background: #111827; backdrop-filter: none; -webkit-backdrop-filter: none; }
+    }
+
+    @media (prefers-contrast: more) {
+      :root { --bd: rgba(0, 0, 0, 0.2); --t3: #6B7280; }
+      .card { border-color: rgba(0, 0, 0, 0.25); }
+    }
+  </style>
 </head>
 
 <body>
+  <nav class="topbar">
+    <a class="brand" href="index.html" aria-label="ShArch Studio">
+      <div class="brand-mark">SA</div>
+      <div>
+        <div class="brand-name">ShArch<span> · Studio</span></div>
+      </div>
+      <div class="brand-sub" data-i18n="brand_sub">ARCHITECTURAL TOOLKIT</div>
+    </a>
+    <div class="lang-switch" onclick="toggleLang()" role="button" tabindex="0" aria-label="Switch language">
+      <span id="langZH" class="active">中</span>
+      <span class="sep" style="font-weight:400;opacity:0.3">/</span>
+      <span id="langEN">EN</span>
+    </div>
+  </nav>
 
-  <div class="loader" id="loader">
-    <div class="spin"></div>
-    <div class="ltxt" id="ltxt">LOADING</div>
-    <div id="lbarWrap"
-      style="width:160px;height:3px;background:rgba(255,255,255,.15);border-radius:2px;margin-top:14px;overflow:hidden;display:none">
-      <div id="lbar" style="height:100%;width:0%;background:#fff;border-radius:2px;transition:width .4s ease"></div>
+  <header class="hero">
+    <div class="hero-eyebrow" data-i18n="hero_eyebrow">SHARCH STUDIO · v1.3</div>
+    <h1 class="hero-title" data-i18n="hero_title">From site to portfolio,<br>one calm toolkit.</h1>
+    <p class="hero-subtitle" data-i18n="hero_subtitle">A suite of front-end architectural drawing tools — real OSM data, isometric parti sequences, plan rendering and print-ready boards. Pure browser, no watermark, unified bilingual UI.</p>
+    <div class="hero-meta" data-i18n="hero_meta">9 STUDIO TOOLS · 18 ANALYSIS TYPES · 6 CITY-MASS MODELS</div>
+  </header>
+
+  <section class="tools-section">
+    <div class="section-head">
+      <div class="section-title" data-i18n="section_title">Studio Tools</div>
+      <div class="section-count" id="toolCount">— / —</div>
     </div>
-    <div id="lpct"
-      style="font-family:Space Mono,monospace;font-size:9px;color:rgba(255,255,255,.6);margin-top:7px;letter-spacing:.1em">
+    <div class="grid" id="grid"></div>
+  </section>
+
+  <footer class="footer">
+    <div>ShArch · v1.3 · <span data-i18n="footer_made">pure front-end · no watermark</span></div>
+    <div class="footer-links">
+      <a href="https://github.com/" target="_blank" rel="noopener" data-i18n="footer_github">GitHub</a>
+      <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener" data-i18n="footer_osm">© OpenStreetMap</a>
     </div>
-  </div>
+  </footer>
+
   <div class="toast" id="toast"></div>
-  <div id="layerModal"
-    style="display:none;position:fixed;inset:0;z-index:9000;background:rgba(20,20,22,0.45);backdrop-filter:blur(3px);align-items:center;justify-content:center">
-    <div
-      style="background:var(--sf);border:1px solid var(--bd);border-radius:14px;padding:24px;width:380px;max-width:90vw;max-height:80vh;overflow-y:auto;box-shadow:0 12px 48px rgba(0,0,0,.2)">
-      <div
-        style="font-family:'Space Mono',monospace;font-size:13px;font-weight:700;color:var(--tx);letter-spacing:.04em;margin-bottom:4px"
-        data-i18n="modal_layered_title">
-        LAYERED AXONOMETRIC</div>
-      <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--t3);margin-bottom:16px"
-        data-i18n="modal_layered_subtitle">Select 2–8
-        analyses to stack · order = stack order</div>
-      <div id="layerList"></div>
-      <div style="display:flex;gap:8px;margin-top:18px">
-        <button onclick="closeLayerPicker()"
-          style="flex:1;padding:9px;font-family:'Space Mono',monospace;font-size:10px;background:transparent;color:var(--t2);border:1px solid var(--bd);border-radius:8px;cursor:pointer"
-          data-i18n="btn_cancel">CANCEL</button>
-        <button onclick="runLayered()"
-          style="flex:2;padding:9px;font-family:'Space Mono',monospace;font-size:10px;background:var(--tx);color:var(--sf);border:none;border-radius:8px;cursor:pointer;font-weight:700"
-          data-i18n="btn_generate_poster">GENERATE
-          POSTER →</button>
-      </div>
-    </div>
-  </div>
-  <div class="app">
-    <div class="sb">
-      <div class="sb-top" style="flex-wrap: wrap; justify-content: space-between; align-items: center;">
-        <div style="min-width:max-content">
-          <div class="sb-name" id="sbName" style="white-space:nowrap">ShArch<span>生成器</span></div>
-        </div>
-        <div class="lang-switch" onclick="toggleLang()">
-          <span id="langZH" class="active">中</span>
-          <span class="sep" style="font-weight:400;opacity:0.3">/</span>
-          <span id="langEN">EN</span>
-        </div>
-        <div class="sb-sub" data-i18n="sb_sub" style="flex-basis:100%;margin-top:2px">ARCHITECTURAL SITE ANALYSIS</div>
-      </div>
-      <div class="sb-mid">
-        <!-- Studio Tools Link Section -->
-        <div class="sec" id="secStudioLink">
-          <div class="lbl" data-i18n="studio_tool_title">Studio Tools</div>
-          <a href="bubble-analysis/bubble-analysis.html" style="text-decoration: none; display: block;">
-            <div class="mb" style="margin: 0 0 4px 0; font-weight: 500; text-align: left; padding: 9px 12px;" data-i18n="tool_bubble_link">
-              ◌ Bubble Diagram ↗
-            </div>
-          </a>
-          <a href="studio/strategy/strategy.html" style="text-decoration: none; display: block;">
-            <div class="mb" style="margin: 0 0 4px 0; font-weight: 500; text-align: left; padding: 9px 12px;" data-i18n="tool_strategy_link">
-              ◇ Site Strategy ↗
-            </div>
-          </a>
-          <a href="studio/floorplan/floorplan.html" style="text-decoration: none; display: block;">
-            <div class="mb" style="margin: 0 0 4px 0; font-weight: 500; text-align: left; padding: 9px 12px;" data-i18n="tool_floorplan_link">
-              ▣ Floorplan / AXO ↗
-            </div>
-          </a>
-          <a href="studio/flow/flow.html" style="text-decoration: none; display: block;">
-            <div class="mb" style="margin: 0 0 4px 0; font-weight: 500; text-align: left; padding: 9px 12px;" data-i18n="tool_flow_link">
-              ➤ Flow Analysis ↗
-            </div>
-          </a>
-          <a href="studio/parti/parti.html" style="text-decoration: none; display: block;">
-            <div class="mb" style="margin: 0 0 4px 0; font-weight: 500; text-align: left; padding: 9px 12px;" data-i18n="tool_parti_link">
-              ◆ Parti Studio ↗
-            </div>
-          </a>
-          <a href="studio/planstudio/planstudio.html" style="text-decoration: none; display: block;">
-            <div class="mb" style="margin: 0 0 4px 0; font-weight: 500; text-align: left; padding: 9px 12px;" data-i18n="tool_planrender_link">
-              ▦ Plan Render ↗
-            </div>
-          </a>
-          <a href="studio/elevation/elevation.html" style="text-decoration: none; display: block;">
-            <div class="mb" style="margin: 0 0 4px 0; font-weight: 500; text-align: left; padding: 9px 12px;" data-i18n="tool_elevation_link">
-              △ Elevation / Section ↗
-            </div>
-          </a>
-          <a href="studio/layout/layout.html" style="text-decoration: none; display: block;">
-            <div class="mb" style="margin: 0; font-weight: 500; text-align: left; padding: 9px 12px;" data-i18n="tool_layout_link">
-              ▥ Portfolio Layout ↗
-            </div>
-          </a>
-        </div>
 
-        <!-- Location moved to map column -->
-        <div class="sec">
-          <div class="lbl" data-i18n="viewmode">View Mode</div>
-          <div class="ms">
-            <div class="mb on" id="view2d" onclick="setView('2d')" data-i18n="v2d">2D Analysis</div>
-            <div class="mb" id="view3d" onclick="setView('3d')" data-i18n="v3d">3D City</div>
-          </div>
-        </div>
+  <script>
+    /* ─── Tool catalogue ─── */
+    const TOOLS = [
+      {
+        href: 'studio/general-tool/general-tool.html',
+        icon: '◎',
+        name: { en: 'Site Analysis', zh: '场地分析' },
+        desc: {
+          en: 'OSM-based 2D / 3D site analysis · 18 diagram types · layered axonometric PDF',
+          zh: '基于 OSM 的 2D / 3D 场地分析 · 18 种分析图 · 爆炸轴测 PDF'
+        },
+        tag: { en: 'MAIN', zh: '主工具' },
+        accent: '#2563EB',
+        featured: true
+      },
+      {
+        href: 'studio/bubble-analysis/bubble-analysis.html',
+        icon: '◌',
+        name: { en: 'Bubble Diagram', zh: '泡泡图' },
+        desc: {
+          en: 'Force-directed bubble layout for program & adjacency relationships',
+          zh: '力导向气泡布局，梳理功能与邻接关系'
+        },
+        tag: { en: 'CONCEPT', zh: '概念' },
+        accent: '#7C3AED'
+      },
+      {
+        href: 'studio/strategy/strategy.html',
+        icon: '◇',
+        name: { en: 'Site Strategy', zh: '场地策略' },
+        desc: {
+          en: 'Entries, sightlines, zones & circulation on a real map base',
+          zh: '在真实底图上绘制出入口、视线、分区与流线'
+        },
+        tag: { en: 'STRATEGY', zh: '策略' },
+        accent: '#0891B2'
+      },
+      {
+        href: 'studio/flow/flow.html',
+        icon: '➤',
+        name: { en: 'Flow Analysis', zh: '流线分析' },
+        desc: {
+          en: 'Pedestrian, vehicle, logistics, fire & landscape circulation',
+          zh: '人流、车流、后勤、消防与景观游线'
+        },
+        tag: { en: 'FLOW', zh: '流线' },
+        accent: '#059669'
+      },
+      {
+        href: 'studio/parti/parti.html',
+        icon: '◆',
+        name: { en: 'Parti Studio', zh: 'Parti 概念演变' },
+        desc: {
+          en: 'BIG / OMA-style isometric massing sequence · chain or preset',
+          zh: 'BIG / OMA 风格等轴测体块演变 · 链式或预设'
+        },
+        tag: { en: 'PARTI', zh: '概念' },
+        accent: '#DC2626'
+      },
+      {
+        href: 'studio/floorplan/floorplan.html',
+        icon: '▣',
+        name: { en: 'Floorplan / AXO', zh: '平面 / 轴测' },
+        desc: {
+          en: 'Draw walls, rooms, furniture, multi-floor · export axonometric',
+          zh: '绘制墙、房间、家具、多楼层 · 导出轴测'
+        },
+        tag: { en: 'DRAW', zh: '制图' },
+        accent: '#D97706'
+      },
+      {
+        href: 'studio/planstudio/planstudio.html',
+        icon: '▦',
+        name: { en: 'Plan Render', zh: '总平上色' },
+        desc: {
+          en: 'Turn base maps into refined master-plan color studies',
+          zh: '将底图快速转为高级总平色彩研究'
+        },
+        tag: { en: 'RENDER', zh: '渲染' },
+        accent: '#0D9488'
+      },
+      {
+        href: 'studio/elevation/elevation.html',
+        icon: '△',
+        name: { en: 'Elevation / Section', zh: '立面 / 剖面' },
+        desc: {
+          en: 'Material fills, ground, sky atmosphere & entourage',
+          zh: '材质填充、地面、天空氛围与配景'
+        },
+        tag: { en: 'RENDER', zh: '渲染' },
+        accent: '#9333EA'
+      },
+      {
+        href: 'studio/layout/layout.html',
+        icon: '▥',
+        name: { en: 'Portfolio Layout', zh: '作品集排版' },
+        desc: {
+          en: 'A1 / A2 / A3 boards · strategy templates · print-ready export',
+          zh: 'A1 / A2 / A3 图板 · 策略模板 · 打印就绪导出'
+        },
+        tag: { en: 'LAYOUT', zh: '排版' },
+        accent: '#4F46E5'
+      }
+    ];
 
-        <div class="sec" id="secStyle">
-          <div class="lbl" data-i18n="mapstyle">Map Style</div>
-          <div class="ms" style="grid-template-columns:1fr 1fr">
-            <div class="mb on" id="tileLight" onclick="setTile(this,'light')" data-i18n="tile_light">Light</div>
-            <div class="mb" id="tileSat" onclick="setTile(this,'sat')" data-i18n="tile_sat">Sat</div>
-          </div>
-          <div class="rr"><label data-i18n="radius">Radius</label><input type="range" min="200" max="2000" step="100"
-              value="600" id="rSlider" oninput="updateR()" /><span class="rv" id="rVal">600m</span></div>
-        </div>
-        <div class="sec" id="secOverlay">
-          <div class="lbl"><span data-i18n="map_overlay">Map Overlay</span> <span
-              style="font-size:8px;color:var(--t3);font-weight:400" data-i18n="after_generate">after generate</span>
-          </div>
-          <div class="ms" style="grid-template-columns:1fr 1fr 1fr">
-            <div class="mb ovbtn" onclick="setOvStyle('nolli',this)">Nolli</div>
-            <div class="mb ovbtn" onclick="setOvStyle('diagram',this)">Diagram</div>
-            <div class="mb ovbtn" onclick="setOvStyle('dark',this)">Dark</div>
-          </div>
-        </div>
-        <div class="sec" id="sec3d" style="display:none">
-          <div class="lbl"><span data-i18n="analysis_types_3d">3D Analysis Types</span> <span
-              style="font-size:8px;color:var(--t3);font-weight:400" data-i18n="tap_preview">tap to preview · all
-              generate</span></div>
-          <div class="ms" style="grid-template-columns:1fr 1fr">
-            <div class="mb on" id="m3d_white" onclick="SM3('white')" data-i18n="m3d_white">White</div>
-            <div class="mb" id="m3d_height" onclick="SM3('height')" data-i18n="m3d_height">Height</div>
-            <div class="mb" id="m3d_zone" onclick="SM3('zone')" data-i18n="m3d_zone">Zoning</div>
-            <div class="mb" id="m3d_density" onclick="SM3('density')" data-i18n="m3d_density">Density</div>
-            <div class="mb" id="m3d_solar" onclick="SM3('solar')" data-i18n="m3d_solar">Solar</div>
-            <div class="mb" id="m3d_skyline" onclick="SM3('skyline')" data-i18n="m3d_skyline">Skyline</div>
-          </div>
-          <div id="leg3d" style="margin-top:10px;font-family:Space Mono,monospace"></div>
-          <div id="solar3d" style="display:none;margin-top:10px">
-            <div id="sclock3d" style="font-size:20px;font-weight:700;color:var(--tx);font-family:Space Mono,monospace">
-              12:00</div>
-            <div id="sph3d" style="font-size:8px;color:var(--t3);margin-bottom:5px;font-family:Space Mono,monospace"
-              data-i18n="solar_noon">
-              SOLAR NOON</div>
-            <input type="range" id="ssl3d" min="0" max="1439" value="720" step="5"
-              style="width:100%;accent-color:var(--tx)" />
-          </div>
-          <div style="display:flex;gap:6px;align-items:center;margin-top:10px">
-            <span style="font-size:8px;color:var(--t3);letter-spacing:.1em" data-i18n="shape_3d">SHAPE</span>
-            <div class="mb on" id="shp3d_circle" onclick="setShape3('circle')"
-              style="flex:1;text-align:center;padding:6px" data-i18n="shp3d_circle">Circle</div>
-            <div class="mb" id="shp3d_square" onclick="setShape3('square')" style="flex:1;text-align:center;padding:6px"
-              data-i18n="shp3d_square">Square</div>
-          </div>
-        </div>
-        <div class="sec" id="secTypes">
-          <div class="lbl" data-i18n="analysis">Analysis Types</div>
-          <div class="ms" style="margin-bottom:12px"><button class="mb" onclick="selAll(1)"
-              data-i18n="btn_all">all</button><button class="mb" onclick="selAll(0)" data-i18n="btn_none">none</button>
-          </div>
-          <div id="alist"></div>
-        </div>
-        <div class="sec" id="secShape">
-          <div class="lbl" data-i18n="shape">Diagram Shape</div>
-          <div class="ms" style="grid-template-columns:1fr 1fr; gap:6px;">
-            <div class="mb on" id="shpCircle" onclick="setShape('circle',this)" data-i18n="shp_circle">● Circle</div>
-            <div class="mb" id="shpRect" onclick="setShape('rect',this)" data-i18n="shp_round">▢ Round</div>
-            <div class="mb" id="shpSquare" onclick="setShape('square',this)" data-i18n="shp_square">█ Square</div>
-            <div class="mb" id="shpPoly" onclick="startPolygon()" data-i18n="shp_poly">⬡ Site</div>
-          </div>
-          <div id="polyHint"
-            style="display:none;margin-top:8px;font-size:9px;color:var(--t2);line-height:1.5;background:var(--sf);border:1px solid var(--ln);border-radius:8px;padding:9px">
-            <span id="polyHintTxt" data-i18n="poly_hint_text">点击地图添加边界点（至少3个），画出你的场地范围。</span>
-            <div style="display:flex;gap:6px;margin-top:8px">
-              <button onclick="finishPolygon()"
-                style="flex:1;font-size:9px;font-family:'Space Mono',monospace;background:var(--tx);color:var(--sf);border:none;border-radius:6px;padding:7px;cursor:pointer"
-                data-i18n="btn_done">✓
-                DONE</button>
-              <button onclick="clearPolygon()"
-                style="flex:1;font-size:9px;font-family:'Space Mono',monospace;background:none;color:var(--t2);border:1px solid var(--ln);border-radius:6px;padding:7px;cursor:pointer"
-                data-i18n="btn_clear">✕
-                CLEAR</button>
-            </div>
-          </div>
-        </div>
-        <div class="sec" id="secDisplay">
-          <div class="lbl" data-i18n="display_opts">Diagram Elements</div>
-          <div style="display:flex;gap:12px;margin-top:6px;flex-wrap:wrap">
-            <label
-              style="font-family:'Noto Sans', 'Noto Sans SC', sans-serif;font-size:10px;color:var(--t2);cursor:pointer;display:flex;align-items:center;gap:6px">
-              <input type="checkbox" id="showScaleChk" checked onchange="toggleScale(this.checked)"
-                style="cursor:pointer" />
-              <span data-i18n="opt_scale">Scale Bar</span>
-            </label>
-            <label
-              style="font-family:'Noto Sans', 'Noto Sans SC', sans-serif;font-size:10px;color:var(--t2);cursor:pointer;display:flex;align-items:center;gap:6px">
-              <input type="checkbox" id="showNorthChk" checked onchange="toggleNorth(this.checked)"
-                style="cursor:pointer" />
-              <span data-i18n="opt_north">Compass</span>
-            </label>
-            <label
-              style="font-family:'Noto Sans', 'Noto Sans SC', sans-serif;font-size:10px;color:var(--t2);cursor:pointer;display:flex;align-items:center;gap:6px">
-              <input type="checkbox" id="legendZhChk" checked onchange="toggleLegendZh(this.checked)"
-                style="cursor:pointer" />
-              <span data-i18n="opt_legend_zh">Chinese Legend</span>
-            </label>
-          </div>
-        </div>
-        <div class="sec" id="secExportBg">
-          <div class="lbl" data-i18n="export_bg">Export Background</div>
-          <div style="display:flex;align-items:center;gap:8px;margin-top:6px">
-            <select id="bgSelect" onchange="setExportBg(this.value)"
-              style="font-size:10px;border:1px solid var(--ln);border-radius:5px;padding:4px;cursor:pointer;background:var(--sf);color:var(--tx);flex:1">
-              <option value="theme" data-i18n="bg_theme" selected>Theme Default</option>
-              <option value="transparent" data-i18n="bg_transparent">Transparent</option>
-              <option value="custom" data-i18n="bg_custom">Custom</option>
-            </select>
-            <input type="color" id="exportBgPick" value="#ffffff" oninput="setExportBg(this.value, true)"
-              style="width:30px;height:24px;border:1px solid var(--ln);border-radius:5px;padding:0;cursor:pointer;background:none;display:none" />
-          </div>
-        </div>
-        <div class="sec" id="secTheme">
-          <div class="lbl"><span data-i18n="color_theme">Color Theme</span> <span
-              style="font-size:8px;color:var(--t3);font-weight:400" data-i18n="applies_all">applies to all</span>
-          </div>
-          <div class="ms" style="grid-template-columns:1fr 1fr 1fr">
-            <div class="mb on" id="thm0" onclick="setTheme(0)" data-i18n="theme_warm">Warm</div>
-            <div class="mb" id="thm1" onclick="setTheme(1)" data-i18n="theme_cool">Cool</div>
-            <div class="mb" id="thm2" onclick="setTheme(2)" data-i18n="theme_mono">Mono</div>
-          </div>
-          <div style="display:flex;align-items:center;gap:8px;margin-top:9px">
-            <span style="font-size:8px;color:var(--t3);letter-spacing:.1em;flex:1" data-i18n="accent_color">ACCENT COLOR
-              · 主色</span>
-            <input type="color" id="accentPick" value="#C0392B" oninput="setAccent(this.value)"
-              style="width:30px;height:24px;border:1px solid var(--ln);border-radius:5px;padding:0;cursor:pointer;background:none" />
-            <button onclick="setAccent(null)" title="Reset to default red"
-              style="font-size:8px;font-family:'Space Mono',monospace;color:var(--t3);background:none;border:1px solid var(--ln);border-radius:5px;padding:4px 7px;cursor:pointer"
-              data-i18n="btn_reset">RESET</button>
-          </div>
-        </div>
-      </div>
-      <!-- ALWAYS VISIBLE BOTTOM BUTTONS -->
-      <div class="sb-bot">
-        <button class="gen" id="genMain" onclick="generateMain()" data-i18n="btn_generate">GENERATE ANALYSIS ↗</button>
-        <div class="exp-row" id="exp2d">
-          <div class="ebtn" onclick="gate(exportPDF)" style="grid-column:1/-1" data-i18n="btn_report_pdf">REPORT PDF ↓
-          </div>
-        </div>
+    /* ─── i18n ─── */
+    let lang = 'zh';
+    try { lang = localStorage.getItem('em_lang') || 'zh'; } catch (e) { }
 
-        <div class="exp-row" id="exp2dL" style="margin-top:8px">
-          <div class="ebtn" onclick="gate(()=>openLayerPicker())" style="grid-column:1/-1"
-            data-i18n="btn_layered_axon_pdf">LAYERED AXON PDF ↓</div>
-        </div>
-        <div class="exp-row" id="exp3d" style="display:none">
-          <div class="ebtn" onclick="gate(()=>S3.exportReportPDF())" style="grid-column:1/-1"
-            data-i18n="btn_report_pdf">REPORT PDF ↓</div>
-        </div>
-      </div>
-    </div>
+    const I18N = {
+      brand_sub: { en: 'ARCHITECTURAL TOOLKIT', zh: '建筑制图工具集' },
+      hero_eyebrow: { en: 'SHARCH STUDIO · v1.3', zh: 'SHARCH 工作室 · v1.3' },
+      hero_title: {
+        en: 'From site to portfolio,<br>one calm toolkit.',
+        zh: '从场地到图板，<br>一套从容的工具。'
+      },
+      hero_subtitle: {
+        en: 'A suite of front-end architectural drawing tools — real OSM data, isometric parti sequences, plan rendering and print-ready boards. Pure browser, no watermark, unified bilingual UI.',
+        zh: '一套纯前端的建筑制图工具——真实 OSM 数据、等轴测概念演变、总平上色与打印就绪图板。浏览器即用、无水印、中英双语统一。'
+      },
+      hero_meta: {
+        en: '9 STUDIO TOOLS · 18 ANALYSIS TYPES · 6 CITY-MASS MODELS',
+        zh: '9 项工作室工具 · 18 种分析图 · 6 种城市体量模型'
+      },
+      section_title: { en: 'Studio Tools', zh: '工作室工具' },
+      footer_made: { en: 'pure front-end · no watermark', zh: '纯前端 · 无水印' },
+      footer_github: { en: 'GitHub', zh: 'GitHub' },
+      footer_osm: { en: '© OpenStreetMap', zh: '© OpenStreetMap' },
+      open_in: { en: 'OPEN', zh: '打开' },
+      lang_toast: { en: 'English', zh: '中文' }
+    };
 
-    <div class="res">
-      <div class="res-scroll">
-        <div class="empty" id="emp">
-          <div class="erule"></div>
-          <div class="etxt" data-i18n="empty_state">SELECT SITE · CHOOSE ANALYSES · GENERATE</div>
-          <div class="erule"></div>
-        </div>
-        <div id="statBar"
-          style="display:none;flex-wrap:wrap;gap:0;border:1px solid var(--ln);border-radius:12px;overflow:hidden;margin-bottom:18px;background:var(--sf)">
-        </div>
-        <div class="grid" id="rgrid" style="display:none"></div>
-      </div>
+    function t(obj) { return (obj && obj[lang]) || (obj && obj.en) || ''; }
 
-      <div class="sbar">
-        <div class="sd" id="sdot"></div><span id="stxt" data-i18n="ready_status">READY</span><span
-          style="margin-left:auto">ShArch · v1.3</span>
-      </div>
-    </div>
+    function hexSoft(hex) {
+      // soft tint background from accent hex
+      const r = parseInt(hex.slice(1, 3), 16);
+      const g = parseInt(hex.slice(3, 5), 16);
+      const b = parseInt(hex.slice(5, 7), 16);
+      return `rgba(${r},${g},${b},0.10)`;
+    }
 
-    <div class="map-column">
-      <div class="map-header">
-        <div class="lbl" data-i18n="loc">Location</div>
-        <input class="loc-in" id="locIn" data-i18n-ph="locph" placeholder="Search address or place..." />
-        <button class="srch-btn" onclick="doSearch()" data-i18n="btn_search">⌕ &nbsp;search on map</button>
-        <div class="cr">
-          <div class="cb" id="latB" data-i18n="lat_lbl">Lat —</div>
-          <div class="cb" id="lngB" data-i18n="lng_lbl">Lng —</div>
-        </div>
-        <div id="netStatus"
-          style="margin-top:7px;font-family:Space Mono,monospace;font-size:10px;color:var(--t2);display:flex;align-items:center;gap:7px;background:var(--s2);border:1px solid var(--bd);border-radius:7px;padding:7px 9px">
-          <span id="netDot"
-            style="width:9px;height:9px;border-radius:50%;background:var(--bd2);display:inline-block;flex-shrink:0"></span><span
-            id="netTxt" style="flex:1" data-i18n="net_unknown">OSM status unknown</span><button onclick="testNet()"
-            style="font-size:9px;font-family:Space Mono,monospace;background:var(--tx);border:none;border-radius:4px;padding:3px 9px;cursor:pointer;color:#fff;font-weight:700"
-            data-i18n="btn_test">TEST</button>
-        </div>
-      </div>
-      <div class="mw" id="mwrap">
-        <div id="map"></div>
-        <div id="map3d" style="position:absolute;inset:0;z-index:15;display:none"></div>
-        <div class="hud">
-          <div class="hp" id="hudTag" data-i18n="hud_click_map">CLICK MAP TO SELECT SITE</div>
-          <div class="hp" id="hudCoord" style="display:none"></div>
-        </div>
-        <div class="hint" id="hint" data-i18n="map_hint">CLICK ANYWHERE ON MAP TO DROP PIN</div>
-        <div id="dbg"
-          style="display:none;position:absolute;bottom:0;left:0;right:0;z-index:20;background:rgba(0,0,0,0.82);color:#eee;font:10px/1.6 Space Mono,monospace;padding:8px 12px;max-height:120px;overflow-y:auto">
-        </div>
-      </div>
-    </div>
-  </div>
-  <script src="app.js"></script>
+    function renderTools() {
+      const grid = document.getElementById('grid');
+      grid.innerHTML = '';
+      TOOLS.forEach((tool, i) => {
+        const a = document.createElement('a');
+        a.className = 'card';
+        a.href = tool.href;
+        a.style.setProperty('--card-accent', tool.accent);
+        a.style.setProperty('--card-accent-soft', hexSoft(tool.accent));
+        a.style.animationDelay = (i * 60) + 'ms';
+        a.innerHTML = `
+          <div class="card-glow"></div>
+          <div class="card-head">
+            <div class="card-icon">${tool.icon}</div>
+            <span class="card-tag${tool.featured ? ' featured' : ''}">${t(tool.tag)}</span>
+          </div>
+          <div class="card-title">${t(tool.name)}</div>
+          <div class="card-desc">${t(tool.desc)}</div>
+          <div class="card-foot">
+            <span>${t(I18N.open_in)}</span>
+            <span class="card-arrow">→</span>
+          </div>
+        `;
+        grid.appendChild(a);
+      });
+      const count = document.getElementById('toolCount');
+      count.textContent = `${TOOLS.length} / ${TOOLS.length}`;
+    }
+
+    function applyLang() {
+      document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en';
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.dataset.i18n;
+        if (I18N[key]) el.innerHTML = I18N[key][lang];
+      });
+      document.getElementById('langZH').classList.toggle('active', lang === 'zh');
+      document.getElementById('langEN').classList.toggle('active', lang === 'en');
+      renderTools();
+    }
+
+    function toggleLang() {
+      lang = lang === 'zh' ? 'en' : 'zh';
+      try { localStorage.setItem('em_lang', lang); } catch (e) { }
+      applyLang();
+      showToast(lang === 'zh' ? '已切换至中文' : 'Switched to English');
+    }
+
+    let toastTimer;
+    function showToast(msg) {
+      const el = document.getElementById('toast');
+      el.textContent = msg;
+      el.classList.add('on');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => el.classList.remove('on'), 1800);
+    }
+
+    // keyboard support for language switch
+    document.querySelector('.lang-switch').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleLang(); }
+    });
+
+    applyLang();
+  </script>
 </body>
 
 </html>

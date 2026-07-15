@@ -22,6 +22,7 @@ button,input,select,textarea{font:inherit;color:inherit}.mono{font-family:"Space
 <body>
 <div class="topbar">
   <div class="brandMark">SA</div><div class="brand">ShArch<small>Parti · Concept Evolution</small></div>
+  <a href="../../index.html" id="homeBtn" class="topbtn" style="background:var(--accent);color:#fff;border-color:var(--accent);text-decoration:none">← 主页</a>
   <input id="projectTitle" class="projectTitle" value="Concept Evolution">
   <div class="tabs"><button class="tab on" data-view="work">WORK</button><button class="tab" data-view="board">BOARD</button></div>
   <div class="spacer"></div>
@@ -396,7 +397,7 @@ function exportPNG(){
  const url=URL.createObjectURL(new Blob([xml],{type:'image/svg+xml'})),img=new Image();
  img.onload=()=>{const scale=2,c=document.createElement('canvas');c.width=Math.round(ew*scale);c.height=Math.round(eh*scale);const g=c.getContext('2d');g.fillStyle=style().bg;g.fillRect(0,0,c.width,c.height);g.drawImage(img,0,0,c.width,c.height);URL.revokeObjectURL(url);c.toBlob(b=>{const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=(state.title||'parti').replace(/[^\w-]+/g,'_')+'_parti_v4_9.png';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000)},'image/png')};img.onerror=()=>{URL.revokeObjectURL(url);toast(state.lang==='zh'?'导出失败':'EXPORT FAILED')};img.src=url
 }
-$$('.tab').forEach(b=>b.onclick=()=>{state.view=b.dataset.view;$$('.tab').forEach(x=>x.classList.toggle('on',x===b));state.selectedId=null;state.tool='select';state.stepFocus=state.steps.length-1;renderAll()});$('#undoBtn').onclick=undo;$('#redoBtn').onclick=redo;$('#saveBtn').onclick=saveProject;$('#loadBtn').onclick=loadProject;$('#exportBtn').onclick=exportPNG;$('#langBtn').onclick=()=>{state.lang=state.lang==='zh'?'en':'zh';$('#langBtn').textContent=state.lang==='zh'?'EN':'中';renderAll()};$('#projectTitle').oninput=()=>{state.title=$('#projectTitle').value;renderCanvas()};$('#zoomIn').onclick=()=>{state.zoom=Math.min(1.5,state.zoom+.1);renderCanvas()};$('#zoomOut').onclick=()=>{state.zoom=Math.max(.65,state.zoom-.1);renderCanvas()};$('#zoomFit').onclick=()=>{state.zoom=1;renderCanvas()};
+$$('.tab').forEach(b=>b.onclick=()=>{state.view=b.dataset.view;$$('.tab').forEach(x=>x.classList.toggle('on',x===b));state.selectedId=null;state.tool='select';state.stepFocus=state.steps.length-1;renderAll()});$('#undoBtn').onclick=undo;$('#redoBtn').onclick=redo;$('#saveBtn').onclick=saveProject;$('#loadBtn').onclick=loadProject;$('#exportBtn').onclick=exportPNG;$('#langBtn').onclick=()=>{state.lang=state.lang==='zh'?'en':'zh';$('#langBtn').textContent=state.lang==='zh'?'EN':'中';const hb=$('#homeBtn');if(hb)hb.textContent=state.lang==='zh'?'← 主页':'← Home';renderAll()};$('#projectTitle').oninput=()=>{state.title=$('#projectTitle').value;renderCanvas()};$('#zoomIn').onclick=()=>{state.zoom=Math.min(1.5,state.zoom+.1);renderCanvas()};$('#zoomOut').onclick=()=>{state.zoom=Math.max(.65,state.zoom-.1);renderCanvas()};$('#zoomFit').onclick=()=>{state.zoom=1;renderCanvas()};
 window.__PARTI_V4__={state,addBase,setTool,applyCut,applyMove,applyLift,applyRotate,applyScale,applyStretch,applyExtrude,applyDuplicate,applyTerrace,applyCourtyardOp,applyBridge,applyMirror,applySubtract,applyProgram,deleteStep,updateCurrentStep,undo,redo,renderAll,renderBoard,exportBoardSVG};
 if(new URLSearchParams(location.search).get('courtyardtest')==='1'){
   state.pieces=[];state.steps=[];state.redo=[];state.selectedId=null;state.stepFocus=-1;state.tool='select';
@@ -434,6 +435,5 @@ if(new URLSearchParams(location.search).get('selftest')==='1'){addBase('box');st
 renderAll();
 })();
 </script>
-<a href="../../index.html" style="position:fixed;left:18px;bottom:18px;z-index:9999;padding:9px 14px;border:1px solid #E5E7EB;border-radius:999px;background:rgba(255,255,255,.92);color:#111827;font:600 11px 'Inter',sans-serif;text-decoration:none;box-shadow:0 8px 24px rgba(0,0,0,.08);backdrop-filter:blur(10px)">← <span>ShArch</span></a>
 </body>
 </html>
