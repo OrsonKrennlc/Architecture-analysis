@@ -1,0 +1,15 @@
+{
+  "name": "sharch-studio",
+  "version": "1.0.0",
+  "description": "ShArch Studio - Architecture Analysis Tool",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"No tests specified\" && exit 0"
+  },
+  "keywords": ["architecture", "analysis", "gis"],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@vercel/analytics": "^1.1.1"
+  }
+}
