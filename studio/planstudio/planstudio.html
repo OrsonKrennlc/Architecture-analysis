@@ -4,6 +4,11 @@
 <title>总平上色 · Plan Render Studio</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Inter:wght@400;500;600;700&family=Archivo:wght@800&display=swap" rel="stylesheet">
+<!-- Vercel Web Analytics -->
+<script>
+window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+</script>
+<script defer src="/_vercel/insights/script.js"></script>
 <style>
 :root{--ink:#111827;--sub:#6B7280;--paper:#FAFAFA;--line:#E5E7EB;--accent:#2563EB;--panel:#FFFFFF;--stage:#E5E7EB}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -1233,6 +1238,10 @@ document.getElementById('expPng').onclick=()=>_safeExportCanvas(c=>{c.toBlob(bl=
 document.getElementById('expJpg').onclick=()=>_safeExportCanvas(oc=>{const fc=document.createElement('canvas');fc.width=oc.width;fc.height=oc.height;const fx=fc.getContext('2d');fx.fillStyle='#fff';fx.fillRect(0,0,fc.width,fc.height);fx.drawImage(oc,0,0);fc.toBlob(bl=>{if(!bl){toast(psT('t_jpg_fail'));return;}_downloadBlob('plan_render_'+expRes+'x.jpg',bl);toast(psT('t_jpg_ok')+(W*expRes)+'×'+(H*expRes));},'image/jpeg',0.92);});
 document.getElementById('expPdf').onclick=()=>{if(!W){toast(psT('t_upload_first'));return;}const url=buildExport().toDataURL('image/png');const w=window.open('','_blank');
   if(!w){toast(psT('t_pdf_popup'));return;}
+<!-- Vercel Web Analytics -->
+<script>
+window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+</script>
   w.document.write('<html><head><title>plan</title><style>@page{margin:0}body{margin:0}img{width:100%;display:block}</style></head><body><img src="'+url+'" onload="setTimeout(function(){window.print()},150)"></body></html>');
   w.document.close();document.getElementById('expMenu').style.display='none';toast(psT('t_pdf_print'));};
 document.getElementById('zIn').onclick=()=>{zoom=clampZoom(zoom*1.2);drawView();};
