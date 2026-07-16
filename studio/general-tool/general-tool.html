@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1.0" />
-  <title>ShArch生成器</title>
+  <title>AntiMap 生成器</title>
   <link rel="icon" type="image/png" href="favicon.png">
   <link rel="apple-touch-icon" href="favicon.png">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -13,6 +13,7 @@
     rel="stylesheet" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/suncalc@1.9.0/suncalc.min.js"></script>
+  <link rel="stylesheet" href="../../common/css/theme.css">
   <link rel="stylesheet" href="styles.css">
 </head>
 
@@ -89,10 +90,10 @@
     <div class="sb">
       <div class="sb-top" style="flex-wrap: wrap; justify-content: space-between; align-items: center;">
         <div style="min-width:max-content">
-          <div class="sb-name" id="sbName" style="white-space:nowrap">ShArch<span>生成器</span></div>
+          <div class="sb-name" id="sbName" style="white-space:nowrap">AntiMap<span>生成器</span></div>
         </div>
         <a href="../../index.html" data-i18n="home_btn" style="padding:7px 12px;border:1px solid var(--accent);background:var(--accent);border-radius:8px;font:700 11px 'Space Mono',monospace;color:#fff;text-decoration:none;white-space:nowrap">← Home 主页</a>
-        <div class="lang-switch" onclick="toggleLang()">
+        <div class="lang-switch" onclick="toggleLang()" style="display:none">
           <span id="langZH" class="active">中</span>
           <span class="sep" style="font-weight:400;opacity:0.3">/</span>
           <span id="langEN">EN</span>
@@ -243,7 +244,7 @@
 
       <div class="sbar">
         <div class="sd" id="sdot"></div><span id="stxt" data-i18n="ready_status">READY</span><span
-          style="margin-left:auto">ShArch · v1.3</span>
+          style="margin-left:auto">AntiMap · v1.5</span>
       </div>
     </div>
 
@@ -278,6 +279,7 @@
       </div>
     </div>
   </div>
+  <script src="../../common/js/utils.js"></script>
   <script src="app.js"></script>
 </body>
 

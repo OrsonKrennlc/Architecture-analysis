@@ -4,7 +4,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" name="viewport"/>
-<title>ShArch · Elevation / Section Studio</title>
+<title>AntiMap · Elevation / Section Studio</title>
 <link href="https://fonts.googleapis.com" rel="preconnect"/>
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&amp;family=Inter:wght@400;500;600;700;800&amp;family=Archivo:wght@700;800;900&amp;display=swap" rel="stylesheet"/>
 <style>
@@ -116,18 +116,18 @@ button,input,select{font-family:inherit}
 </head>
 <body>
 <div id="langPick" style="display:none;position:fixed;inset:0;z-index:100000;background:#FAFAFA;align-items:center;justify-content:center;font-family:Inter,system-ui,sans-serif;flex-direction:column;gap:20px">
-<div style="text-align:center"><div style="font-family:Space Mono,monospace;font-size:13px;letter-spacing:.2em;color:#2563EB;font-weight:700">SHARCH</div><div style="font-size:22px;font-weight:700;color:#111827;margin-top:8px">选择语言 · Choose language</div></div>
+<div style="text-align:center"><div style="font-family:Space Mono,monospace;font-size:13px;letter-spacing:.2em;color:#2563EB;font-weight:700">ANTIMAP</div><div style="font-size:22px;font-weight:700;color:#111827;margin-top:8px">选择语言 · Choose language</div></div>
 <div style="display:flex;gap:14px"><button onclick="setLang('zh')" style="padding:14px 34px;border-radius:12px;background:#111827;color:#fff;border:none;font-family:Inter,sans-serif;font-size:13px;font-weight:600;cursor:pointer">中文</button><button onclick="setLang('en')" style="padding:14px 34px;border-radius:12px;background:#fff;color:#111827;border:1.5px solid #111827;font-family:Inter,sans-serif;font-size:13px;font-weight:600;cursor:pointer">English</button></div>
 </div>
 <div class="app">
 <header class="top">
-<div class="brand"><div class="mark">SA</div><div class="btitle">ShArch<small>Elevation / Section Render</small></div></div>
+<div class="brand"><div class="mark">AM</div><div class="btitle">AntiMap<small>Elevation / Section Render</small></div></div>
 <a href="../../index.html" data-em-original="← HOME" style="margin-left:6px;padding:7px 12px;border:1px solid var(--accent,#2563EB);background:var(--accent,#2563EB);border-radius:7px;color:#fff;font:700 10px 'Space Mono',monospace;text-decoration:none;white-space:nowrap;cursor:pointer;display:inline-flex;align-items:center">← HOME</a>
 <input aria-label="Project title" class="titleInput" id="projectTitle" value="Soft Elevation Study"/>
 <button class="topBtn" id="undoBtn">UNDO</button><button class="topBtn" id="redoBtn">REDO</button><button class="topBtn" id="clearRenderBtn">CLEAR</button>
 <button class="topBtn" id="copyBtn">COPY</button><button class="topBtn" id="pasteBtn">PASTE</button>
 <button class="topBtn" id="compareBtn">BEFORE</button>
-<div class="spacer"></div><button class="topBtn" id="langBtn" title="中文 / English">中</button>
+<div class="spacer"></div><button class="topBtn" id="langBtn" title="中文 / English" style="display:none">中</button>
 <button class="topBtn" id="saveBtn">SAVE</button><button class="topBtn" id="loadBtn">LOAD</button>
 <button class="topBtn dark" id="exportPng">PNG</button><button class="topBtn" id="exportSvg">SVG</button><button class="topBtn" id="exportBoard">BOARD</button><button class="topBtn red" id="exportPdf">PDF</button>
 </header>
@@ -829,13 +829,13 @@ function moveObject(o,orig,dx,dy,snap){let nx=(orig.x||0)+dx,ny=(orig.y||0)+dy;l
 function snapToEdges(o,orig,nx,ny){const tmp=cloneObject(orig);tmp.x=nx;tmp.y=ny;if(tmp.kind==='poly'){const dx=nx-orig.x,dy=ny-orig.y;tmp.pts=orig.pts.map(p=>({x:p.x+dx,y:p.y+dy}))}const b=objBounds(tmp);if(!b)return{x:nx,y:ny};const edgesX=[b.x,b.x+b.w,b.x+b.w/2],edgesY=[b.y,b.y+b.h,b.y+b.h/2];let bestX=null,bestY=null;state.objects.forEach(other=>{if(other.id===o.id||other.type==='region')return;const ob=objBounds(other);if(!ob)return;[ob.x,ob.x+ob.w,ob.x+ob.w/2].forEach(ex=>edgesX.forEach(x=>{const d=ex-x;if(Math.abs(d)<8&&(!bestX||Math.abs(d)<Math.abs(bestX.d)))bestX={d,line:ex}}));[ob.y,ob.y+ob.h,ob.y+ob.h/2].forEach(ey=>edgesY.forEach(y=>{const d=ey-y;if(Math.abs(d)<8&&(!bestY||Math.abs(d)<Math.abs(bestY.d)))bestY={d,line:ey}}));});return{x:nx+(bestX?bestX.d:0),y:ny+(bestY?bestY.d:0),sx:bestX?bestX.line:0,sy:bestY?bestY.line:0}}
 function drawSnapGuides(x,y){ctx.save();ctx.strokeStyle='rgba(182,74,61,.55)';ctx.lineWidth=1;if(x){ctx.beginPath();ctx.moveTo(x,40);ctx.lineTo(x,H-40);ctx.stroke()}if(y){ctx.beginPath();ctx.moveTo(40,y);ctx.lineTo(W-40,y);ctx.stroke()}ctx.restore()}
 function updateLayers(){const el=document.getElementById('layers');if(!el)return;el.innerHTML='';state.objects.slice().reverse().forEach(o=>{const d=document.createElement('div');d.className='layer '+(o.id===state.selected?'on':'');d.innerHTML=`<span class="dot" style="background:${o.material?matInfo[o.material]?.color||'#888':'#888'}"></span><span class="nm">${o.name}</span><span class="x">×</span>`;d.onclick=e=>{if(e.target.className==='x'){pushUndo();state.objects=state.objects.filter(x=>x.id!==o.id);if(state.selected===o.id)state.selected=null;render();updateInspector()}else{state.selected=o.id;render();updateInspector()}};el.appendChild(d)})}
-function updateInspector(){const el=document.getElementById('inspector');const o=getSelected();if(!o){el.innerHTML='<div class="hint"><b>No object selected.</b><br>Click a material region, ground block, tree, person or line to edit it.</div>';return}let typeLabel=o.type==='region'?'material region':o.type;let html=`<div class="selectName">${o.name}</div><div class="selectType">${typeLabel}${o.kind?' · '+o.kind:''}</div>`;
+function updateInspector(){const el=document.getElementById('inspector');const o=getSelected();if(!o){el.innerHTML='<div class="hint"><b>No object selected.</b><br>Click a material region, ground block, tree, person or line to edit it.</div>';emTranslateTextNodes(el);return}let typeLabel=o.type==='region'?'material region':o.type;let html=`<div class="selectName">${o.name}</div><div class="selectType">${typeLabel}${o.kind?' · '+o.kind:''}</div>`;
 if(o.type==='sheet'){
   const txt=(o.text||'').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   html+=`<div class="secTitle">Sheet Object</div><textarea id="sheetText" class="sheetTextArea">${txt}</textarea>`;
   html+=sliderHtml('Opacity','selOpacity',Math.round((o.opacity??1)*100),0,100)+sliderHtml('Scale','selScale',Math.round((o.scale??1)*100),20,260)+sliderHtml('Rotate','selRot',Math.round(o.rot||0),-180,180)+sliderHtml('Width','selW',Math.round(o.w||160),40,1100)+sliderHtml('Height','selH',Math.round(o.h||60),20,720);
   html+=`<div class="two"><button class="btn" id="frontBtn">FRONT</button><button class="btn" id="backBtn">BACK</button></div><div style="height:7px"></div><button class="btn accent" id="dupBtn">DUPLICATE</button><div style="height:8px"></div><button class="btn ghost" id="deleteBtn">DELETE</button>`;
-  el.innerHTML=html;bindSheetInspector(o);return;
+  el.innerHTML=html;bindSheetInspector(o);emTranslateTextNodes(el);return;
 }
 if(o.material && !(o.type==='shape'&&o.kind==='line')){html+=`<div class="secTitle">Material Edit</div><div class="colorRow">${(coreMaterialKeys.concat(o.material&&o.material[0]==='m'?[o.material]:[])).map(k=>`<button class="colorDot ${o.material===k?'on':''}" data-change-mat="${k}" title="${matInfo[k].name}" style="background:${k==='hatch'?'repeating-linear-gradient(45deg,#fff 0 5px,#888 5px 6px)':matInfo[k].color}"></button>`).join('')}</div><div style="height:10px"></div>`;html+=sliderHtml('Texture','matScale',Math.round((o.materialScale||1)*100),20,250)+sliderHtml('Rotation','matRot',Math.round(o.materialRot||0),-180,180);if(o.material==='hatch')html+=sliderHtml('Hatch Gap','hatchSpacing',Math.round(o.hatchSpacing||9),4,32)+sliderHtml('Hatch Angle','hatchAngle',Math.round(o.hatchAngle||0),-90,90);html+=`<div class="row"><label>Tint</label><input id="matTint" class="textLite" value="${o.tint&&o.tint!=='none'?o.tint:''}" placeholder="#B64A3D optional"></div>`}
 if(o.type==='region'){html+=`<div class="miniNote">Drag the material on canvas. Expand pushes the fill outside the detected boundary and can overlap the linework.</div><div style="height:8px"></div>`}
@@ -845,7 +845,7 @@ if(o.type==='asset'||o.type==='region'){html+=sliderHtml('Scale','selScale',Math
 if(o.type==='shape'&&o.kind==='rect'){html+=sliderHtml('Width','selW',Math.round(o.w),10,800)+sliderHtml('Height','selH',Math.round(o.h),10,500)+sliderHtml('Rotate','selRot',Math.round(o.rot||0),-180,180)}if(o.type==='shape'&&o.groundType){html+=`<div class="secTitle">Ground</div>`+sliderHtml('Thickness','objGroundThickness',Math.round(o.groundThickness||state.groundThickness),4,90)+sliderHtml('Steps','objGroundSteps',Math.round(o.groundSteps||state.groundSteps),2,8)+sliderHtml('Slope','objSlopeAngle',Math.round(o.slopeAngle||state.slopeAngle),-45,45)}
 if(o.type==='shape'&&o.kind==='line'){html+=sliderHtml('Weight','selWeight',o.weight||2,1,16)}
 if(o.type!=='shape' || o.kind!=='line'){html+=`<div class="two"><button class="btn" id="frontBtn">FRONT</button><button class="btn" id="backBtn">BACK</button></div><div style="height:7px"></div><button class="btn accent" id="dupBtn">DUPLICATE</button>`}
-html+=`<div style="height:8px"></div><button class="btn ghost" id="deleteBtn">DELETE</button>`;el.innerHTML=html;bindInspector(o)}
+html+=`<div style="height:8px"></div><button class="btn ghost" id="deleteBtn">DELETE</button>`;el.innerHTML=html;bindInspector(o);emTranslateTextNodes(el)}
 function sliderHtml(label,id,val,min,max){return `<div class="row"><label>${label}</label><input id="${id}" type="range" min="${min}" max="${max}" value="${val}"><span class="val" id="${id}Val">${val}</span></div>`}
 function bindInspector(o){document.querySelectorAll('[data-change-mat]').forEach(b=>b.onclick=()=>{pushUndo();o.material=b.dataset.changeMat;if(o.material==='custom_fill'){o.textureData=state.fillTextureData;o.textureName=state.fillTextureName;}else{o.textureData=null;o.textureImg=null;o.textureName='';}render();updateInspector()});const bind=(id,fn)=>{const e=document.getElementById(id);if(e)e.oninput=()=>{const val=document.getElementById(id+'Val');if(val)val.textContent=e.value;fn(+e.value);render();}};bind('selOpacity',v=>o.opacity=v/100);bind('regionExpand',v=>{o.expand=v;state.fillExpand=v});bind('selScale',v=>o.scale=v/100);bind('selRot',v=>o.rot=v);bind('selW',v=>o.w=v);bind('selH',v=>o.h=v);bind('selWeight',v=>o.weight=v);bind('matScale',v=>o.materialScale=v/100);bind('matRot',v=>o.materialRot=v);bind('hatchSpacing',v=>o.hatchSpacing=v);bind('hatchAngle',v=>o.hatchAngle=v);bind('objGroundThickness',v=>o.groundThickness=v);bind('objGroundSteps',v=>o.groundSteps=v);bind('objSlopeAngle',v=>o.slopeAngle=v);const tint=document.getElementById('matTint');if(tint)tint.oninput=()=>{o.tint=tint.value.trim()||'none';render()};const del=document.getElementById('deleteBtn');if(del)del.onclick=()=>{pushUndo();state.objects=state.objects.filter(x=>x.id!==o.id);state.selected=null;render();updateInspector()};const dup=document.getElementById('dupBtn');if(dup)dup.onclick=()=>duplicateSelected();const fr=document.getElementById('frontBtn');if(fr)fr.onclick=()=>{pushUndo();state.objects=state.objects.filter(x=>x.id!==o.id);state.objects.push(o);render()};const bk=document.getElementById('backBtn');if(bk)bk.onclick=()=>{pushUndo();state.objects=state.objects.filter(x=>x.id!==o.id);state.objects.unshift(o);render()}}
 function duplicateSelected(){const o=getSelected();if(!o)return;pushUndo();const c=cloneObject(o);c.id=uid();c.name=o.name+' Copy';if(c.x){c.x+=36;c.y+=24}if(c.x1){c.x1+=36;c.x2+=36;c.y1+=24;c.y2+=24}if(c.pts)c.pts=c.pts.map(p=>({x:p.x+36,y:p.y+24}));if(c.maskData){c.maskImg=new Image();c.maskImg.onload=render;c.maskImg.src=c.maskData}if(c.src){c.img=new Image();c.img.onload=render;c.img.src=c.src}state.objects.push(c);state.selected=c.id;render();updateInspector()}
@@ -1559,6 +1559,7 @@ function setupCustomAreaDrawingV30(){
   const fillSec=document.querySelector('.left .modeFill');
   if(fillSec&&!document.getElementById('fillDrawRect')){
     const host=document.createElement('div');host.innerHTML='<div style="height:8px"></div><div class="secTitle">Draw Fill Area</div><div class="two"><button class="btn" id="fillDrawRect">RECT FILL</button><button class="btn" id="fillDrawPoly">POLY FILL</button></div><div class="miniNote" style="margin-top:6px">Draw a custom material region when automatic boundary detection is not suitable.</div>';
+    emTranslateTextNodes(host);
     fillSec.appendChild(host);
     document.getElementById('fillDrawRect').onclick=()=>{state.customDrawTarget='fill';setTool('rect');showToast('DRAW RECTANGULAR MATERIAL AREA')};
     document.getElementById('fillDrawPoly').onclick=()=>{state.customDrawTarget='fill';setTool('poly');document.getElementById('polyBox')?.classList.add('on');showToast('DRAW POLYGON MATERIAL AREA')};
@@ -1646,30 +1647,106 @@ const EM_ZH={
 'Draw Line':'绘制线条','Outline':'轮廓线','Section Cut':'剖切线','ORTHOGONAL MODE':'正交模式','FINISH LINE':'完成线条','Sky / Atmosphere':'天空 / 氛围','Every preset controls color, linework, materials, ground and atmosphere together. Use Custom for manual editing.':'每个预设会同时控制配色、线稿、材质、地面和氛围。需要手动调整时选择自定义。','Sky Fill Area':'天空区域填充','SKY RECT':'天空矩形','SKY POLY':'天空多边形','Draw the selected sky effect only inside a rectangle or polygon.':'只在绘制的矩形或多边形区域内填充当前天空效果。','Sky Strength':'天空强度','Horizon Fade':'远景渐隐','Paper Grain':'纸张颗粒','BLANK':'留白','MIST':'雾化','HORIZON':'远景','WASH':'水洗','Style':'风格','Style Presets':'风格预设','NO STYLE':'无风格','BLACK / WHITE':'纯黑白','RED / WHITE':'红白','FOREST WASH':'森林水洗','SLATE SECTION':'蓝灰剖面','CLAY PORTFOLIO':'陶土作品集','REALISTIC ATMOSPHERE':'写实氛围','GRAY':'灰阶','REAL':'写实','COLLAGE':'拼贴','SOFT':'柔和',
 'Upload Asset':'上传配景','UPLOAD ASSET':'上传配景','Category':'分类','MY MATERIALS':'我的材质','CONCRETE':'混凝土','METAL':'金属','TILE':'瓷砖','FABRIC':'织物','All':'全部','Trees':'树','People':'人物','Cars':'车辆','Sky':'天空','Plants':'植物',
 'Portfolio Presets':'作品集预设','Color Palette':'配色','CUSTOM':'自定义','CUSTOM LOOK':'自定义模式','ATMOSPHERIC SECTION':'氛围剖面','SOFT PORTFOLIO':'柔和作品集','EDITORIAL B/W':'编辑黑白','DARK POCHE':'深色剖切','DUST BLUE SECTION':'雾蓝剖面','SAGE LANDSCAPE':'鼠尾草景观','CONCRETE COLLAGE':'混凝土拼贴','MORANDI EARTH':'莫兰迪地层','Ground Quality':'地面质感参数','Layer Count':'地层数量','Layer Wave':'地层波动','Color Variation':'色差','Edge Fade':'边缘渐隐','Advanced Surface':'高级材质','Offset X':'水平偏移','Offset Y':'垂直偏移','Contrast':'对比度','Blur':'模糊','Gradient Angle':'渐变方向','Edge Softness':'边缘柔化','Ground Layers':'地层控制','Surface Quality':'材质质感','Surface':'纹理强度','Gradient':'渐变','Fine Grain':'细颗粒','Top Light':'顶部亮度','Bottom Density':'底部密度','Mist Fade':'雾化渐隐','Inspector':'属性','No object selected.':'未选择对象。','Opacity':'透明度','Scale':'缩放','Rotate':'旋转','Material':'材质','Texture':'贴图尺度','Rotation':'贴图旋转','Hatch Gap':'排线间距','Hatch Angle':'排线角度','Tint':'着色','FRONT':'置顶','BACK':'置底','DUPLICATE':'复制对象','DELETE':'删除','Width':'宽度','Height':'高度','Weight':'线宽','Expand':'外扩',
-'Sheet Marks':'图纸标注','LEVEL':'标高','SCALE':'比例','FRAME':'图框','TECH':'技术指标','Drawing Cleanup':'图纸清理','Brightness':'亮度','Contrast':'对比度','Saturation':'饱和度','REMOVE WHITE BACKGROUND':'移除白底','White Cut':'白色阈值','REBUILD LINES':'重建线稿','RESET CLEAN':'重置清理','Atmosphere':'氛围','Grain':'颗粒','Fog':'雾化','Edge Dark':'暗角','Linework':'线稿','Base Image':'底图','Line Color':'线色','Project Test':'项目','CLEAR ALL':'全部清空','CLEAR RENDER':'清空渲染','RESET STYLE':'重置风格','SAVE TEMPLATE':'保存模板','LOAD TEMPLATE':'读取模板','DOWNLOAD PROJECT JSON':'下载项目文件','Export Board':'导出图板','Board Size':'图板尺寸','Title':'标题','Subtitle':'副标题','Margin':'边距','Scale Bar':'比例尺','Transparent PNG':'透明 PNG'
+'Sheet Marks':'图纸标注','LEVEL':'标高','SCALE':'比例','FRAME':'图框','TECH':'技术指标','Drawing Cleanup':'图纸清理','Brightness':'亮度','Contrast':'对比度','Saturation':'饱和度','REMOVE WHITE BACKGROUND':'移除白底','White Cut':'白色阈值','REBUILD LINES':'重建线稿','RESET CLEAN':'重置清理','Atmosphere':'氛围','Grain':'颗粒','Fog':'雾化','Edge Dark':'暗角','Linework':'线稿','Base Image':'底图','Line Color':'线色','Project Test':'项目','CLEAR ALL':'全部清空','CLEAR RENDER':'清空渲染','RESET STYLE':'重置风格','SAVE TEMPLATE':'保存模板','LOAD TEMPLATE':'读取模板','DOWNLOAD PROJECT JSON':'下载项目文件','Export Board':'导出图板','Board Size':'图板尺寸','Title':'标题','Subtitle':'副标题','Margin':'边距','Scale Bar':'比例尺','Transparent PNG':'透明 PNG',
+// Expanded keys for complete Chinese translations
+'CONC':'混凝土','SOIL':'土壤','GRASS':'草地','STONE':'石材','ROAD':'道路','WATER':'水体','HATCH':'剖面排线','WHITE':'白色','BLACK':'黑色','GRAY':'灰色','RED':'红色','SOFT CONC':'柔和混凝土','RAW CONC':'粗野混凝土','MIST CONC':'雾化混凝土','PLASTER':'抹灰','PAPER':'纸张水洗','CHARCOAL':'炭黑水洗','FOG GLASS':'雾化玻璃','STONE MIST':'石材雾化','GLASS':'玻璃','WOOD':'木材','BRICK':'砖墙','GREEN':'绿化','PINE':'松树','SOFT':'柔树','B/W':'黑白树','HUMAN':'写实人物','SECTION':'剖面人','SILH':'剪影人','CAR':'写实车辆','MIN CAR':'极简车辆','CLOUD':'写实云朵','BIRDS':'飞鸟配景','SHRUB':'灌木丛','TREE':'平面树','ALL':'全部','TREES':'树木','PEOPLE':'人物','CARS':'车辆','SKY':'天空','PLANT':'植物',
+'Select':'选择','Fill Area':'区域填充','Ground Rect':'地面矩形','Ground Poly':'地面多边形','Line':'线条','Tolerance':'魔棒填色容差','Close Gap':'自动线闭合度','Fill Expand':'填色外延膨胀','Line Fade':'线稿淡出','Base Fade':'底图底膜淡出','Texture':'纹理对比',
+'Upload an elevation or section':'上传立剖面图纸','Then click closed areas to fill materials, draw ground blocks, and place trees, people, cars or clouds.':'然后点击封闭区域填充材质、绘制剖切地面，或拖放树木、人物、车辆、云朵配景。',
+'UPLOAD · AUTO LINEWORK · FILL · DECORATE · EXPORT':'上传图纸 · 提取线稿 · 材质填充 · 放置配景 · 导出分享',
+'SNAP ALIGN':'正交对齐开启','ORIGINAL':'对比原图','Inspector':'属性栏','Threshold':'提取阈值','Cut Weight':'剖切线宽','Black':'纯黑','Graphite':'石墨灰','Mono Red':'单色红','White':'纯白','REBUILD':'重新提取','CLEAR LINES':'清空线条','Effects':'特效调整','Board Export':'图板导出',
+'Auto':'自适应尺寸','A3 Landscape':'A3 横版','A3 Portrait':'A3 竖版','Square':'正方形','Portfolio Story':'作品集竖长图条','Subtitle':'副标题','SHOW SCALE BAR':'显示比例尺','TRANSPARENT PNG':'透明背景 PNG','EXPORT BOARD':'导出完整图板','PRINT':'打印图纸','Hidden Layers':'图层管理','SELECT OFF':'取消选中','How to use':'使用指南',
+'1. Upload line drawing / SU screenshot.':'1. 上传线稿图或 SU/Rhino 截图。','2. Click Auto Linework.':'2. 点击“自动提取线稿”构建选区轮廓。','3. Use Fill Area to fill closed regions.':'3. 使用“区域填充”点击封闭区域进行材质上色。','4. Draw ground, place assets, adjust style.':'4. 绘制地面，添加配景树木，选择作品集风格预设。','5. Export PNG / PDF / SVG.':'5. 一键导出高清 PNG、PDF 或 SVG (AI) 线画。',
+'Off: free angle. On: horizontal / vertical segments. Shift also temporarily constrains.':'关闭：自由角度绘制。开启：正交（水平/垂直）分段绘制。按住 Shift 键可临时锁定正交。','Floorplan-style drawing.':'立剖面线稿绘制：',
+'Click point by point to draw. Double-click or Enter to finish. Esc cancels. Turn Orthogonal on for horizontal / vertical lines, or hold Shift temporarily.':'点击以添加端点，双击或按回车完成，Esc 键取消。开启正交可绘制水平或垂直线段，按住 Shift 键可临时锁定正交约束。',
+'Ground type controls the shape. Ground material controls the fill. Uploaded texture is saved into the project.':'地面类型决定地面外轮廓几何形状，地面材质决定内部纹理样式。上传的自定义贴图将打包保存在项目文件中。',
+'Commercial asset slots are ready.':'本地配景素材库就绪',
+'Name folders like assets/trees/tree_soft_01.png, assets/people/person_section_01.svg, assets/cars/car_minimal_01.svg, assets/sky/cloud_wash_01.png. They will show as cards here when connected.':'在 assets 目录下的 trees、people、cars、sky 文件夹中放入自定义素材（例如 tree_soft_01.png），即可自动在这里以卡片加载使用。',
+'UPLOAD OWN ASSET':'上传自定义素材','UPLOAD TEXTURE':'上传自定义贴图','Edit Objects':'编辑与调整对象',
+'Click any material, ground, asset, line or sheet mark.':'点击画布上的任何材质、地面体块、配景、线条或图纸标注。',
+'Then drag it on the canvas, or adjust opacity / scale / rotate in the right panel.':'即可在画布上拖动其位置，或在右侧属性面板中精确调整透明度、缩放比和旋转角度。',
+'CLEAR SELECTION':'清空选中对象','Tolerance':'填色选区容差','Close Gap':'缝隙闭合度','Fill Expand':'填色向外膨胀','Preview first.':'请先悬停预览：',
+'Move over a closed area to preview, click to fill. Click an existing fill to edit it.':'鼠标滑过封闭区域以预览范围，点击即可填入材质。点击已填充区域可随时在右侧修改。',
+'Put textures in assets/materials using simple names such as concrete_01.png, wood_01.png or glass_01.png.':'将自定义材质纹理放入 assets/materials 目录下，使用如 concrete_01.png、wood_01.png 等英文命名，即可在此处显示。',
+'Delete':'删除对象','Scale':'大小缩放','Rotate':'旋转角度','Texture':'贴图尺度','Rotation':'贴图旋转','Hatch Gap':'排线间距','Hatch Angle':'排线角度','Tint':'混色着色','FRONT':'置顶','BACK':'置底','DUPLICATE':'复制对象','DELETE':'删除对象'
 };
 const EM_EN={};
-function emStoreOriginal(){document.querySelectorAll('button,.secTitle,.modeBtn,.smallTool,.groundPreset,.styleBtn,.sheetTool,.hint,.miniNote,.maxNote,.selectType,summary').forEach(el=>{if(!el.dataset.emOriginal)el.dataset.emOriginal=el.innerHTML});}
-function emTranslateNode(el){if(!el.dataset.emOriginal)return;if(lang==='en'){el.innerHTML=el.dataset.emOriginal;return;}let html=el.dataset.emOriginal;Object.keys(EM_ZH).sort((a,b)=>b.length-a.length).forEach(k=>{html=html.split(k).join(EM_ZH[k])});el.innerHTML=html;}
+function emStoreOriginal(){
+  document.querySelectorAll('button,.secTitle,.modeBtn,.groundPreset,.styleBtn,.sheetTool,.hint,.miniNote,.maxNote,.selectType,summary,.unifiedStyleAction,.portfolioPreset,.skyMode,.groundFinish,.groundMat,.lineKind,.assetCat,.assetBtn,.checkRow,.status,.compareBadge').forEach(el=>{
+    if(el.querySelector('input,select,textarea')) return;
+    if(!el.dataset.emOriginal) el.dataset.emOriginal=el.innerHTML;
+  });
+}
+function emTranslateNode(el){
+  if(!el.dataset.emOriginal)return;
+  if(lang==='en'){el.innerHTML=el.dataset.emOriginal;return;}
+  let html=el.dataset.emOriginal;
+  Object.keys(EM_ZH).sort((a,b)=>b.length-a.length).forEach(k=>{
+    html=html.split(k).join(EM_ZH[k])
+  });
+  el.innerHTML=html;
+}
 function emTranslateStaticLabels(){
-  document.querySelectorAll('label').forEach(el=>{
-    if(el.querySelector('input,select,textarea')){
-      const walker=document.createTreeWalker(el,NodeFilter.SHOW_TEXT);
-      const nodes=[];while(walker.nextNode())nodes.push(walker.currentNode);
-      nodes.forEach(n=>{let t=n.nodeValue;Object.keys(EM_ZH).sort((a,b)=>b.length-a.length).forEach(k=>{t=t.split(k).join(lang==='zh'?EM_ZH[k]:k)});n.nodeValue=t;});
-    }
+  const targets = document.querySelectorAll('aside.left label, aside.right label, .checkRow, aside.left h2, aside.left p, aside.right h2, aside.right p, .compareBadge, .status, #empty h2, #empty p');
+  targets.forEach(el => {
+    const walker=document.createTreeWalker(el,NodeFilter.SHOW_TEXT);
+    const nodes=[];while(walker.nextNode())nodes.push(walker.currentNode);
+    nodes.forEach(n=>{
+      if(n.emOriginal === undefined) n.emOriginal = n.nodeValue;
+      let t = n.emOriginal;
+      if(lang === 'zh'){
+        Object.keys(EM_ZH).sort((a,b)=>b.length-a.length).forEach(k=>{
+          t=t.split(k).join(EM_ZH[k])
+        });
+      }
+      n.nodeValue = t;
+    });
   });
 }
 function emTranslateTextNodes(root){
-  if(!root||lang!=='zh')return;
+  if(!root)return;
   const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);const nodes=[];
   while(walker.nextNode())nodes.push(walker.currentNode);
-  nodes.forEach(n=>{let t=n.nodeValue;Object.keys(EM_ZH).sort((a,b)=>b.length-a.length).forEach(k=>{t=t.split(k).join(EM_ZH[k])});n.nodeValue=t;});
+  nodes.forEach(n=>{
+    if(n.emOriginal === undefined) n.emOriginal = n.nodeValue;
+    let t = n.emOriginal;
+    if(lang === 'zh'){
+      Object.keys(EM_ZH).sort((a,b)=>b.length-a.length).forEach(k=>{
+        t=t.split(k).join(EM_ZH[k])
+      });
+    } else {
+      t = n.emOriginal;
+    }
+    n.nodeValue=t;
+  });
 }
 window.emTranslateTextNodes=emTranslateTextNodes;
 function applyLang(){document.documentElement.lang=lang||'zh';emStoreOriginal();document.querySelectorAll('[data-em-original]').forEach(emTranslateNode);const lb=document.getElementById('langBtn');if(lb)lb.textContent=lang==='zh'?'EN':'中';emTranslateStaticLabels();window.dispatchEvent(new Event('em-language-changed'));}
 function setLang(l){lang=l;try{localStorage.setItem('em_lang',l)}catch(e){}const p=document.getElementById('langPick');if(p)p.style.display='none';applyLang();}
-function initLang(){if(!lang){lang='zh';const p=document.getElementById('langPick');if(p)p.style.display='flex'}applyLang();}
+function initLang(){
+  if(!lang){lang=localStorage.getItem('em_lang')||'zh';}
+  const p=document.getElementById('langPick');
+  if(p)p.style.display='none';
+  const statusEl = document.getElementById('status');
+  if(statusEl) {
+    const originalSet = Object.getOwnPropertyDescriptor(Node.prototype, 'textContent').set;
+    Object.defineProperty(statusEl, 'textContent', {
+      set: function(val) {
+        let t = val;
+        if(lang === 'zh') {
+          Object.keys(EM_ZH).sort((a,b)=>b.length-a.length).forEach(k => {
+            t = t.split(k).join(EM_ZH[k]);
+          });
+        }
+        originalSet.call(this, t);
+      },
+      get: function() {
+        return Object.getOwnPropertyDescriptor(Node.prototype, 'textContent').get.call(this);
+      },
+      configurable: true
+    });
+  }
+  applyLang();
+}
 window.addEventListener('DOMContentLoaded',()=>{initLang();const b=document.getElementById('langBtn');if(b)b.onclick=()=>setLang(lang==='zh'?'en':'zh');});
 
 

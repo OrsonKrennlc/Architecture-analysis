@@ -425,17 +425,7 @@ const OV = {
   },
 };
 
-// Strict green/water filter for overlay
-function isRealGreen(t) {
-  const le = t.leisure || '', lu = t.landuse || '', nat = t.natural || '';
-  return le === 'park' || le === 'garden' || le === 'nature_reserve' || le === 'recreation_ground' ||
-    lu === 'forest' || lu === 'grass' || lu === 'meadow' || lu === 'village_green' ||
-    nat === 'wood' || nat === 'grassland';
-}
-function isRealWater(t) {
-  const nat = t.natural || '', wat = t.water || '', ww = t.waterway || '';
-  return nat === 'water' || wat || ww === 'riverbank' || ww === 'dock';
-}
+// Note: isRealGreen and isRealWater are imported from shared utils.js
 
 function drawMapOv(key) {
   if (mapOvLayer) { map.removeLayer(mapOvLayer); mapOvLayer = null; }
@@ -537,13 +527,7 @@ function setOvStyle(key, el) {
   }
 }
 
-const OPS = [
-  'https://maps.mail.ru/osm/tools/overpass/api/interpreter',
-  'https://overpass-api.de/api/interpreter',
-  'https://lz4.overpass-api.de/api/interpreter',
-  'https://overpass.openstreetmap.fr/api/interpreter',
-  'https://overpass.kumi.systems/api/interpreter',
-];
+const OPS = SHARED_OVERPASS_ENDPOINTS;
 
 // ── Daily usage limit (per browser, soft cap to protect free OSM) ──
 function checkDailyLimit() {
@@ -647,59 +631,7 @@ function getBounds() {
    COORDINATE TRANSFORMATION (GCJ02/BD09/WGS84)
 ════════════════════════════════════════ */
 const PI = Math.PI;
-const a_ee = 6378245.0;
-const ee = 0.00669342162296594323;
-
-function transformLat(x, y) {
-  let ret = -100.0 + 2.0 * x + 3.0 * y + 0.2 * y * y + 0.1 * x * y + 0.2 * Math.sqrt(Math.abs(x));
-  ret += (20.0 * Math.sin(6.0 * x * PI) + 20.0 * Math.sin(2.0 * x * PI)) * 2.0 / 3.0;
-  ret += (20.0 * Math.sin(y * PI) + 40.0 * Math.sin(y / 3.0 * PI)) * 2.0 / 3.0;
-  ret += (160.0 * Math.sin(y / 12.0 * PI) + 320 * Math.sin(y * PI / 30.0)) * 2.0 / 3.0;
-  return ret;
-}
-
-function transformLon(x, y) {
-  let ret = 300.0 + x + 2.0 * y + 0.1 * x * x + 0.1 * x * y + 0.1 * Math.sqrt(Math.abs(x));
-  ret += (20.0 * Math.sin(6.0 * x * PI) + 20.0 * Math.sin(2.0 * x * PI)) * 2.0 / 3.0;
-  ret += (20.0 * Math.sin(x * PI) + 40.0 * Math.sin(x / 3.0 * PI)) * 2.0 / 3.0;
-  ret += (150.0 * Math.sin(x / 12.0 * PI) + 300.0 * Math.sin(x / 30.0 * PI)) * 2.0 / 3.0;
-  return ret;
-}
-
-function outOfChina(lat, lng) {
-  return !(lng > 73.66 && lng < 135.05 && lat > 3.86 && lat < 53.55);
-}
-
-function gcj02towgs84(lat, lng) {
-  if (outOfChina(lat, lng)) return [lat, lng];
-  let dlat = transformLat(lng - 105.0, lat - 35.0);
-  let dlng = transformLon(lng - 105.0, lat - 35.0);
-  let radlat = lat / 180.0 * PI;
-  let magic = Math.sin(radlat);
-  magic = 1 - ee * magic * magic;
-  let sqrtmagic = Math.sqrt(magic);
-  dlat = (dlat * 180.0) / ((a_ee * (1 - ee)) / (magic * sqrtmagic) * PI);
-  dlng = (dlng * 180.0) / (a_ee / sqrtmagic * Math.cos(radlat) * PI);
-  let mglat = lat + dlat;
-  let mglng = lng + dlng;
-  return [lat * 2 - mglat, lng * 2 - mglng];
-}
-
-// Convert input coordinate to WGS84 to ensure data source alignment
-function unifyToWGS84(lat, lng) {
-  // If the user uses a domestic map that gives GCJ-02, we can convert it here
-  // For now, assume we convert from GCJ02 to WGS84 if in China and suspected shifted
-  // Note: if it's already WGS84, applying this will unshift it incorrectly.
-  // Actually, since OSM data is strictly WGS84, we just need to make sure the projection mapping is perfectly aligned.
-  return [lat, lng];
-}
-
-function latLngToMeters(lat, lng) {
-  const x = lng * 20037508.34 / 180;
-  let y = Math.log(Math.tan((90 + lat) * Math.PI / 360)) / (Math.PI / 180);
-  y = y * 20037508.34 / 180;
-  return [x, y];
-}
+// Coordinate transformations (gcj02towgs84, outOfChina, unifyToWGS84, latLngToMeters) are imported from shared utils.js
 
 function proj(lat, lng, b) {
   if (!b || b.mxLng === b.mnLng || b.mxLat === b.mnLat) return [W / 2, H / 2];
@@ -2180,11 +2112,11 @@ function applyLang() {
   document.documentElement.lang = lang;
 
   // Page Title
-  document.title = lang === 'zh' ? 'ShArch生成器' : 'ShArch Generator';
+  document.title = lang === 'zh' ? 'AntiMap生成器' : 'AntiMap Generator';
 
   // Sidebar Header Logo
   const sbn = document.getElementById('sbName');
-  if (sbn) sbn.innerHTML = lang === 'zh' ? 'ShArch<span>生成器</span>' : 'ShArch<span>Generator</span>';
+  if (sbn) sbn.innerHTML = lang === 'zh' ? 'AntiMap<span>生成器</span>' : 'AntiMap<span>Generator</span>';
 
   // Update lang switcher toggle UI
   const zh = document.getElementById('langZH');
@@ -3700,7 +3632,7 @@ function exportPortfolio() {
   }).join('');
   const title = (sName || 'Site').toUpperCase();
   const bgcPortfolio = exportBgColor === 'theme' ? '#fff' : (exportBgColor === 'transparent' ? '#ffffff' : exportBgColor);
-  const html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>ShArch · ' + title + ' · Portfolio Board</title>'
+  const html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>AntiMap · ' + title + ' · Portfolio Board</title>'
     + '<style>@import url(\'https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Archivo:wght@400;600;700;800;900&display=swap\');'
     + '@page{size:A3 landscape;margin:0}'
     + '*{margin:0;padding:0;box-sizing:border-box}'
@@ -3731,7 +3663,7 @@ function exportPortfolio() {
     + '<div class="subrow"><div class="desc">' + desc + '</div>'
     + '<div class="metrics">' + metrics.map(m => '<div class="m"><div class="mk">' + m[0] + '</div><div class="mv">' + m[1] + '</div></div>').join('') + '</div></div>'
     + '<div class="pgrid" style="grid-template-columns:repeat(' + Math.min(sel.length, Math.ceil(Math.sqrt(sel.length * 1.6))) + ',1fr)">' + cells + '</div>'
-    + '<div class="bfoot"><span>ShArch · Architectural Site Analysis</span><span>Data © OpenStreetMap contributors · ' + date + '</span></div>'
+    + '<div class="bfoot"><span>AntiMap · Architectural Site Analysis</span><span>Data © OpenStreetMap contributors · ' + date + '</span></div>'
     + '</div></body></html>';
   const blob = new Blob([addPrintPromptHelper(html)], { type: 'text/html' });
   const url = URL.createObjectURL(blob);
@@ -3758,7 +3690,7 @@ function exportPDF() {
   const isDarkOv = curOvStyle === 'dark';
   const ovLabel = curOvStyle ? `${curOvStyle.toUpperCase()} OVERLAY` : '';
   const bgcPDF = exportBgColor === 'theme' ? '#fff' : (exportBgColor === 'transparent' ? '#ffffff' : exportBgColor);
-  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>ShArch · ${sName || 'Site'}</title>
+  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>AntiMap · ${sName || 'Site'}</title>
 <style>
 @page{size:${EXP_PAGE[expFormat] || 'A4 portrait'};margin:12mm}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -3782,7 +3714,7 @@ body{font-family:\'Noto Sans\', \'Noto Sans SC\', sans-serif;background:${bgcPDF
 <div class="header">
 ${ovSVG || ''}
 <div class="header-meta">
-<h1>ShArch &nbsp;·&nbsp; ${(sName || 'SITE').toUpperCase()}</h1>
+<h1>AntiMap &nbsp;·&nbsp; ${(sName || 'SITE').toUpperCase()}</h1>
 <p>${sLat?.toFixed(5)}°N &nbsp;·&nbsp; ${sLng?.toFixed(5)}°E &nbsp;&nbsp;|&nbsp;&nbsp; R=${curR}m &nbsp;&nbsp;|&nbsp;&nbsp; ${new Date().toLocaleDateString('en-GB', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
 </div>
 ${ovLabel ? `<div class="header-tag">${ovLabel}</div>` : ''}
@@ -3842,7 +3774,7 @@ function dlLayered(ids) {
 
   let svg = '<svg viewBox="0 0 ' + PW + ' ' + PH + '" xmlns="http://www.w3.org/2000/svg" width="' + PW + '" height="' + PH + '">';
   svg += '<rect width="' + PW + '" height="' + PH + '" fill="#F7F6F3"/>';
-  svg += '<text x="64" y="70" font-size="30" fill="#1A1917" font-family="\'Noto Sans\', \'Noto Sans SC\', sans-serif" font-weight="700" letter-spacing="-.01em">ShArch · ' + loc + '</text>';
+  svg += '<text x="64" y="70" font-size="30" fill="#1A1917" font-family="\'Noto Sans\', \'Noto Sans SC\', sans-serif" font-weight="700" letter-spacing="-.01em">AntiMap · ' + loc + '</text>';
   const subtitle = lang === 'zh'
     ? (sLat ? sLat.toFixed(4) + 'N · ' + sLng.toFixed(4) + 'E' : '') + '  |  半径=' + curR + 'm  |  ' + sel.length + '层轴测叠加图  |  ' + date
     : (sLat ? sLat.toFixed(4) + 'N · ' + sLng.toFixed(4) + 'E' : '') + '  |  R=' + curR + 'm  |  ' + sel.length + '-LAYER AXONOMETRIC  |  ' + date;
@@ -3894,10 +3826,10 @@ function dlLayered(ids) {
     svg += '<text x="' + (PW - 64) + '" y="' + (labelY - 8) + '" text-anchor="end" font-size="9" fill="#C0392B" font-family="\'Noto Sans\', \'Noto Sans SC\', sans-serif" font-weight="700">' + String(idx + 1).padStart(2, '0') + '</text>';
   });
 
-  svg += '<text x="64" y="' + (PH - 30) + '" font-size="7.5" fill="#C8C6C0" font-family="\'Noto Sans\', \'Noto Sans SC\', sans-serif" letter-spacing=".06em">ShArch · openstreetmap.org · ' + date + '</text>';
+  svg += '<text x="64" y="' + (PH - 30) + '" font-size="7.5" fill="#C8C6C0" font-family="\'Noto Sans\', \'Noto Sans SC\', sans-serif" letter-spacing=".06em">AntiMap · openstreetmap.org · ' + date + '</text>';
   svg += '</svg>';
 
-  const html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>ShArch Layered · ' + (sName || 'Site') + '</title>'
+  const html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>AntiMap Layered · ' + (sName || 'Site') + '</title>'
     + '<style>*{margin:0;padding:0}body{background:#F7F6F3}svg{width:100%;height:auto;display:block}'
     + '@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}</style></head><body>'
     + svg + '</body></html>';
@@ -3916,8 +3848,11 @@ function buildOverlaySVG(key, PW, PH) {
   const b = getBounds();
   const PAD2 = 0;
   function px(lat, lon) {
-    const x = (lon - b.mnLng) / (b.mxLng - b.mnLng) * PW;
-    const y = (b.mxLat - lat) / (b.mxLat - b.mnLat) * PH;
+    const [mx, my] = latLngToMeters(lat, lon);
+    const [minX, minY] = latLngToMeters(b.mnLat, b.mnLng);
+    const [maxX, maxY] = latLngToMeters(b.mxLat, b.mxLng);
+    const x = (mx - minX) / (maxX - minX) * PW;
+    const y = (maxY - my) / (maxY - minY) * PH;
     return [isFinite(x) ? x : PW / 2, isFinite(y) ? y : PH / 2];
   }
   function poly(geom) { return geom.map(n => px(n.lat, n.lon).join(',')).join(' '); }
@@ -4070,7 +4005,7 @@ async function dlCard(id, fmt, ev) {
   let svgStr = new XMLSerializer().serializeToString(el);
   const date = new Date().toLocaleDateString('en-GB', { year: 'numeric', month: 'long', day: 'numeric' });
   const bgc = exportBgColor === 'theme' ? '#F5F4F2' : (exportBgColor === 'transparent' ? '#ffffff' : exportBgColor);
-  const html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>' + name + ' · ShArch</title>'
+  const html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>' + name + ' · AntiMap</title>'
     + '<style>@import url(\'https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap\');'
     + '*{margin:0;padding:0}body{background:' + bgc + ';font-family:"Noto Sans", "Noto Sans SC", sans-serif;display:flex;flex-direction:column;align-items:center;padding:40px}'
     + '.hd{width:520px;max-width:90vw;display:flex;justify-content:space-between;align-items:baseline;border-bottom:1.5px solid #1A1917;padding-bottom:8px;margin-bottom:16px}'
@@ -4163,13 +4098,13 @@ async function dlBoard(fmt) {
   });
 
   svg += '<rect x="' + mX + '" y="' + (bH - mB + 8) + '" width="' + (bW - mX * 2) + '" height=".5" fill="#E0DDD8"/>';
-  svg += '<text x="' + mX + '" y="' + (bH - mB + 24) + '" font-size="7.5" fill="#C8C6C0" font-family="\'Noto Sans\', \'Noto Sans SC\', sans-serif">ShArch \u00b7 openstreetmap.org \u00b7 ' + date + '</text>';
+  svg += '<text x="' + mX + '" y="' + (bH - mB + 24) + '" font-size="7.5" fill="#C8C6C0" font-family="\'Noto Sans\', \'Noto Sans SC\', sans-serif">AntiMap \u00b7 openstreetmap.org \u00b7 ' + date + '</text>';
   svg += '<text x="' + (bW - mX) + '" y="' + (bH - mB + 24) + '" text-anchor="end" font-size="7.5" fill="#C8C6C0" font-family="\'Noto Sans\', \'Noto Sans SC\', sans-serif">' + coord + '</text>';
   svg += '</svg>';
 
-  const fname = 'sharch_board_' + (sName || 'site').toLowerCase().replace(/\s+/g, '_');
+  const fname = 'antimap_board_' + (sName || 'site').toLowerCase().replace(/\s+/g, '_');
   // Output as PDF-ready printable HTML page
-  const html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>ShArch Poster · ' + (sName || 'Site') + '</title>'
+  const html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>AntiMap Poster · ' + (sName || 'Site') + '</title>'
     + '<style>*{margin:0;padding:0}body{background:#F5F4F2;display:flex;justify-content:center;padding:20px}svg{width:100%;height:auto;max-width:1400px;display:block}'
     + '@media print{body{padding:0;-webkit-print-color-adjust:exact;print-color-adjust:exact}}</style></head><body>'
     + svg + '</body></html>';
@@ -4213,7 +4148,7 @@ function startLoadTips() {
 function stopLoadTips() { if (_tipTimer) { clearInterval(_tipTimer); _tipTimer = null; } const el = document.getElementById('ltip'); if (el) el.textContent = ''; }
 function loadDone() { const w = document.getElementById('lbarWrap'); if (w) w.style.display = 'none'; stopLoadTips(); }
 function unload() { document.getElementById('loader').classList.remove('on'); loadDone(); }
-function toast(m) { const t = document.getElementById('toast'); t.textContent = m; t.classList.add('on'); setTimeout(() => t.classList.remove('on'), 2400); }
+// Unified toast notification is imported from shared utils.js
 document.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.id === 'locIn') doSearch(); });
 renderList();
 setTimeout(testNet, 2000);

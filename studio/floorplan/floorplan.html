@@ -93,9 +93,9 @@ input[type=range]{width:100%;accent-color:var(--accent);margin:2px 0 9px}
 <body>
 <div class="app">
   <div class="top">
-    <div class="brand"><span class="dot"></span>ShArch <small>· Plan Draw 平面图</small></div>
+    <div class="brand"><span class="dot"></span>AntiMap <small>· Plan Draw 平面图</small></div>
     <a href="../../index.html" data-fp-i18n="home_btn" class="tbtn solid" style="background:var(--accent);border-color:var(--accent);color:#fff;text-decoration:none;white-space:nowrap">← Home 主页</a>
-    <button id="langBtn" style="font:700 10px 'Space Mono';border:1px solid var(--line);background:#fff;border-radius:7px;padding:7px 10px;cursor:pointer;color:var(--ink)">EN</button>
+    <button id="langBtn" style="font:700 10px 'Space Mono';border:1px solid var(--line);background:#fff;border-radius:7px;padding:7px 10px;cursor:pointer;color:var(--ink);display:none">EN</button>
     <div class="spacer"></div>
     <button class="tbtn solid" id="autoBtn" data-fp-i18n="tb_auto">AUTO 自动排布</button>
     <button class="tbtn" id="td3dBtn" data-fp-i18n="tb_3d">3D ⬚</button>
@@ -135,57 +135,57 @@ input[type=range]{width:100%;accent-color:var(--accent);margin:2px 0 9px}
         <p class="glab" data-fp-i18n="g_col">Column 柱子</p>
         <div class="grp" id="cshape"><button data-s="sq" class="on" data-fp-i18n="c_sq">方柱</button><button data-s="circ" data-fp-i18n="c_circ">圆柱</button></div>
         <div class="chips" id="cmat" style="margin:9px 0"></div>
-        <div class="row"><span>尺寸 Size</span><b><span id="csV">0.5</span> m</b></div>
+        <div class="row"><span data-fp-i18n="c_size">尺寸 Size</span><b><span id="csV">0.5</span> m</b></div>
         <input type="range" id="cs" min="0.2" max="1.5" step="0.05" value="0.5">
         <p class="glab" style="margin-top:12px" data-fp-i18n="g_grid">自动柱网 Grid</p>
-        <div class="row"><span>X 间距 m</span><input type="number" id="gSX" step="0.5" value="6" style="width:64px"></div>
-        <div class="row"><span>X 数量</span><input type="number" id="gNX" step="1" min="1" value="4" style="width:64px"></div>
-        <div class="row"><span>Y 间距 m</span><input type="number" id="gSY" step="0.5" value="6" style="width:64px"></div>
-        <div class="row"><span>Y 数量</span><input type="number" id="gNY" step="1" min="1" value="3" style="width:64px"></div>
-        <button class="tbtn solid" id="gColBtn" style="width:100%;margin-top:6px">生成柱网 ⊞</button>
-        <div class="hint" style="margin-top:5px">从外墙范围左上角起排;无外墙则从原点起。</div>
+        <div class="row"><span data-fp-i18n="cg_x_spacing">X 间距 m</span><input type="number" id="gSX" step="0.5" value="6" style="width:64px"></div>
+        <div class="row"><span data-fp-i18n="cg_x_count">X 数量</span><input type="number" id="gNX" step="1" min="1" value="4" style="width:64px"></div>
+        <div class="row"><span data-fp-i18n="cg_y_spacing">Y 间距 m</span><input type="number" id="gSY" step="0.5" value="6" style="width:64px"></div>
+        <div class="row"><span data-fp-i18n="cg_y_count">Y 数量</span><input type="number" id="gNY" step="1" min="1" value="3" style="width:64px"></div>
+        <button class="tbtn solid" id="gColBtn" style="width:100%;margin-top:6px" data-fp-i18n="cg_generate">生成柱网 ⊞</button>
+        <div class="hint" style="margin-top:5px" data-fp-i18n="cg_hint">从外墙范围左上角起排;无外墙则从原点起。</div>
       </div>
       <div class="sec">
         <p class="glab" data-fp-i18n="g_set">Settings 设置</p>
-        <div class="row" style="margin-bottom:6px"><span>当前画墙类型 Wall Type</span><b id="wallModeV">外墙 Ext</b></div>
-        <div class="grp" id="wmode" style="margin-bottom:9px"><button data-m="ext" class="on">外墙 Thick</button><button data-m="int">内墙 Thin</button></div>
-        <div class="row"><span>外墙厚 Ext</span><b><span id="weV">0.30</span> m</b></div>
+        <div class="row" style="margin-bottom:6px"><span data-fp-i18n="w_current">当前画墙类型 Wall Type</span><b id="wallModeV">外墙 Ext</b></div>
+        <div class="grp" id="wmode" style="margin-bottom:9px"><button data-m="ext" class="on" data-fp-i18n="w_thick">外墙 Thick</button><button data-m="int" data-fp-i18n="w_thin">内墙 Thin</button></div>
+        <div class="row"><span data-fp-i18n="w_thick_label">外墙厚 Ext</span><b><span id="weV">0.30</span> m</b></div>
         <input type="range" id="we" min="0.15" max="0.6" step="0.01" value="0.30">
-        <div class="row"><span>内墙厚 Int</span><b><span id="wiV">0.15</span> m</b></div>
+        <div class="row"><span data-fp-i18n="w_thin_label">内墙厚 Int</span><b><span id="wiV">0.15</span> m</b></div>
         <input type="range" id="wi" min="0.06" max="0.4" step="0.01" value="0.15">
-        <div class="row"><span>门宽 Door</span><b><span id="dwV">0.9</span> m</b></div>
+        <div class="row"><span data-fp-i18n="w_door_label">门宽 Door</span><b><span id="dwV">0.9</span> m</b></div>
         <input type="range" id="dw" min="0.6" max="2.4" step="0.05" value="0.9">
-        <div class="row"><span>窗宽 Window</span><b><span id="wwV">1.2</span> m</b></div>
+        <div class="row"><span data-fp-i18n="w_window_label">窗宽 Window</span><b><span id="wwV">1.2</span> m</b></div>
         <input type="range" id="ww" min="0.4" max="3" step="0.1" value="1.2">
         <div class="toggle on" id="orthoT"><span class="box"></span><span data-fp-i18n="t_ortho">正交锁定 Ortho</span></div>
-        <div class="row" id="angleSnapRow" style="margin-bottom:9px"><span style="font-size:11px;font-weight:600">角度约束 Snap°</span>
+        <div class="row" id="angleSnapRow" style="margin-bottom:9px"><span style="font-size:11px;font-weight:600" data-fp-i18n="w_snap_deg">角度约束 Snap°</span>
           <div class="grp" id="angleSnapGrp" style="margin:0;flex:1;max-width:160px">
             <button data-a="90" class="on">90°</button>
             <button data-a="45">45°</button>
             <button data-a="30">30°</button>
             <button data-a="60">60°</button>
-            <button data-a="0">自由</button>
+            <button data-a="0" data-fp-i18n="w_free">自由</button>
           </div>
         </div>
         <div class="toggle" id="snapT"><span class="box"></span><span data-fp-i18n="t_snap">网格吸附 Snap 0.5m</span></div>
         <div class="toggle" id="dimT"><span class="box"></span><span data-fp-i18n="t_dim">标注尺寸 Dimensions</span></div>
         <div class="toggle" id="renderT"><span class="box"></span><span data-fp-i18n="t_render">渲染预览 Render Preview</span></div>
         <div class="toggle on" id="winGlassT"><span class="box"></span><span data-fp-i18n="t_glass">窗玻璃显示 Window Glass</span></div>
-        <div class="row" style="margin-top:9px"><span>出图主题</span><select id="renderTheme" style="flex:1;max-width:130px;padding:5px;border:1px solid var(--line);border-radius:7px;font-size:12px"><option value="warm">暖色</option><option value="nordic">北欧浅灰</option><option value="mono">单色高级</option><option value="morandi">莫兰迪</option></select></div>
+        <div class="row" style="margin-top:9px"><span data-fp-i18n="r_theme_label">出图主题</span><select id="renderTheme" style="flex:1;max-width:130px;padding:5px;border:1px solid var(--line);border-radius:7px;font-size:12px"><option value="warm" data-fp-i18n="rt_warm">暖色</option><option value="nordic" data-fp-i18n="rt_nordic">北欧浅灰</option><option value="mono" data-fp-i18n="rt_mono">单色高级</option><option value="morandi" data-fp-i18n="rt_morandi">莫兰迪</option></select></div>
       </div>
       <div class="sec" id="imgSec">
         <p class="glab" data-fp-i18n="g_ref">Reference 底图</p>
         <input type="file" id="imgFile" accept="image/*" style="display:none">
         <div class="grp" id="refModeGrp" style="margin-bottom:8px">
-          <button data-r="prev">上一层</button><button data-r="image" class="on">本层图</button><button data-r="both">两者</button><button data-r="none">关闭</button>
+          <button data-r="prev" data-fp-i18n="rm_prev">上一层</button><button data-r="image" class="on" data-fp-i18n="rm_curr">本层图</button><button data-r="both" data-fp-i18n="rm_both">两者</button><button data-r="none" data-fp-i18n="rm_close">关闭</button>
         </div>
         <button class="tbtn" style="width:100%;margin-bottom:8px" id="imgPick" data-fp-i18n="r_upload">上传本层底图 Upload</button>
         <div id="imgCtl" style="display:none">
-          <div class="row"><span>透明度</span><b><span id="opV">55</span>%</b></div>
+          <div class="row"><span data-fp-i18n="r_opacity">透明度</span><b><span id="opV">55</span>%</b></div>
           <input type="range" id="op" min="10" max="100" value="55">
           <button class="tbtn" style="width:100%;margin-bottom:7px" id="calBtn" data-fp-i18n="r_cal">标定比例 Calibrate</button>
           <button class="tbtn" style="width:100%;margin-bottom:7px" id="alignPrevImg" data-fp-i18n="r_align">对齐上一层底图 Align prev</button>
-          <button class="tbtn" style="width:100%;margin-bottom:7px" id="bothRefBtn">显示本层+上一层 Overlay</button>
+          <button class="tbtn" style="width:100%;margin-bottom:7px" id="bothRefBtn" data-fp-i18n="r_both_ref">显示本层+上一层 Overlay</button>
           <div class="toggle" id="lockT"><span class="box"></span><span data-fp-i18n="r_lock">锁定底图 Lock</span></div>
         </div>
       </div>
@@ -223,29 +223,29 @@ input[type=range]{width:100%;accent-color:var(--accent);margin:2px 0 9px}
   <div id="axoPanel" style="position:absolute;top:54px;right:14px;width:230px;max-height:calc(100% - 80px);overflow-y:auto;background:rgba(255,255,255,.92);backdrop-filter:blur(10px);border:1px solid var(--line);border-radius:12px;padding:12px;font-size:11px">
     <p class="glab" style="margin-top:0" data-fp-i18n="a_style">风格 Style</p>
     <div class="grp" id="axoStyle" style="margin-bottom:11px;flex-wrap:wrap">
-      <button data-s="color" class="on">竞赛填色</button>
-      <button data-s="big">BIG</button>
-      <button data-s="rhino">Rhino白模</button>
-      <button data-s="soft">柔光</button>
-      <button data-s="collage">拼贴</button>
-      <button data-s="clay">白模</button>
-      <button data-s="line">黑白线稿</button>
-      <button data-s="dark">黑底</button>
-      <button data-s="glass">玻璃</button>
-      <button data-s="blueprint">蓝图</button>
+      <button data-s="color" class="on" data-fp-i18n="as_color">竞赛填色</button>
+      <button data-s="big" data-fp-i18n="as_big">BIG</button>
+      <button data-s="rhino" data-fp-i18n="as_rhino">Rhino白模</button>
+      <button data-s="soft" data-fp-i18n="as_soft">柔光</button>
+      <button data-s="collage" data-fp-i18n="as_collage">拼贴</button>
+      <button data-s="clay" data-fp-i18n="as_clay">白模</button>
+      <button data-s="line" data-fp-i18n="as_line">黑白线稿</button>
+      <button data-s="dark" data-fp-i18n="as_dark">黑底</button>
+      <button data-s="glass" data-fp-i18n="as_glass">玻璃</button>
+      <button data-s="blueprint" data-fp-i18n="as_blueprint">蓝图</button>
     </div>
-    <div class="toggle" id="axoLabelT"><span class="box"></span><span>房间标注 Labels</span></div>
-    <div class="toggle" id="axoCalloutT"><span class="box"></span><span>圆形引线标注 Callout</span></div>
+    <div class="toggle" id="axoLabelT"><span class="box"></span><span data-fp-i18n="a_labels">房间标注 Labels</span></div>
+    <div class="toggle" id="axoCalloutT"><span class="box"></span><span data-fp-i18n="a_callouts">圆形引线标注 Callout</span></div>
     <div id="axoCalloutCtl" style="display:none;border:1px solid var(--line);border-radius:9px;padding:9px;margin:4px 0 8px;background:#fff">
-      <div class="row"><span>引线高度 Height</span><b><span id="axoCalloutLiftV">72</span> px</b></div>
+      <div class="row"><span data-fp-i18n="a_lead_h">引线高度 Height</span><b><span id="axoCalloutLiftV">72</span> px</b></div>
       <input type="range" id="axoCalloutLift" min="24" max="160" step="2" value="72" style="width:100%">
-      <div class="row"><span>引线颜色 Color</span><input type="color" id="axoCalloutColor" value="#1A1917" style="width:46px;height:25px;border:1px solid var(--line);border-radius:6px;background:none"></div>
-      <div class="grp" id="axoCalloutStyle" style="margin:6px 0 0"><button data-c="box" class="on">标签盒</button><button data-c="dot">圆点</button><button data-c="line">细线</button></div>
+      <div class="row"><span data-fp-i18n="a_lead_c">引线颜色 Color</span><input type="color" id="axoCalloutColor" value="#1A1917" style="width:46px;height:25px;border:1px solid var(--line);border-radius:6px;background:none"></div>
+      <div class="grp" id="axoCalloutStyle" style="margin:6px 0 0"><button data-c="box" class="on" data-fp-i18n="ac_box">标签盒</button><button data-c="dot" data-fp-i18n="ac_dot">圆点</button><button data-c="line" data-fp-i18n="ac_line">细线</button></div>
     </div>
-    <div class="toggle" id="axoFurnT"><span class="box"></span><span>显示家具 Furniture</span></div>
-    <div class="toggle" id="axoGroundT"><span class="box"></span><span>显示地块底图 Site</span></div>
-    <div class="toggle on" id="axoAllFloorsT"><span class="box"></span><span>显示全部楼层 All Floors</span></div>
-    <div class="row" style="margin-top:9px"><span>楼层间距 Floor Gap</span><b><span id="axoFloorGapV">0.75</span> m</b></div>
+    <div class="toggle" id="axoFurnT"><span class="box"></span><span data-fp-i18n="a_show_furn">显示家具 Furniture</span></div>
+    <div class="toggle" id="axoGroundT"><span class="box"></span><span data-fp-i18n="a_show_site">显示地块底图 Site</span></div>
+    <div class="toggle on" id="axoAllFloorsT"><span class="box"></span><span data-fp-i18n="a_show_all">显示全部楼层 All Floors</span></div>
+    <div class="row" style="margin-top:9px"><span data-fp-i18n="a_floor_gap">楼层间距 Floor Gap</span><b><span id="axoFloorGapV">0.75</span> m</b></div>
     <input type="range" id="axoFloorGap" min="0.10" max="5.00" step="0.05" value="0.75" style="width:100%">
     <p class="glab" style="margin-top:10px" data-fp-i18n="a_slab">楼板颜色 Floor Slab</p>
     <div class="axoSwatches" id="axoFloorColor">
@@ -711,7 +711,7 @@ function deleteFloor(idx){
   reviveImageState(()=>{syncProps(); renderFloorBar(); syncRefModeUI(); draw(); fit();});
 }
 function renameFloor(idx){
-  const nm=prompt('楼层名称', FLOORS[idx].name);
+  const nm=prompt(fpT('rename_floor_prompt'), FLOORS[idx].name);
   if(nm&&nm.trim()){ FLOORS[idx].name=nm.trim().slice(0,12); renderFloorBar(); }
 }
 function renderFloorBar(){
@@ -724,7 +724,7 @@ function renderFloorBar(){
     tab.appendChild(label);
     if(FLOORS.length>1){
       const del=document.createElement('span'); del.className='fdel'; del.textContent='✕';
-      del.onclick=(e)=>{e.stopPropagation(); if(confirm('删除楼层 '+f.name+'?')) deleteFloor(i);};
+      del.onclick=(e)=>{e.stopPropagation(); if(confirm(fpT('del_floor_confirm') + ' ' + f.name + '?')) deleteFloor(i);};
       tab.appendChild(del);
     }
     tab.onclick=()=>switchFloor(i);
@@ -734,28 +734,32 @@ function renderFloorBar(){
     const addWrap=document.createElement('div');
     addWrap.style.cssText='display:flex;align-items:center;gap:4px;margin-left:4px';
     const addBlank=document.createElement('button');
-    addBlank.className='ftabAdd'; addBlank.textContent='＋ 新楼层';
-    addBlank.title='新建空白楼层'; addBlank.style.cssText='font-size:11px;padding:5px 10px';
+    addBlank.className='ftabAdd'; addBlank.textContent='＋ ' + fpT('new_floor');
+    addBlank.title=fpT('new_floor_title'); addBlank.style.cssText='font-size:11px;padding:5px 10px';
     addBlank.onclick=()=>chooseNewFloorSource();
     const addDup=document.createElement('button');
-    addDup.className='ftabAdd'; addDup.textContent='⎘ 复制本层';
-    addDup.title='复制当前楼层作为新楼层'; addDup.style.cssText='font-size:11px;padding:5px 10px';
+    addDup.className='ftabAdd'; addDup.textContent='⎘ ' + fpT('dup_floor');
+    addDup.title=fpT('dup_floor_title'); addDup.style.cssText='font-size:11px;padding:5px 10px';
     addDup.onclick=()=>addFloor('dup','image');
     if(FLOORS.length>1){
       const addFrom=document.createElement('button');
-      addFrom.className='ftabAdd'; addFrom.textContent='📋 从…复制';
-      addFrom.title='从指定楼层复制'; addFrom.style.cssText='font-size:11px;padding:5px 10px';
+      addFrom.className='ftabAdd'; addFrom.textContent='📋 ' + fpT('copy_from');
+      addFrom.title=fpT('copy_from_title'); addFrom.style.cssText='font-size:11px;padding:5px 10px';
       addFrom.onclick=()=>{
         const names=FLOORS.map((f,i)=>(i+1)+'. '+f.name).join('\\n');
-        const idx=parseInt(prompt('从哪层复制？输入编号:\\n'+names, (curFloor+1)))-1;
+        const promptMsg = FP_LANG === 'zh' ? '从哪层复制？输入编号:\\n' : 'Copy from which floor? Enter number:\\n';
+        const idx=parseInt(prompt(promptMsg+names, (curFloor+1)))-1;
         if(idx>=0&&idx<FLOORS.length){
-          if(FLOORS.length>=MAX_FLOORS){toast('最多支持 '+MAX_FLOORS+' 个楼层 · 适合高层快速叠层');return;}
+          if(FLOORS.length>=MAX_FLOORS){
+            toast(FP_LANG==='zh'?'最多支持 '+MAX_FLOORS+' 个楼层':'Max floors allowed: '+MAX_FLOORS);
+            return;
+          }
           snapshotCurrentFloor();
           const newData=cloneState(FLOORS[idx].data);
           const nextName=(FLOORS.length+1)+'F';
           FLOORS.push({name:nextName,height:FLOORS[idx].height,data:newData,refMode:'image'});
           switchFloor(FLOORS.length-1);
-          toast('已从 '+FLOORS[idx].name+' 复制为 '+nextName);
+          toast(FP_LANG==='zh'?'已从 '+FLOORS[idx].name+' 复制为 '+nextName : 'Copied from '+FLOORS[idx].name+' to '+nextName);
         }
       };
       addWrap.appendChild(addBlank);addWrap.appendChild(addDup);addWrap.appendChild(addFrom);
@@ -2656,63 +2660,119 @@ let FP_LANG='zh';try{FP_LANG=localStorage.getItem('em_lang')||'zh'}catch(e){}
 const FP_I18N={
   // topbar buttons
   home_btn:{zh:'← 主页',en:'← Home'},
-  tb_auto:{zh:'AUTO 自动排布',en:'AUTO Layout'},
-  tb_3d:{zh:'3D ⬚',en:'3D ⬚'},
-  tb_axo:{zh:'AXO 轴测分析图',en:'AXO Analysis'},
-  tb_urban:{zh:'Send Urban ↗',en:'Send Urban ↗'},
-  tb_undo:{zh:'UNDO ↶',en:'UNDO ↶'},
-  tb_redo:{zh:'REDO ↷',en:'REDO ↷'},
-  tb_clear:{zh:'CLEAR',en:'CLEAR'},
-  tb_png:{zh:'PNG ↓',en:'PNG ↓'},
-  tb_render:{zh:'出图 ✦',en:'Render ✦'},
-  tb_svg:{zh:'SVG (AI) ↓',en:'SVG (AI) ↓'},
-  tb_dxf:{zh:'DXF (CAD) ↓',en:'DXF (CAD) ↓'},
+  tb_auto:{zh:'自动排布',en:'Auto Layout'},
+  tb_3d:{zh:'3D 视图',en:'3D View'},
+  tb_axo:{zh:'轴测分析图',en:'Axonometric'},
+  tb_urban:{zh:'发送城市数据',en:'Send Urban'},
+  tb_undo:{zh:'撤销',en:'Undo'},
+  tb_redo:{zh:'重做',en:'Redo'},
+  tb_clear:{zh:'清空',en:'Clear'},
+  tb_png:{zh:'导出 PNG',en:'Export PNG'},
+  tb_render:{zh:'渲染出图',en:'Render'},
+  tb_svg:{zh:'导出 SVG',en:'Export SVG'},
+  tb_dxf:{zh:'导出 DXF',en:'Export DXF'},
   // sidebar group labels
-  g_tools:{zh:'Tools 工具',en:'Tools'},
-  g_room:{zh:'Room Type 房间类型',en:'Room Type'},
-  g_furn:{zh:'Furniture 家具',en:'Furniture'},
-  g_door:{zh:'Door Type 门类型',en:'Door Type'},
-  g_col:{zh:'Column 柱子',en:'Column'},
-  g_grid:{zh:'自动柱网 Grid',en:'Auto Column Grid'},
-  g_set:{zh:'Settings 设置',en:'Settings'},
-  g_ref:{zh:'Reference 底图',en:'Reference'},
-  g_sel:{zh:'Selection 选中',en:'Selection'},
+  g_tools:{zh:'绘图工具',en:'Tools'},
+  g_room:{zh:'空间类型',en:'Space Types'},
+  g_furn:{zh:'家具配景',en:'Furniture'},
+  g_door:{zh:'门窗构件',en:'Doors & Windows'},
+  g_col:{zh:'柱网构件',en:'Columns'},
+  g_grid:{zh:'自动轴网',en:'Auto Grid'},
+  g_set:{zh:'绘图设置',en:'Settings'},
+  g_ref:{zh:'参考底图',en:'Reference Image'},
+  g_sel:{zh:'构件属性',en:'Selection'},
   // door types
-  d_single:{zh:'单开',en:'Single'},
-  d_double:{zh:'双开',en:'Double'},
-  d_sliding:{zh:'推拉',en:'Sliding'},
-  d_open:{zh:'洞口',en:'Opening'},
+  d_single:{zh:'单开门',en:'Single Door'},
+  d_double:{zh:'双开门',en:'Double Door'},
+  d_sliding:{zh:'推拉门',en:'Sliding Door'},
+  d_open:{zh:'门洞',en:'Opening'},
   // column types
-  c_sq:{zh:'方柱',en:'Square'},
-  c_circ:{zh:'圆柱',en:'Round'},
+  c_sq:{zh:'方柱',en:'Square Column'},
+  c_circ:{zh:'圆柱',en:'Round Column'},
   // toggles
-  t_ortho:{zh:'正交锁定 Ortho',en:'Ortho Lock'},
-  t_snap:{zh:'网格吸附 Snap 0.5m',en:'Snap 0.5m'},
-  t_dim:{zh:'标注尺寸 Dimensions',en:'Dimensions'},
-  t_render:{zh:'渲染预览 Render Preview',en:'Render Preview'},
-  t_glass:{zh:'窗玻璃显示 Window Glass',en:'Window Glass'},
+  t_ortho:{zh:'正交锁定',en:'Ortho Lock'},
+  t_snap:{zh:'网格吸附 (0.5米)',en:'Grid Snap (0.5m)'},
+  t_dim:{zh:'显示标注尺寸',en:'Show Dimensions'},
+  t_render:{zh:'渲染预览',en:'Render Preview'},
+  t_glass:{zh:'显示窗玻璃',en:'Show Window Glass'},
   // reference controls
-  r_upload:{zh:'上传本层底图 Upload',en:'Upload'},
-  r_cal:{zh:'标定比例 Calibrate',en:'Calibrate'},
-  r_align:{zh:'对齐上一层底图 Align prev',en:'Align prev'},
-  r_lock:{zh:'锁定底图 Lock',en:'Lock'},
-  r_del:{zh:'删除 Delete',en:'Delete'},
+  r_upload:{zh:'上传本层底图',en:'Upload Reference'},
+  r_cal:{zh:'标定尺寸比例',en:'Calibrate Scale'},
+  r_align:{zh:'对齐上一层底图',en:'Align with Upper Floor'},
+  r_lock:{zh:'锁定底图位置',en:'Lock Reference'},
+  r_del:{zh:'删除参考底图',en:'Delete Reference'},
   // AXO panel labels
-  a_style:{zh:'风格 Style',en:'Style'},
-  a_slab:{zh:'楼板颜色 Floor Slab',en:'Floor Slab'},
-  a_nav:{zh:'画面操作 Navigation',en:'Navigation'},
-  a_place:{zh:'AXO 直接放置 Direct Place',en:'Direct Place'},
-  a_light:{zh:'光影 Lighting / Sun',en:'Lighting / Sun'},
-  a_wallmat:{zh:'墙体材质 Wall Material',en:'Wall Material'},
-  a_bg:{zh:'背景颜色 Background',en:'Background'},
-  a_explode:{zh:'炸开 Explode',en:'Explode'},
-  a_cut:{zh:'剖切 Section Cut',en:'Section Cut'},
-  a_h:{zh:'层高 Height m',en:'Height m'},
-  a_view:{zh:'视角 View',en:'View'},
+  a_style:{zh:'渲染风格',en:'Style'},
+  a_slab:{zh:'楼板颜色',en:'Floor Slab'},
+  a_nav:{zh:'画面操作',en:'Navigation'},
+  a_place:{zh:'AXO 直接放置',en:'Direct Place'},
+  a_light:{zh:'阳光与阴影',en:'Lighting & Shadows'},
+  a_wallmat:{zh:'墙体材质',en:'Wall Material'},
+  a_bg:{zh:'背景颜色',en:'Background Color'},
+  a_explode:{zh:'垂直炸开度',en:'Explode Gap'},
+  a_cut:{zh:'水平剖切高度',en:'Section Cut Height'},
+  a_h:{zh:'层高 (米)',en:'Height (m)'},
+  a_view:{zh:'默认轴测视角',en:'ViewPreset'},
   // auto-layout modal
-  modal_title:{zh:'自动排布 Auto-layout',en:'Auto-layout'},
-  modal_hint:{zh:'先画好<b>封闭外墙</b>。下面添加各功能块(类型 + 目标面积 m²,面积只作相对比例),选排布方式 → 生成。隔墙、走廊会自动产生。<b>注:不等于消防审查通过。</b>',en:'First draw a <b>closed outer wall</b>. Add program blocks (type + target area m², area is relative only), pick a layout variant → generate. Partition walls and corridors are created automatically. <b>Note: not a fire-code review.</b>'},
+  modal_title:{zh:'自动空间排布',en:'Auto-layout'},
+  modal_hint:{zh:'请先画好<b>封闭外墙</b>。在下方添加各功能块（类型与目标面积，面积比代表相对比例），选择排布方式后点击生成。隔墙与走廊将自动生成。',en:'Please draw a <b>closed outer wall</b> first. Add program blocks below (type + target area m²), pick a layout variant, and generate. Partition walls and corridors will be created automatically.'},
   modal_addblk:{zh:'+ 添加功能块',en:'+ Add program block'},
+  // additional labels to avoid mixed texts
+  c_size:{zh:'柱子尺寸',en:'Column Size'},
+  cg_x_spacing:{zh:'X 轴间距 (米)',en:'X Spacing (m)'},
+  cg_x_count:{zh:'X 轴数量',en:'X Grid Count'},
+  cg_y_spacing:{zh:'Y 轴间距 (米)',en:'Y Spacing (m)'},
+  cg_y_count:{zh:'Y 轴数量',en:'Y Grid Count'},
+  cg_generate:{zh:'生成轴网 ⊞',en:'Generate Grid ⊞'},
+  cg_hint:{zh:'从外墙范围左上角起排；若无外墙则从原点起。',en:'Generates from top-left of outer walls, or origin if none.'},
+  w_current:{zh:'当前画墙类型',en:'Current Wall Type'},
+  w_thick:{zh:'外墙 (粗线)',en:'Outer Wall (Thick)'},
+  w_thin:{zh:'内墙 (细线)',en:'Inner Wall (Thin)'},
+  w_thick_label:{zh:'外墙厚度',en:'Outer Wall Thickness'},
+  w_thin_label:{zh:'内墙厚度',en:'Inner Wall Thickness'},
+  w_door_label:{zh:'默认门宽',en:'Default Door Width'},
+  w_window_label:{zh:'默认窗宽',en:'Default Window Width'},
+  w_snap_deg:{zh:'角度吸附约束',en:'Angle Snap Constraint'},
+  w_free:{zh:'无约束',en:'Free'},
+  r_theme_label:{zh:'出图主题色',en:'Rendering Theme'},
+  rt_warm:{zh:'温暖色调',en:'Warm'},
+  rt_nordic:{zh:'北欧浅灰',en:'Nordic Light Gray'},
+  rt_mono:{zh:'单色高级',en:'Mono Premium'},
+  rt_morandi:{zh:'莫兰迪色',en:'Morandi'},
+  rm_prev:{zh:'上一层参考',en:'Upper Floor'},
+  rm_curr:{zh:'本层底图',en:'Current Floor'},
+  rm_both:{zh:'两者叠加',en:'Both'},
+  rm_close:{zh:'关闭显示',en:'Hide Reference'},
+  r_opacity:{zh:'底图不透明度',en:'Image Opacity'},
+  r_both_ref:{zh:'显示本层+上层叠合',en:'Show Current + Upper Overlay'},
+  a_labels:{zh:'房间标注 Labels',en:'Room Labels'},
+  a_callouts:{zh:'圆形引线标注 Callouts',en:'Circle Callouts'},
+  a_lead_h:{zh:'引线高度 Height',en:'Lead Height'},
+  a_lead_c:{zh:'引线颜色 Color',en:'Lead Color'},
+  a_floor_gap:{zh:'楼层垂直间距 Floor Gap',en:'Floor Gap'},
+  a_show_furn:{zh:'显示内部家具 Furniture',en:'Show Furniture'},
+  a_show_site:{zh:'显示地块底图 Site',en:'Show Site'},
+  a_show_all:{zh:'显示全部楼层 All Floors',en:'Show All Floors'},
+  as_color:{zh:'竞赛填色',en:'Competition Color'},
+  as_big:{zh:'BIG 风格',en:'BIG Style'},
+  as_rhino:{zh:'Rhino 白模',en:'Rhino Clay'},
+  as_soft:{zh:'柔和淡彩',en:'Soft Light'},
+  as_collage:{zh:'复古拼贴',en:'Collage'},
+  as_clay:{zh:'材质白模',en:'Clay Model'},
+  as_line:{zh:'纯黑白线稿',en:'Black & White Lines'},
+  as_dark:{zh:'深色模式',en:'Dark Theme'},
+  as_glass:{zh:'玻璃半透明',en:'Glass Translucent'},
+  as_blueprint:{zh:'工程蓝图',en:'Blueprint'},
+  ac_box:{zh:'标签矩形盒',en:'Label Box'},
+  ac_dot:{zh:'连接圆点',en:'Circle Dot'},
+  ac_line:{zh:'单排细线',en:'Thin Line'},
+  del_floor_confirm:{zh:'删除楼层',en:'Delete Floor'},
+  new_floor:{zh:'新楼层',en:'New Floor'},
+  new_floor_title:{zh:'新建空白楼层',en:'Create an empty new floor'},
+  dup_floor:{zh:'复制本层',en:'Duplicate Floor'},
+  dup_floor_title:{zh:'复制当前楼层到新楼层',en:'Duplicate current floor to a new floor'},
+  copy_from:{zh:'从…复制',en:'Copy from...'},
+  copy_from_title:{zh:'从指定楼层复制数据',en:'Copy data from a specific floor'},
   m_variant:{zh:'排布方式 Variant',en:'Variant'},
   modal_cancel:{zh:'取消',en:'Cancel'},
   modal_gen:{zh:'生成 Generate',en:'Generate'},

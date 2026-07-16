@@ -20,6 +20,7 @@ out/
 # OS
 .DS_Store
 Thumbs.db
+Desktop.ini
 
 # IDE
 .vscode/
@@ -38,3 +39,6 @@ yarn-error.log*
 .env
 .env.local
 .env*.local
+
+# Gemini internal files
+.gemini/
