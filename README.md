@@ -100,7 +100,7 @@ Architecture-analysis/
 
 ## 🚀 快速上手
 
-本程序为纯静态应用，无需任何 Node.js 后端服务，双击即可运行。但由于 OSM nominations 及 overpass 在无 Referer 时会战略性返回 406，**强烈建议使用本地静态服务器启动**。
+本程序为纯静态应用，无需任何 Node.js 后端服务。但由于 OSM Nominatim 及 Overpass API 在缺少 Referer 时会返回 406 CORS 错误，**必须使用本地静态服务器启动**（直接双击 HTML 文件仅能浏览门户页面，数据请求将失败）。
 
 ### 本地启动步骤
 1. 将本仓库克隆至本地：
@@ -119,5 +119,5 @@ Architecture-analysis/
 ---
 
 ## 👥 参与贡献与开发者 Wiki
-- 若你想了解 2D/3D 渲染细节、Overpass QL 查询合并机制、地形/气候 API 拼接或本地扩展添加一种新的分析图层，请仔细阅读 [WIKI.md](file:///c:/Users/HP/Documents/GitHub/Architecture-analysis/WIKI.md)。
+- 若你想了解 2D/3D 渲染细节、Overpass QL 查询合并机制、地形/气候 API 拼接或本地扩展添加一种新的分析图层，请仔细阅读 [WIKI.md](WIKI.md)。
 - 本项目在场地数据分析图的设计思路上参考了 [easymap.uk](https://easymap.uk/)，向开源社区的创作者们致以诚挚的谢意。
